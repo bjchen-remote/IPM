@@ -1,0 +1,26 @@
+.DS_Store
+.ipynb_checkpoints/
+*.asv
+*.autosave
+*.mat
+*.log
+*.tmp
+*.cache
+matlab_crash_dump.*
+
+# Simulation products are large and should stay out of source history.
+result/
+!result/README.md
+
+# Common image/video artifacts when batch rendering is local.
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+*.mp4
+*.mov
+*.avi
+
+# Local config/metadata
+.vscode/

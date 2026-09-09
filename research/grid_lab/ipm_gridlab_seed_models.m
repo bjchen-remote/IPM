@@ -1,0 +1,179 @@
+function seeds = ipm_gridlab_seed_models(profiles,options)
+%IPM_GRIDLAB_SEED_MODELS Fit initial teacher and analytic monitor families.
+%   Geometry is fitted to the union of peak/front intervals over all frozen
+%   times.  Candidate variations change the smooth contrast cap, the sharp
+%   front width, the algebraic decay of the core's left tail, and a common
+%   strength scale for the core/front/bridge contributions and contrast cap.
+
+if nargin < 2 || isempty(options)
+    options = struct();
+end
+options = resolve_options(options);
+validate_profiles(profiles);
+records = profiles.records;
+halfWidth = records(1).xPositive(end);
+
+peakCenters = [records.peakCenter];
+peakLeftEdges = peakCenters-[records.coreWidthLeft];
+peakRightEdges = peakCenters+[records.coreWidthRight];
+coreCenter = median(peakCenters);
+minimumFrozenDx = arrayfun(@(value) ...
+    min(diff(value.xPositive)),records);
+minimumWidth = max(options.minimumWidthFraction*halfWidth, ...
+    options.minimumCellWidths*median(minimumFrozenDx));
+coreLeftWidth = max(coreCenter-min(peakLeftEdges),minimumWidth);
+coreRightWidth = max(max(peakRightEdges)-coreCenter,minimumWidth);
+
+frontCenters = [records.leftFrontCenter];
+frontLeftEdges = frontCenters-[records.leftFrontHalfWidth];
+frontRightEdges = frontCenters+[records.leftFrontHalfWidth];
+frontCenter = median(frontCenters);
+frontWidth = max(0.5*(max(frontRightEdges)-min(frontLeftEdges)), ...
+    minimumWidth);
+bridgeCenter = 0.5*(frontCenter+coreCenter);
+bridgeWidth = max(coreCenter-frontCenter,2*minimumWidth);
+
+base = struct();
+base.name = 'asymmetric_power_front_seed';
+base.kind = 'asymmetric_power_front';
+base.floor = 1;
+base.combinePower = options.combinePower;
+base.contrastCap = 10;
+base.core = struct('center',coreCenter,'strength',12, ...
+    'leftWidth',coreLeftWidth,'rightWidth',coreRightWidth, ...
+    'leftShape',2.5,'rightShape',2, ...
+    'leftTailPower',1.25,'rightTailPower',2.5);
+base.front = struct('center',frontCenter,'strength',9, ...
+    'width',frontWidth,'shape',4,'tailPower',3);
+base.bridge = struct('center',bridgeCenter,'strength',4, ...
+    'width',bridgeWidth,'shape',2,'tailPower',2);
+
+candidateCount = numel(options.strengthScales)* ...
+    numel(options.contrastCaps)*numel(options.frontWidthFactors)* ...
+    numel(options.leftTailPowers);
+candidates = cell(candidateCount,1);
+candidateIndex = 0;
+% Keep the unscaled family as the leading block when strengthScales starts
+% with one, preserving the legacy cap/width/tail candidate ordering.
+for strengthScale = options.strengthScales(:)'
+    for cap = options.contrastCaps(:)'
+        for widthFactor = options.frontWidthFactors(:)'
+            for leftTailPower = options.leftTailPowers(:)'
+                model = base;
+                model.strengthScale = strengthScale;
+                model.contrastCap = cap*strengthScale;
+                model.core.strength = base.core.strength*strengthScale;
+                model.front.strength = base.front.strength*strengthScale;
+                model.bridge.strength = base.bridge.strength*strengthScale;
+                model.front.width = frontWidth*widthFactor;
+                model.core.leftTailPower = leftTailPower;
+                if strengthScale == 1
+                    model.name = sprintf( ...
+                        'power_cap_%g_front_%g_lefttail_%g', ...
+                        model.contrastCap,widthFactor,leftTailPower);
+                else
+                    model.name = sprintf( ...
+                        ['power_cap_%g_front_%g_lefttail_%g_' ...
+                        'strength_%.15g'],model.contrastCap, ...
+                        widthFactor,leftTailPower,strengthScale);
+                end
+                candidateIndex = candidateIndex+1;
+                candidates{candidateIndex} = model;
+            end
+        end
+    end
+end
+candidateNames = cellfun(@(model) model.name,candidates, ...
+    'UniformOutput',false);
+if numel(unique(candidateNames,'stable')) ~= candidateCount
+    error('ipm:gridlab:SeedCandidateNames', ...
+        ['Candidate names are not unique. Use sufficiently separated ' ...
+        'candidate option values.']);
+end
+
+reference = unique([records.xPositive],'sorted');
+if numel(reference) > options.maximumTeacherPoints
+    retained = unique(round(linspace( ...
+        1,numel(reference),options.maximumTeacherPoints)));
+    reference = reference(retained);
+end
+teacherStack = zeros(numel(records),numel(reference));
+for index = 1:numel(records)
+    if abs(records(index).xPositive(end)-halfWidth) > ...
+            1e3*eps(max(1,halfWidth))
+        error('ipm:gridlab:SeedDomain', ...
+            'All feature profiles must share one positive-half domain.');
+    end
+    teacherStack(index,:) = interp1(records(index).xPositive, ...
+        records(index).teacherIndicator,reference,'pchip');
+end
+teacherDensity = max(teacherStack,[],1);
+teacherDensity = max(teacherDensity,eps);
+teacher = struct('name','worst_time_log_spline_teacher', ...
+    'kind','log_spline_teacher','knots',reference, ...
+    'logDensity',log(teacherDensity));
+
+fitGeometry = struct( ...
+    'coreCenter',coreCenter,'coreLeftWidth',coreLeftWidth, ...
+    'coreRightWidth',coreRightWidth,'frontCenter',frontCenter, ...
+    'frontWidth',frontWidth,'bridgeCenter',bridgeCenter, ...
+    'bridgeWidth',bridgeWidth, ...
+    'peakCenterRange',[min(peakCenters),max(peakCenters)], ...
+    'leftFrontCenterRange',[min(frontCenters),max(frontCenters)]);
+seeds = struct('schemaVersion',1,'base',base,'teacher',teacher, ...
+    'candidates',{candidates},'fitGeometry',fitGeometry, ...
+    'options',options);
+end
+
+function options = resolve_options(options)
+if ~isstruct(options) || ~isscalar(options)
+    error('ipm:gridlab:SeedOptions', ...
+        'options must be a scalar structure.');
+end
+defaults = struct('minimumWidthFraction',1e-6,'minimumCellWidths',2, ...
+    'combinePower',4,'maximumTeacherPoints',4097, ...
+    'contrastCaps',[6,10,16], ...
+    'frontWidthFactors',[0.75,1.25], ...
+    'leftTailPowers',[1.25,2], ...
+    'strengthScales',1);
+names = fieldnames(defaults);
+unexpected = setdiff(fieldnames(options),names,'stable');
+if ~isempty(unexpected)
+    error('ipm:gridlab:SeedOptions', ...
+        'Unknown option(s): %s.',strjoin(unexpected,', '));
+end
+for index = 1:numel(names)
+    name = names{index};
+    if ~isfield(options,name)
+        options.(name) = defaults.(name);
+    end
+end
+validateattributes(options.minimumWidthFraction,{'numeric'}, ...
+    {'scalar','real','finite','positive'},mfilename, ...
+    'options.minimumWidthFraction');
+validateattributes(options.minimumCellWidths,{'numeric'}, ...
+    {'scalar','real','finite','positive'},mfilename, ...
+    'options.minimumCellWidths');
+validateattributes(options.combinePower,{'numeric'}, ...
+    {'scalar','real','finite','>=',1},mfilename,'options.combinePower');
+validateattributes(options.maximumTeacherPoints,{'numeric'}, ...
+    {'scalar','integer','>=',17},mfilename,'options.maximumTeacherPoints');
+for field = {'contrastCaps','frontWidthFactors','leftTailPowers', ...
+        'strengthScales'}
+    validateattributes(options.(field{1}),{'numeric'}, ...
+        {'vector','real','finite','positive','nonempty'},mfilename, ...
+        ['options.' field{1}]);
+end
+end
+
+function validate_profiles(profiles)
+if ~isstruct(profiles) || ~isscalar(profiles) || ...
+        ~isfield(profiles,'schemaVersion') || ...
+        ~ismember(profiles.schemaVersion,[1,2]) || ...
+        ~isfield(profiles,'kind') || ...
+        ~strcmp(profiles.kind,'ipm_frozen_grid_features') || ...
+        ~isfield(profiles,'records') || isempty(profiles.records)
+    error('ipm:gridlab:SeedProfiles', ...
+        'Pass profiles from ipm_gridlab_feature_profiles.');
+end
+end

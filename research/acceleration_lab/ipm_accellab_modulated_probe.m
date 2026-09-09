@@ -1,0 +1,119 @@
+function [report,data] = ipm_accellab_modulated_probe(state,user)
+%IPM_ACCELLAB_MODULATED_PROBE Separate shape residual from inner grid motion.
+%   Uses the unchanged canonical RHS exactly once. No scale/gauge/state is
+%   changed. beta and gamma are logarithmic computational inner-length rates;
+%   physical compression rates per canonical time are c_l-beta / c_l-gamma.
+if nargin < 2, user = struct(); end
+opts = struct('fitHalfWidthX',1,'fitHeightY',1.5, ...
+    'holdoutHalfWidthX',2,'holdoutHeightY',3,'fitOptions',struct(), ...
+    'referenceLogWidthRates',[],'referenceCanonicalWindow',[], ...
+    'includeExactCoordinates',false,'exactCoordinateOptions',struct());
+names = fieldnames(user);
+assert(all(ismember(names,fieldnames(opts))),'ipm:ModulatedOptions','Unknown probe option.');
+for index = 1:numel(names), opts.(names{index}) = user.(names{index}); end
+assert(islogical(opts.includeExactCoordinates) && isscalar(opts.includeExactCoordinates), ...
+    'ipm:ModulatedOptions','includeExactCoordinates must be logical.');
+for name = {'fitHalfWidthX','fitHeightY','holdoutHalfWidthX','holdoutHeightY'}
+    validateattributes(opts.(name{1}),{'numeric'},{'scalar','finite','positive'});
+end
+if ~isempty(opts.referenceLogWidthRates)
+    validateattributes(opts.referenceLogWidthRates,{'numeric'},{'vector','numel',2,'finite','real'});
+    validateattributes(opts.referenceCanonicalWindow,{'numeric'}, ...
+        {'vector','numel',2,'finite','real','increasing'});
+end
+assert(opts.holdoutHalfWidthX > opts.fitHalfWidthX && opts.holdoutHeightY > opts.fitHeightY, ...
+    'ipm:ModulatedOptions','The holdout rectangle must strictly contain the fit rectangle.');
+s = state.config.scaling;
+assert(state.config.schemaVersion == 4 && state.config.frozen && ...
+    strcmp(s.scalingContract,'exact_gauge_no_feedback_v1') && ...
+    strcmp(s.dynamicScaleGeometry,'isotropic') && strcmp(s.rescalingMode,'dynamic') && ...
+    strcmp(s.cOmegaGauge,'wall_omega_quadratic_peak') && ...
+    strcmp(s.lengthGauge,'transport_anchor') && s.transportAnchorX == 1 && ...
+    s.lengthScaleGain == 1 && s.widthGaugeGain == 0 && ...
+    s.omegaGaugeGain == 0 && s.travelingWaveGain == 0, ...
+    'ipm:ModulatedContract','The current exact isotropic quadratic gauge is required.');
+ops = state.ops;
+omega = state.rho*ops.Dx';
+mask = abs(ops.x-ops.rescaling.pinX) <= ops.rescaling.peakTrackingHalfWidth;
+wall = ipm.diagnostics.measureFeatures(omega(1,:),ops.x,0.9,mask);
+vertical = ipm.diagnostics.measureFeatures(abs(omega(:,wall.peakIndex))',ops.y',0.9,[]);
+peak = ipm.evolve.quadraticPeakFunctional(omega(1,:),ops.x,wall.peakIndex);
+widthX = wall.widths(1);
+widthY = vertical.widths(1);
+assert(all(isfinite([widthX,widthY])) && min(widthX,widthY) > 0, ...
+    'ipm:ModulatedWidth','Positive resolved inner widths are required.');
+xi = (ops.X-peak.x)/widthX;
+eta = ops.Y/widthY;
+fitMask = abs(xi) <= opts.fitHalfWidthX & eta <= opts.fitHeightY;
+outerMask = abs(xi) <= opts.holdoutHalfWidthX & eta <= opts.holdoutHeightY;
+holdoutMask = outerMask & ~fitMask;
+wallMask = false(size(omega));
+wallMask(1,:) = outerMask(1,:);
+fitWallMask = wallMask & fitMask;
+holdoutWallMask = wallMask & holdoutMask;
+[rhs,flow] = ipm.evolve.flow(state.rho,ops,state.scale);
+forcing = rhs*ops.Dx';
+omegaX = omega*ops.Dx';
+omegaY = ops.Dy*omega;
+motion = ipm_accellab_quadratic_motion(omega(1,:),forcing(1,:),ops.x,wall.peakIndex);
+problem = struct('forcing',forcing,'translation',omegaX, ...
+    'scaleX',(ops.X-peak.x).*omegaX,'scaleY',ops.Y.*omegaY, ...
+    'weights',ops.integrationWeights,'amplitudeScale',peak.value, ...
+    'fitMask',fitMask,'masks',struct('full',true(size(omega)), ...
+        'core',outerMask,'wall',wallMask,'fit',fitMask,'holdout',holdoutMask, ...
+        'fitWall',fitWallMask,'holdoutWall',holdoutWallMask));
+assert(~isfield(opts.fitOptions,'fixedTranslationRate'), ...
+    'ipm:ModulatedOptions','Translation variants are preregistered by this probe.');
+free = ipm_accellab_fit_motion(problem,opts.fitOptions);
+fixedOptions = opts.fitOptions;
+fixedOptions.fixedTranslationRate = motion.translationRate;
+fixed = ipm_accellab_fit_motion(problem,fixedOptions);
+free.physicalCompressionXPerCanonicalTime = flow.canonicalCL-free.logScaleXRate;
+free.physicalCompressionYPerCanonicalTime = flow.canonicalCL-free.logScaleYRate;
+fixed.physicalCompressionXPerCanonicalTime = flow.canonicalCL-fixed.logScaleXRate;
+fixed.physicalCompressionYPerCanonicalTime = flow.canonicalCL-fixed.logScaleYRate;
+free.minusReferenceLogWidthRates = [];
+fixed.minusReferenceLogWidthRates = [];
+if ~isempty(opts.referenceLogWidthRates)
+    free.minusReferenceLogWidthRates = ...
+        [free.logScaleXRate,free.logScaleYRate]-opts.referenceLogWidthRates(:)';
+    fixed.minusReferenceLogWidthRates = ...
+        [fixed.logScaleXRate,fixed.logScaleYRate]-opts.referenceLogWidthRates(:)';
+end
+report = struct('kind','modulated_inner_residual_diagnostic_only', ...
+    'canonicalTime',state.scale.canonicalTime,'physicalTime',state.scale.physicalTime, ...
+    'gridSize',size(state.rho),'cl',flow.canonicalCL,'cOmega',flow.canonicalCOmega, ...
+    'quadraticPeak',peak.value,'peakX',peak.x,'wallCoreWidth',widthX, ...
+    'verticalCoreWidth',widthY,'strictQuadraticMotion',motion, ...
+    'freeMotion',free,'fixedQuadraticMotion',fixed, ...
+    'freeMinusQuadraticTranslationRate',free.translationRate-motion.translationRate, ...
+    'options',opts,'pdeAcceptedSteps',0,'originalRhsEvaluations',1, ...
+    'rawGaugeResidual',flow.omegaGaugeResidual, ...
+    'poissonResidual',flow.poissonResidual, ...
+    'interpretation','A good local motion fit is a shape diagnostic, not a modified gauge or singularity proof.');
+if opts.includeExactCoordinates
+    try
+        exact = ipm_accellab_exact_inner_rates(omega,forcing,ops.x,ops.y, ...
+            wall.peakIndex,opts.exactCoordinateOptions);
+        rates = [exact.translationRate,exact.logScaleXRate,exact.logScaleYRate];
+        exact.metrics = ipm_accellab_motion_metrics(problem,rates);
+        exact.physicalCompressionXPerCanonicalTime = flow.canonicalCL-exact.logScaleXRate;
+        exact.physicalCompressionYPerCanonicalTime = flow.canonicalCL-exact.logScaleYRate;
+        exact.minusFreeLogWidthRates = rates(2:3)-[free.logScaleXRate,free.logScaleYRate];
+        exact.minusFixedQuadraticLogWidthRates = rates(2:3)-[fixed.logScaleXRate,fixed.logScaleYRate];
+        exact.comparisonMasks = 'Identical to the preregistered LS masks; only the applied coordinate rates change.';
+    catch exception
+        if ~startsWith(exception.identifier,'ipm:Inner')
+            rethrow(exception);
+        end
+        exact = struct('kind','exact_inner_coordinate_rejection','valid',false, ...
+            'exceptionIdentifier',exception.identifier,'exceptionMessage',exception.message, ...
+            'options',opts.exactCoordinateOptions,'isEvolutionGauge',false);
+    end
+    report.exactInnerCoordinates = exact;
+end
+if nargout > 1
+    data = struct('omega',omega,'forcing',forcing,'omegaX',omegaX, ...
+        'omegaY',omegaY,'rhs',rhs,'flow',flow,'problem',problem);
+end
+end

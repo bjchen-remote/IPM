@@ -24,7 +24,8 @@ if nargin<2 || ~policy.enabled,return;end
 required={'autonomousMesh','initialCondition','degeneratePower','symmetryMode','transportAnchorX','xlim','ymax'};
 assert(isstruct(choices)&&isscalar(choices)&&all(isfield(choices,required)),id,'Initial observer requires complete compatible choices.');
 p=choices.autonomousMesh;
-assert(p.enabled&&p.version==2,id,'The fixed initial observer requires enabled autonomous version two.');
+assert(p.enabled&&any(p.version == [2,3,4]),id, ...
+    'The fixed initial observer requires enabled autonomous version two, three, or four.');
 assert(ischar(choices.initialCondition)&&strcmp(choices.initialCondition,'degenerate_primitive')&& ...
     choices.degeneratePower==8&&strcmp(choices.symmetryMode,'double_odd_omega')&& ...
     choices.transportAnchorX==1,id,'This rule supports only the original k8 primitive and anchor one.');

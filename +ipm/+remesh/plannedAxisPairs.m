@@ -15,9 +15,9 @@ report=struct('kind','ipm_bounded_planned_axis_pairs_v1','policy',policy,'featur
     'anchor',anchor,'inputAnchorExact',any(x==anchor)&&any(x==-anchor), ...
     'xTrials',struct([]),'yTrials',struct([]),'selectedPairs',struct([]),'status','planning', ...
     'noLU',true,'noTransfer',true,'noFlow',true,'sameBoxSameNodeCount',sameN,'globalFeasibilityClaim',false);
-if isfield(policy,'version')&&policy.version==2
+if isfield(policy,'version')&&any(policy.version == [2,3,4])
     report.kind='ipm_bounded_planned_axis_pairs_v2';
-    report.actualSourceNodeCount=[numel(x),numel(y)];
+    report.actualSourceNodeCount=[numel(x),numel(y)];if policy.version == 3,report.kind='ipm_bounded_planned_axis_pairs_v3';end;if policy.version == 4,report.kind='ipm_bounded_planned_axis_pairs_v4';end
 end
 candidates=struct('x',{},'y',{},'unchanged',{},'xIndex',{},'yIndex',{},'predictedCells',{},'quality',{});
 xRows=struct([]);xAxes={};yRows=struct([]);yAxes={};
@@ -129,7 +129,7 @@ function validate_reference(r,x,y,a,policy)
 assert(isstruct(r)&&isscalar(r)&&all(isfield(r,{'x','y'})));
 validateattributes(a,{'numeric'},{'scalar','finite','positive','<',x(end)});
 rx=r.x(:)';ry=r.y(:);
-if isfield(policy,'version')&&policy.version==2
+if isfield(policy,'version')&&any(policy.version == [2,3,4])
     validateattributes(rx,{'numeric'},{'vector','real','finite','increasing'});
     validateattributes(ry,{'numeric'},{'vector','real','finite','increasing'});
     assert(numel(rx)>=7&&mod(numel(rx),2)==1&&numel(ry)>=7, ...

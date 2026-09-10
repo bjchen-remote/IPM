@@ -45,9 +45,12 @@ version1不允许演化同轴事务，不支持节点数增长；其合同保持
 transfer用完整族/sourceLevelId/targetLevelId纯核对后仅override实际N和base，仍走唯一原插值通路。
 audit分别核对同箱、注册尺寸/参考和合法单调跃迁，保留所有原数值门；differentN不伪称sameBoxAndNodeCount。
 
+version3把冻结方向族扩展到三倍单轴与3×2/2×3组合；version4在每个方向成员内部按固定
+层级扩大参数搜索。`hierarchicalAxisSchedule`和`hierarchicalAxisPairs`只补充候选生成，
+每层仍应用同一质量门，整个尝试前缀与来源身份写入controller账本并由
+`validateController`重读。默认和旧version1/2不注入这些字段，也不升级旧checkpoint。
+
 `planInitialAnalyticFallback` 是显式初始观察策略的纯计划入口，仅在原始t0使用。
 它保留真实粗格的source/clock/step/node字段，将新候选和观察证据另列；每阶段最多3个候选，
 第二阶段索引仍局部编号，原失败账本不改写。`validateController` 同时核对观察规则、
 使用次数、阶段索引和实际初选轴；保存的观察轴不属于求解referenceFamily。
-
-roundedAxis 的二分只在浮点中点等于端点时提前结束，此后原固定80轮已不能改变返回值。实际1200组完整轴/构造信息逐值及完整套件通过；构造器ABBA中位1.415倍，不能解释为整段PDE速度比。证据位于result/verification/autonomous_runtime_20260909/rounded_growth_stagnation_candidate_v1。

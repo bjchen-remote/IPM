@@ -4,6 +4,7 @@ function report = suite()
 fprintf('Running layered IPM verification...\n');
 report = struct();
 report.config = ipmtests.baseline.config();
+report.serverInterface = ipmtests.baseline.serverInterface();
 report.grid = ipmtests.baseline.grid();
 report.elliptic = ipmtests.baseline.elliptic();
 report.numericCore = ipmtests.baseline.numericCore();

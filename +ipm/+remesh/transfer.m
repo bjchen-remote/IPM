@@ -7,7 +7,7 @@ yNew = proposal.y;
 registeredTarget = [];
 if isfield(config.remesh,'autonomousMesh') && ...
         config.remesh.autonomousMesh.enabled && ...
-        config.remesh.autonomousMesh.version == 2
+        any(config.remesh.autonomousMesh.version == [2,3,4])
     % The frozen config still describes the original node counts.  Only a
     % reproducible, explicitly registered member may override runtime N.
     registeredTarget = registered_target(rho,ops,config,proposal);

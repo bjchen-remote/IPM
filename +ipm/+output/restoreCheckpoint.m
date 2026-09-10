@@ -84,7 +84,7 @@ if isfield(config.remesh,'autonomousMesh') || isfield(metadata,'autonomousMesh')
             'remeshCount',ops.remeshCount,'coreCells',[flow.coreGridPoints,flow.verticalCoreGridPoints], ...
             'safety',flow.safetyFactor,'x',ops.x,'y',ops.y, ...
             'baseX',ops.baseX,'baseY',ops.baseY,'history',log.history);
-        if config.remesh.autonomousMesh.version == 2
+        if any(config.remesh.autonomousMesh.version == [2,3,4])
             current.levelId=metadata.autonomousMesh.currentLevelId;
             current.nodeCount=[ops.nx,ops.ny];
             current.snapshots=struct('rho',{log.snapshotRho},'x',{log.snapshotX},'y',{log.snapshotY});

@@ -13,8 +13,8 @@ version = 1;
 if isfield(input,'version')
     value = input.version;
     if ~isnumeric(value) || ~isreal(value) || ~isscalar(value) || ...
-            ~isfinite(value) || ~any(value == [1,2])
-        error(identifier,'autonomousMesh.version must be 1 or 2.');
+            ~isfinite(value) || ~any(value == [1,2,3,4])
+        error(identifier,'autonomousMesh.version must be 1, 2, 3, or 4.');
     end
     version = double(value);
 end
@@ -47,11 +47,14 @@ defaults = struct('version',version,'enabled',true,'targetCoreCells',target, ...
     'maximumMassRelativeDefect',5e-12,'maximumRelativeRangeViolation',2e-4, ...
     'qualityLimits',quality,'search',search,'timeUnit','native_canonical', ...
     'trendWindow',.35,'maximumReviewInterval',.2);
-if version == 2
+if any(version == [2,3,4])
     if ~isfield(input,'nodeFamily')
-        error(identifier,'Version 2 requires an explicit nodeFamily.maximumTotalNodes.');
+        error(identifier,'Versions 2, 3 and 4 require an explicit nodeFamily.maximumTotalNodes.');
     end
-    defaults.nodeFamily = node_family(input.nodeFamily,identifier);
+    defaults.nodeFamily = node_family(input.nodeFamily,identifier,version);
+end
+if version == 4
+    defaults.axisSearchPolicy = ipm.remesh.searchEvidence('registration');
 end
 names = fieldnames(defaults);
 reject_unknown(input,names,'autonomousMesh',identifier);
@@ -73,6 +76,11 @@ for index = 1:numel(names)
         policy.enabled = logical(value);
     elseif strcmp(name,'qualityLimits') || strcmp(name,'search')
         policy.(name) = fixed_group(value,defaults.(name),label,identifier);
+    elseif strcmp(name,'axisSearchPolicy')
+        if ~isequaln(value,defaults.axisSearchPolicy)
+            error(identifier,'axisSearchPolicy must equal the registered v4 descriptor.');
+        end
+        policy.axisSearchPolicy=defaults.axisSearchPolicy;
     elseif strcmp(name,'nodeFamily')
         policy.nodeFamily = defaults.nodeFamily;
     elseif strcmp(name,'timeUnit')
@@ -93,7 +101,7 @@ if nargin >= 2 && policy.enabled
 end
 end
 
-function group = node_family(input,identifier)
+function group = node_family(input,identifier,version)
 label = 'autonomousMesh.nodeFamily';
 if ~isstruct(input) || ~isscalar(input) || ~isfield(input,'maximumTotalNodes')
     error(identifier,'%s requires an explicit maximumTotalNodes.',label);
@@ -108,6 +116,14 @@ group = struct('generator','selected_base_index_pchip_v1', ...
     'ordering','node_product_then_registration_index', ...
     'componentwiseNondecreasing',true, ...
     'maximumAcceptedGrowthTransitions',2,'maximumTotalNodes',double(cap));
+if any(version == [3,4])
+    if cap ~= 310000
+        error(identifier,'Versions 3 and 4 register maximumTotalNodes=310000 explicitly.');
+    end
+    group.generator = 'selected_base_index_pchip_integer_v2';
+    group.cellFactors = [1,1;2,1;1,2;2,2;3,1;1,3;3,2;2,3];
+    group.maximumAcceptedGrowthTransitions = 3;
+end
 names = fieldnames(group);
 reject_unknown(input,names,label,identifier);
 for index = 1:numel(names)

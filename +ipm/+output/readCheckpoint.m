@@ -89,7 +89,7 @@ if hasPolicy && state.config.remesh.autonomousMesh.enabled
         'coreCells',[history.mesh.coreGridPoints(end),history.mesh.verticalCoreGridPoints(end)], ...
         'safety',history.mesh.safetyFactor(end),'x',state.x,'y',state.y, ...
         'baseX',state.baseX,'baseY',state.baseY,'history',history);
-    if state.config.remesh.autonomousMesh.version == 2
+    if any(state.config.remesh.autonomousMesh.version == [2,3,4])
         if ~isfield(state.runMetadata,'autonomousMesh') || ...
                 ~isfield(state.runMetadata.autonomousMesh,'currentLevelId')
             error('ipm:AutonomousMeshController','Version-two checkpoints require the original current level.');
@@ -169,7 +169,7 @@ if ~isempty(presentRetired)
 end
 config = validate_config(state.config);
 variableNodes=isfield(config.remesh,'autonomousMesh') && ...
-    config.remesh.autonomousMesh.enabled && config.remesh.autonomousMesh.version==2;
+    config.remesh.autonomousMesh.enabled && any(config.remesh.autonomousMesh.version == [2,3,4]);
 if ~variableNodes && (config.grid.nx ~= numel(state.x) || config.grid.ny ~= numel(state.y))
     error('ipm:CheckpointGrid', ...
         'Checkpoint axes do not match the configured node counts.');

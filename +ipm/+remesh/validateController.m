@@ -46,7 +46,7 @@ require(integer(current.step) && integer(current.remeshCount) && ...
     number(current.normalizedTime) && current.normalizedTime == current.canonicalTime && ...
     pair(current.coreCells) && number(current.safety) && current.safety >= 0,id, ...
     'Current projected counts, clocks, core or safety are invalid.');
-versionTwo = policy.version == 2;
+versionTwo = any(policy.version == [2,3,4]);
 if versionTwo
     fields(current,{'levelId','nodeCount','snapshots'},id,'version-two current projection');
     require(same_value(current.nodeCount,[numel(current.x),numel(current.y)]),id, ...
@@ -201,6 +201,9 @@ if versionTwo
     level_observations(current,w,family,levelIds,config.output.storeSnapshots,id);
     last_decision(memory.lastDecision,current,family,levelIds,transactions,policy,id);
 end
+if policy.version==4
+    failure_search(memory.lastFailure,policy,family,current,levelIds,transactions,config.time,id);
+end
 report.checked = true;report.transactions = n;report.windowRecords = m;
 end
 
@@ -282,9 +285,47 @@ for k=1:numel(a.attemptSummary)
 end
 require(isempty(row.errorIdentifier) && isempty(row.auditReasons),id, ...
     'An accepted candidate must have no error or audit rejection reasons.');
+if any(policy.version == [3,4])
+    % V3 records each attempted level and its original local pair position.
+    % Only the source level can omit local pair one (a filtered valid keep).
+    factors=vertcat(family.members.cellFactors);counts=vertcat(family.members.nodeCount);
+    ids=find(all(factors>=source.cellFactors,2) & [family.members.resourceAdmitted]' & ...
+        [family.members.qualityPassed]');
+    [~,order]=sortrows([prod(counts(ids,:),2),ids],[1,2]);ids=ids(order);
+    lastRank=0;lastLocal=0;perLevel=zeros(numel(ids),1);
+    for k=1:numel(a.attemptSummary)
+        attempt=a.attemptSummary(k);
+        fields(attempt,{'targetLevelId','localPairIndex'},id,'v3 per-level attempt');
+        require(level_id(attempt.targetLevelId,numel(family.members)) && ...
+            isa(attempt.localPairIndex,'double') && integer(attempt.localPairIndex) && ...
+            attempt.localPairIndex>=1 && attempt.localPairIndex<=policy.search.maximumPairCandidates,id, ...
+            'Each v3 attempt must retain a valid double target and local pair index.');
+        rank=find(ids==attempt.targetLevelId);
+        require(isscalar(rank) && rank>=lastRank,id,'V3 attempts must follow the admitted node-product member order.');
+        if rank==lastRank
+            require(attempt.localPairIndex==lastLocal+1,id,'A member cannot repeat or skip an attempted local pair.');
+        else
+            allowed=attempt.localPairIndex==1 || ...
+                (attempt.targetLevelId==a.sourceLevelId && attempt.localPairIndex==2);
+            require(allowed,id,'A new member starts at pair one, except the filtered source keep.');
+        end
+        perLevel(rank)=perLevel(rank)+1;
+        require(perLevel(rank)<=policy.search.maximumPairCandidates,id,'A member exceeded its registered three-pair budget.');
+        lastRank=rank;lastLocal=attempt.localPairIndex;
+    end
+    require(same_value(a.attemptSummary(end).targetLevelId,a.targetLevelId),id, ...
+        'The final successful attempt must identify the actually committed target member.');
+end
+if policy.version==4
+    fields(d,{'axisSearchEvidence'},id,'v4 committed search evidence');
+    ipm.remesh.searchEvidence('validate',d.axisSearchEvidence,policy,family,a.sourceLevelId,false,true);
+    ipm.remesh.searchEvidence('attempts',a.attemptSummary,d.axisSearchEvidence,a.targetLevelId);
 end
 
-function decision_observation(d,policy,h,id)
+end
+
+function decision_observation(d,policy,h,id,unacceptedSource)
+if nargin<5,unacceptedSource=false;end
 fields(d,{'sourceStep','sourceCanonicalTime','sourcePhysicalTime','sourceNormalizedTime', ...
     'sourceRemeshCount','sourceLevelId','sourceNodeCount','requested','initial','coreCells', ...
     'predictedCoreCells','decayEstimate','reason','stopReason','trendAvailable','decayEvidence'},id,'controller decision');
@@ -323,6 +364,7 @@ for k=1:2
     for side={'From','To'}
         step=e(k).(['secant',side{1},'Step']);time=e(k).(['secant',side{1},'Time']);
         matched=find(h.common.acceptedStep==step);
+        if unacceptedSource && step==d.sourceStep,matched=[];end
         require(isempty(matched) || all(h.common.canonicalTau(matched)==time),id, ...
             'Decay evidence clocks must agree with any matching persisted history observation.');
     end
@@ -331,6 +373,10 @@ end
 
 function last_decision(d,c,family,levels,transactions,policy,id)
 decision_observation(d,policy,c.history,id);
+if policy.version==4
+    fields(d,{'axisSearchEvidence'},id,'v4 current search evidence');
+    ipm.remesh.searchEvidence('validate',d.axisSearchEvidence,policy,family,d.sourceLevelId,d.initial,d.requested);
+end
 require(same_value(d.sourceStep,c.step) && same_value(d.sourceCanonicalTime,c.canonicalTime) && ...
     same_value(d.sourcePhysicalTime,c.physicalTime) && d.sourceRemeshCount<=c.remeshCount && ...
     same_value(d.sourceLevelId,levels(d.sourceRemeshCount+1)),id, ...
@@ -352,6 +398,103 @@ end
 matched=find(c.history.common.acceptedStep==d.sourceStep);
 require(isempty(matched) || (all(c.history.common.canonicalTau(matched)==d.sourceCanonicalTime) && ...
     all(c.history.common.physicalTime(matched)==d.sourcePhysicalTime)),id,'Last decision must match any recorded source clocks.');
+end
+
+function failure_search(f,p,family,c,levels,transactions,time,id)
+h=c.history;
+% Failed candidate prefixes belong to their attempted source, which can be a
+% rejected future step. Do not rewrite them to the rolled-back accepted clock.
+if isempty(fieldnames(f)),return;end
+if isfield(f,'controllerDecision')
+    fields(f,{'attempts','kind'},id,'v4 transaction failure');
+    require(strcmp(f.kind,'candidate_transaction_failure'),id,'Unexpected search failure kind.');
+    d=f.controllerDecision;decision_observation(d,p,h,id);
+    failure_source(d,c,family,levels,transactions,time,false,id);
+    if isfield(f,'step'),require(same_value(f.step,d.sourceStep),id,'Failed attempt step disagrees with its decision.');end
+    if isfield(f,'canonicalTime'),require(same_value(f.canonicalTime,d.sourceCanonicalTime),id,'Failed attempt clock disagrees with its decision.');end
+    fields(d,{'axisSearchEvidence'},id,'v4 failed search evidence');
+    require(no(d.initial)&&yes(d.requested),id,'A failed evolved transaction retains its requested plan.');
+    ipm.remesh.searchEvidence('validate',d.axisSearchEvidence,p,family,d.sourceLevelId,false,true);
+    ipm.remesh.searchEvidence('attempts',f.attempts,d.axisSearchEvidence,[]);
+elseif isfield(f,'axisSearchEvidence')
+    decision_observation(f,p,h,id,true);
+    failure_source(f,c,family,levels,transactions,time,true,id);
+    ipm.remesh.searchEvidence('validate',f.axisSearchEvidence,p,family,f.sourceLevelId,f.initial,f.requested);
+else
+    % Planning exceptions have no completed search to certify. They cannot
+    % masquerade as a candidate attempt sequence or accepted plan.
+    fields(f,{'kind','identifier','message'},id,'v4 planning exception');
+    require(strcmp(f.kind,'planning_exception')&&~isfield(f,'attempts'),id, ...
+        'An incomplete planning exception cannot claim a qualified search prefix.');
+    fields(f,{'attemptedStep','sourceCanonicalTime','sourcePhysicalTime','sourceNormalizedTime'},id,'v4 planning exception clocks');
+    failure_clock(f.attemptedStep,f.sourceCanonicalTime,f.sourcePhysicalTime,f.sourceNormalizedTime,c,time,true,id);
+end
+end
+
+function failure_source(d,c,family,levels,transactions,time,mayBePending,id)
+% Failed observations may survive a later resume. Bind them to the recorded
+% historical mesh epoch; only the direct rollback path may be the next step.
+require(no(d.initial)&&isa(d.sourceRemeshCount,'double')&&integer(d.sourceRemeshCount)&& ...
+    d.sourceRemeshCount>=0&&d.sourceRemeshCount<=c.remeshCount,id,'Failure source epoch is outside the committed ledger.');
+epoch=d.sourceRemeshCount;
+require(same_value(d.sourceLevelId,levels(epoch+1))&& ...
+    same_value(d.sourceNodeCount,family.members(d.sourceLevelId).nodeCount),id, ...
+    'Failure source level and exact double node-count pair must match its immutable reference member.');
+failure_clock(d.sourceStep,d.sourceCanonicalTime,d.sourcePhysicalTime,d.sourceNormalizedTime,c,time,mayBePending,id);
+if d.sourceStep==c.step+1
+    require(same_value(epoch,c.remeshCount)&&same_value(d.sourceLevelId,c.levelId)&& ...
+        same_value(d.sourceNodeCount,c.nodeCount),id,'A pending rollback observation uses the current accepted grid epoch.');
+end
+if epoch>0
+    previous=transactions(epoch);
+    require(d.sourceStep>=previous.sourceStep&&d.sourceCanonicalTime>=previous.sourceCanonicalTime&& ...
+        d.sourcePhysicalTime>=previous.sourcePhysicalTime,id,'Failure observation precedes the start of its mesh epoch.');
+end
+if epoch<numel(transactions)
+    next=transactions(epoch+1);
+    require(d.sourceStep<=next.sourceStep,id,'Failure source step exceeds the end of its mesh epoch.');
+    if ~mayBePending
+        require(d.sourceCanonicalTime<=next.sourceCanonicalTime&&d.sourcePhysicalTime<=next.sourcePhysicalTime,id, ...
+            'An accepted failure source exceeds the end clock of its mesh epoch.');
+    end
+end
+if mayBePending
+    predecessor=find(c.history.common.acceptedStep==d.sourceStep-1);
+    require(isempty(predecessor)||all(c.history.mesh.remeshCount(predecessor)==epoch),id, ...
+        'A stored accepted predecessor must use the failed attempt source mesh epoch.');
+end
+end
+
+function failure_clock(step,t,physical,normalized,c,time,mayBePending,id)
+require(isa(step,'double')&&integer(step)&&step>=1&&step<=c.step+double(mayBePending)&& ...
+    isa(t,'double')&&number(t)&&isa(physical,'double')&&number(physical)&& ...
+    same_value(normalized,t)&&t>0&&physical>=0,id,'Failure attempt counts or clocks are invalid or beyond the next attempted step.');
+if mayBePending
+    % An old rejected attempt is not the later accepted observation bearing
+    % the same step number. Terminal horizons can shorten on legal resume.
+    require(t<=c.canonicalTime+time.maxDt,id,'Unaccepted attempt clock is beyond a conservative immutable step-size bound.');
+    predecessor=find(c.history.common.acceptedStep==step-1);
+    if ~isempty(predecessor)
+        previousTime=c.history.common.canonicalTau(predecessor);previousPhysical=c.history.common.physicalTime(predecessor);
+        require(all(t>previousTime & t<=previousTime+time.maxDt)&&all(physical>=previousPhysical),id, ...
+            'Unaccepted attempt clock is outside the immutable step-size range of its stored predecessor.');
+    end
+    if step==c.step+1
+        require(t>c.canonicalTime&&physical>=c.physicalTime,id,'A pending next attempt must follow the accepted endpoint.');
+    end
+    return
+end
+if step==c.step+1
+    require(mayBePending&&t>c.canonicalTime&&t<=c.canonicalTime+time.maxDt&& ...
+        physical>=c.physicalTime,id,'A rolled-back next step must retain a causal clock within the immutable canonical step-size limit.');
+elseif step==c.step
+    require(same_value(t,c.canonicalTime)&&same_value(physical,c.physicalTime),id,'A current accepted failure source must retain the exact current clocks.');
+else
+    require(t<c.canonicalTime&&physical<=c.physicalTime,id,'Historical failure clocks cannot exceed the accepted endpoint.');
+end
+h=c.history.common;matched=find(h.acceptedStep==step);
+require(isempty(matched)||(all(h.canonicalTau(matched)==t)&&all(h.physicalTime(matched)==physical)),id, ...
+    'Failure clocks must agree with every matching stored accepted history observation.');
 end
 
 function level_observations(c,w,family,levels,storeSnapshots,id)

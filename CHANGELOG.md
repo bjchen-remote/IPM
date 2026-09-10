@@ -1,5 +1,17 @@
 # 本副本变更记录
 
+## 2026-09-10：服务器接口与 version-4 自动网格
+
+- 加入面向服务器的 `ipm.config.longTimeProfile(settings)`、
+  `server/profile_settings.m` 和批处理启动脚本。公开设置
+  `maximumAdjacentGridRatio=2` 精确映射到原 `remeshMaximumCellRatio`，在相邻网格比
+  不超过带舍入容差的 2 时不触发 `grid_smoothness_failure`，其他数值安全停机保持。
+- 将已完成全套数值回归的自动网格 version 4 分层/方向增点实现合入维护路径，保留
+  已验证的 rounded-axis 浮点停滞提前返回。新增独立服务器接口配置与停止边界测试；
+  新接口/停止边界及大箱观察配置实测通过；合并后的 `ipm.verify('all','quick')`
+  与六算例/三迁移 `equivalence` 均实际 exit0。首次接口测试因测试自身把
+  `timeIntegrator` 误读到 transport 域而失败，修正测试字段后通过；数值实现未因该失败修改。
+
 ## 2026-09-09：自动网格构造的逐值提速
 
 - 仅在 roundedAxis 二分中点已等于端点时提前返回，原数值返回值、轴和候选选择保持。400实际构造×3长度单位的1200组完整比较通过；6轮ABBA构造器速度比1.31–1.45、中位1.415，不声称整段PDE同幅提速。

@@ -32,6 +32,12 @@ run(fullfile(projectRoot,'examples','quick_start.m'));
 启用解析初始重网格、自适应重网格及常规输出。`ipm.solve(struct())` 则采用配置表默认值，
 同样不是短算例。实际选项与默认值以 [schema.m](+ipm/+config/schema.m) 为准。
 
+长时间 Profile 的服务器接口使用
+`opts = ipm.config.longTimeProfile(settings)`；可编辑的启动文件、断点续算和
+`maximumAdjacentGridRatio=2` 的准确语义见
+[README_SERVER_ZH.md](README_SERVER_ZH.md)。该辅助函数只构造并校验配置，数值求解仍统一调用
+`ipm.solve`。
+
 ## 数值选择与边界
 
 | 路径 | 空间离散 | 输运 | 时间推进 |

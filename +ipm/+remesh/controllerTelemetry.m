@@ -9,8 +9,8 @@ if isempty(memory)
         'cumulativeAbsolutePeakJump',0,'window',struct('time',[],'step',[], ...
         'remeshCount',[],'coreCells',zeros(0,2),'safety',[]), ...
         'initialization',struct(),'lastDecision',struct(),'lastFailure',struct());
-    if policy.version==2
-        memory.version=2;
+    if any(policy.version == [2,3,4])
+        memory.version=policy.version;
         memory.referenceFamily=struct();memory.currentLevelId=1;
         memory.window.nodeCount=zeros(0,2);memory.window.levelId=[];
     end
@@ -34,7 +34,7 @@ end
 w.time(end+1,1)=t;w.step(end+1,1)=n;w.remeshCount(end+1,1)=epoch;
 w.coreCells(end+1,:)=[state.flow.coreGridPoints,state.flow.verticalCoreGridPoints];
 w.safety(end+1,1)=state.flow.safetyFactor;
-if policy.version==2
+if any(policy.version == [2,3,4])
     actual=[numel(state.ops.x),numel(state.ops.y)];
     assert(isequal(actual,[state.ops.nx,state.ops.ny]), ...
         'ipm:AutonomousMeshMemory','Current node counts must match the actual operators.');

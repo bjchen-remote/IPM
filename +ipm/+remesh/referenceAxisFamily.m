@@ -5,9 +5,9 @@ function family=referenceAxisFamily(rootX,rootY,anchor,policy)
 % A resource cap is a node budget, not an estimate of available LU memory.
 identifier='ipm:AutonomousMeshReferenceFamily';
 assert(isstruct(policy)&&isscalar(policy)&&isfield(policy,'version')&& ...
-    isequal(policy.version,2),identifier,'A resolved version-two policy is required.');
+    any(policy.version == [2,3,4]),identifier,'A resolved version-two or version-three policy is required.');
 normalized=ipm.config.autonomousMeshPolicy(policy);
-assert(isequaln(normalized,policy),identifier,'Pass the normalized version-two policy.');
+assert(isequaln(normalized,policy),identifier,'Pass the normalized registered policy.');
 validateattributes(rootX,{'double'},{'row','real','finite','increasing','>=',-realmax});
 validateattributes(rootY,{'double'},{'column','real','finite','increasing','nonnegative'});
 validateattributes(anchor,{'double'},{'scalar','real','finite','positive'});
@@ -40,6 +40,27 @@ for factor=1:2
     xQuality{factor}=checked_quality(x,policy.qualityLimits,'x',factor);
     yQuality{factor}=checked_quality(y,policy.qualityLimits,'y',factor);
 end
+% Version three adds directional factor three, independently from the immutable
+% root. Root knots are exact; factor-two intermediate knots need not nest.
+if any(policy.version == [3,4])
+    refinedThird=pchip(linspace(0,1,numel(positive)),positive, ...
+        linspace(0,1,3*(numel(positive)-1)+1));
+    refinedThird(1:3:end)=positive;
+    refinedThird(1)=0;
+    xAxes{3}=[-fliplr(refinedThird(2:end)),refinedThird];
+    x=xAxes{3};
+    assert(isequal(x(1:3:end),rootX)&&isequal(x,-fliplr(x))&& ...
+        any(x==anchor)&&any(x==-anchor)&&isequal(x([1,end]),rootX([1,end])), ...
+        identifier,'Factor three must preserve original root knots and anchors exactly.');
+    xQuality{3}=checked_quality(x,policy.qualityLimits,'x',3);
+    yAxes{3}=pchip(linspace(0,1,numel(rootY)),rootY, ...
+        linspace(0,1,3*(numel(rootY)-1)+1))';
+    yAxes{3}(1:3:end)=rootY;yAxes{3}(1)=0;
+    assert(isequal(yAxes{3}(1:3:end),rootY)&& ...
+        isequal(yAxes{3}([1,end]),rootY([1,end])), ...
+        identifier,'Factor three must preserve original y root knots and endpoints exactly.');
+    yQuality{3}=checked_quality(yAxes{3},policy.qualityLimits,'y',3);
+end
 members=struct('index',{},'cellFactors',{},'nodeCount',{},'baseX',{},'baseY',{}, ...
     'resourceAdmitted',{},'qualityPassed',{},'xQuality',{},'yQuality',{});
 for index=1:size(registration.cellFactors,1)
@@ -52,6 +73,7 @@ for index=1:size(registration.cellFactors,1)
 end
 family=struct('version',1,'generator',registration.generator,'rootX',rootX, ...
     'rootY',rootY,'anchor',anchor,'members',members);
+if any(policy.version == [3,4]),family.version=2;end
 end
 
 function q=checked_quality(axis,limits,label,factor)

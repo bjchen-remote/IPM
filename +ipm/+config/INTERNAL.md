@@ -8,6 +8,8 @@
 - `schema()`：选项名、分组、原始默认值、类型及合法取值的唯一清单。
 - `resolve(opts)`：覆盖、规范化、推导、校验，返回 `schemaVersion=4`、`frozen=true` 的配置。
 - `activeCase()`：无参数求解时使用的生产覆盖项；不等于空结构体的配置默认值。
+- `longTimeProfile(settings)`：把服务器长跑的少量公开设置映射为显式 version-4
+  自动网格选项；只解析配置，不创建目录或启动求解。
 - `sixthOrder(overrides)`：构造完整六阶覆盖项；仍由 `resolve` 作最终校验。
 - `tupleViolation(...)`：统一检查耦合数值选择，供解析与持久化结果校验共用。
 - `outputPaths(opts)`：推导默认结果和视频路径，不创建文件。
@@ -38,7 +40,7 @@ adaptiveLevels=[.1 .5 .9]；disabled 不增加这些元组限制。它不更改 
 `initialMeshObservationFallback` 是另一项无默认值的可选 remesh 策略，
 由纯函数 `initialMeshObservationPolicy` 正规化。显式启用的 version1 固定为
 `primitive_k8_fixed_probe_v1`：仅支持原始 `degenerate_primitive`、power8、
-anchor1、double-odd 及已启用的 autonomousMesh v2，要求对称箱 H>4、Ymax>4。
+anchor1、double-odd 及已启用的 autonomousMesh v2/v3/v4，要求对称箱 H>4、Ymax>4。
 内区半宽4、间距.025、尾比1.05、20格平滑坡、最多600000观察节点及一次回退均由版本固定。
 省略该选项不补字段、不改变旧配置；它不更改实际求解节点预算、C或时间步规则。
 

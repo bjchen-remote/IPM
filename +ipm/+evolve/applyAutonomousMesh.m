@@ -6,7 +6,7 @@ function [state,success,attempts]=applyAutonomousMesh(state,plan)
 assert(~isfield(state.ops,'poisson'),'ipm:AutonomousMeshFactorLifetime', ...
     'Release the old factor in the owning caller before building a candidate.');
 policy=state.config.remesh.autonomousMesh;success=false;
-if policy.version==2
+if any(policy.version == [2,3,4])
     assert(plan.requested && isempty(plan.stopReason) && ...
         plan.sourceStep==state.step && plan.sourceCanonicalTime==state.scale.canonicalTime && ...
         plan.sourcePhysicalTime==state.scale.physicalTime && ...
@@ -17,22 +17,57 @@ if policy.version==2
         isequal(plan.coreCells,[state.flow.coreGridPoints,state.flow.verticalCoreGridPoints]), ...
         'ipm:AutonomousMeshStalePlan','A candidate plan must belong to the exact source state.');
 end
+versionFourEvolution=policy.version==4 && ~plan.initial;
+if policy.version==4
+    ipm.remesh.searchEvidence('validate',plan.axisSearchEvidence,policy, ...
+        state.runMetadata.autonomousMesh.referenceFamily,plan.sourceLevelId,plan.initial,plan.requested);
+end
+if versionFourEvolution
+    e=plan.axisSearchEvidence;
+    assert(numel(plan.candidates)==numel(e.filteredCandidateIndices), ...
+        'ipm:AutonomousMeshCandidateOrder','Filtered candidates must retain the complete registered order.');
+    for j=1:numel(plan.candidates)
+        a=plan.candidates(j);d=e.candidates(e.filteredCandidateIndices(j));
+        assert(isfield(a,'searchDescriptor') && isequaln(a.searchDescriptor,d) && ...
+            isequal(a.nodeFamilyIndex,d.targetLevelId) && isequal(a.targetLevelId,d.targetLevelId) && ...
+            isequal(a.localPairIndex,d.localPairIndex) && isequal(a.unchanged,d.unchanged) && ...
+            isequal(a.xIndex,d.xScheduleIndex) && isequal(a.yIndex,d.yTrialIndex), ...
+            'ipm:AutonomousMeshCandidateOrder','A proposal must identify its original compact search descriptor.');
+    end
+end
 attempts=struct('candidateIndex',{},'passed',{},'audit',{}, ...
     'errorIdentifier',{},'errorMessage',{});
+if versionFourEvolution
+    attempts=struct('candidateIndex',{},'passed',{},'audit',{}, ...
+        'errorIdentifier',{},'errorMessage',{},'targetLevelId',{},'localPairIndex',{},'searchDescriptor',{});
+end
 for k=1:numel(plan.candidates)
     axes=plan.candidates(k);
+    if any(policy.version == [3,4]) && ~plan.initial
+        assert(isfield(axes,'targetLevelId') && isfield(axes,'localPairIndex') && ...
+            isequal(axes.targetLevelId,axes.nodeFamilyIndex) && ...
+            isa(axes.localPairIndex,'double') && isscalar(axes.localPairIndex) && ...
+            isreal(axes.localPairIndex) && isfinite(axes.localPairIndex) && ...
+            axes.localPairIndex>=1 && axes.localPairIndex<=policy.search.maximumPairCandidates && ...
+            axes.localPairIndex==fix(axes.localPairIndex), ...
+            'ipm:AutonomousMeshCandidateOrder','The v3 candidate must retain its target and original per-level pair index.');
+    end
     assert(plan.initial || (~axes.unchanged && ...
         (~isequal(axes.x,state.ops.x) || ~isequal(axes.y,state.ops.y))), ...
         'ipm:AutonomousMeshUnchangedTransaction', ...
         'An evolved mesh transaction must actually change at least one axis.');
     proposal=struct('x',axes.x,'y',axes.y);
-    if policy.version==2 && ~plan.initial
+    if any(policy.version == [2,3,4]) && ~plan.initial
         proposal.referenceFamily=state.runMetadata.autonomousMesh.referenceFamily;
         proposal.sourceLevelId=state.runMetadata.autonomousMesh.currentLevelId;
         proposal.targetLevelId=axes.nodeFamilyIndex;
     end
     row=struct('candidateIndex',k,'passed',false,'audit',struct(), ...
         'errorIdentifier','','errorMessage','');
+    if versionFourEvolution
+        row.targetLevelId=axes.targetLevelId;row.localPairIndex=axes.localPairIndex;
+        row.searchDescriptor=axes.searchDescriptor;
+    end
     trial=state;
     try
         if plan.initial
@@ -89,19 +124,32 @@ for k=1:numel(plan.candidates)
                     end
                     memory.initialization.observationFallback=evidence;
                 end
-                if policy.version==2
+                if any(policy.version == [2,3,4])
                     memory.referenceFamily=ipm.remesh.referenceAxisFamily( ...
                         trial.ops.baseX,trial.ops.baseY, ...
                         state.config.scaling.transportAnchorX,policy);
                     memory.currentLevelId=1;
                 end
             else
-                if policy.version==2
+                if any(policy.version == [2,3,4])
                     assert(row.audit.targetLevelId==axes.nodeFamilyIndex, ...
                         'ipm:AutonomousMeshFamily','The audited candidate must match its planned level.');
                     row.audit.controllerDecision=rmfield(plan,{'candidates','axisReport'});
                     row.audit.candidateIndex=k;
                     row.audit.attemptSummary=attempt_summary(attempts);
+                    if any(policy.version == [3,4])
+                        for j=1:numel(attempts)
+                            row.audit.attemptSummary(j).targetLevelId=plan.candidates(j).targetLevelId;
+                            row.audit.attemptSummary(j).localPairIndex=plan.candidates(j).localPairIndex;
+                            if versionFourEvolution
+                                row.audit.attemptSummary(j).searchDescriptor=plan.candidates(j).searchDescriptor;
+                            end
+                        end
+                    end
+                    if versionFourEvolution
+                        ipm.remesh.searchEvidence('attempts',row.audit.attemptSummary, ...
+                            plan.axisSearchEvidence,row.audit.targetLevelId);
+                    end
                     memory.currentLevelId=row.audit.targetLevelId;
                     attempts(k).audit=row.audit;
                 end
@@ -129,10 +177,16 @@ for k=1:numel(plan.candidates)
         if ~recoverable_geometry(exception.identifier)
             % Report a programming/configuration failure separately. Do not
             % disguise it as exhaustion of all geometrically valid candidates.
+            if versionFourEvolution
+                ipm.remesh.searchEvidence('attempts',attempts,plan.axisSearchEvidence,[]);
+            end
             return
         end
     end
     clear trial rhoRate
+end
+if versionFourEvolution && ~isempty(attempts)
+    ipm.remesh.searchEvidence('attempts',attempts,plan.axisSearchEvidence,[]);
 end
 end
 

@@ -71,7 +71,7 @@ if hasPolicy && result.config.remesh.autonomousMesh.enabled
         'coreCells',[mesh.coreGridPoints(end),mesh.verticalCoreGridPoints(end)], ...
         'safety',mesh.safetyFactor(end),'x',result.grid.x,'y',result.grid.y, ...
         'history',result.history);
-    if result.config.remesh.autonomousMesh.version == 2
+    if any(result.config.remesh.autonomousMesh.version == [2,3,4])
         require_fields(result.metadata,{'autonomousMesh'},'version-two metadata');
         require_fields(result.metadata.autonomousMesh,{'currentLevelId'},'version-two controller');
         current.levelId=result.metadata.autonomousMesh.currentLevelId;

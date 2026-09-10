@@ -24,11 +24,16 @@ cp "$project_root/CHANGELOG.md" "$stage/CHANGELOG.md"
 chmod +x "$stage/server/launch.sh" "$stage/server/package_release.sh"
 
 commit="$(git -C "$project_root" rev-parse HEAD)"
+if [[ -z "$(git -C "$project_root" status --porcelain)" ]]; then
+    working_tree_clean=true
+else
+    working_tree_clean=false
+fi
 {
     echo "release=$release_name"
     echo "created_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo "source_commit=$commit"
-    echo "working_tree_changes_included=true"
+    echo "working_tree_clean_at_packaging=$working_tree_clean"
     echo "matlab_reference=R2026a"
 } > "$stage/PACKAGE_INFO.txt"
 (

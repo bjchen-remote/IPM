@@ -2,7 +2,7 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
-本次第二发行版的成本收益判断和未验证范围见 [R2 发行说明](RELEASE_NOTES_R2_ZH.md)。
+本次第二发行版的自动长跑验收、成本收益判断和未验证范围见 [R2.1 发行说明](RELEASE_NOTES_R2_ZH.md)。
 冻结态的方向网格成本前沿和已知停机原因见 [网格建议](MESH_GRID_RECOMMENDATION_ZH.md)。
 本次实验包还把连续 X 峰值的竖向核心影子观测写入结果/断点元数据，
 用于评估正式网格触发的误差；它不改变正式网格决策或 C 规则。
@@ -13,7 +13,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_r2_20260913
+cd ipm_long_time_server_r2_1_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -51,12 +51,12 @@ settings.restartCheckpoint = '';
 
 服务器设置文件显式选 version 5。它依据初始 `Nx×Ny` 和启动时的 `maximumTotalNodes`，一次登记预算内的方向节点级；每轴先用整数因子 1–6，之后按至多约 4/3 的因子增长，直到预算边界。触发重网格时按节点总成本由小到大尝试，每个节点级内从已注册候选中选择最大相邻格宽比最小的合格轴对，并保留质量裕量作为次级排序。相同参考 X/Y 轴的几何试探在单次规划内复用。实际迁移仍须通过核心、前沿、模板、求积、峰跳、质量和值域门；失败不能改变已接受状态。预算 310000、初始 `321×161` 时登记 14 个节点级；改为 1000000 时登记 38 个。选更大预算只需在**新** `t=0` 算例启动前修改设置，不能在 checkpoint 续算时修改。旧 H8 轨道曾在约 τ=11.67 因固定节点族耗尽；若服务器内存允许，建议在新长跑开始前把预算提高到 1000000 并先做短程资源试跑。
 
-`ipm.config.longTimeProfile` 在未指定 `autonomousMeshVersion` 时仍默认 version 4，以便已有脚本配置逐值不变；它的注册节点族固定到 310000。version 5 是新增的自动扩容实验路径，尚需完成原生从零长跑和不同计算域验证。
+`ipm.config.longTimeProfile` 在未指定 `autonomousMeshVersion` 时仍默认 version 4，以便已有脚本配置逐值不变；它的注册节点族固定到 310000。version 5 已完成 H8 从原始 `t=0` 到可信 `τ=12.400290` 的无人工换网格长跑、37 次自主重布，主动暂停前没有网格停机；不同计算域的同等长跑仍需验证。
 
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -89,7 +89,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -98,7 +98,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_20260913/serve
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -106,8 +106,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_r2_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 
@@ -176,7 +176,7 @@ H8 的远边界告警仍在，尚无大箱与时空收敛证据。
 第38、39次的墙面 `Omega_tau` 相对差约 1.40%/2.54%，却对应更大的
 归一化形状导数差；仅改变 C1 幅度率不能解决网格导数敏感性。
 
-version 4 的分层/方向增点实现已通过 baseline、四阶、六阶和新旧一致性完整回归；真实旧轨道的冻结场迁移也通过原生配对检查。此前 version 2 从 `t=0` 的 H8 已运行到 `τ=11.6731`、H64 已运行到 `τ=9.9086`，均因有限候选族耗尽停止；version 4 正是针对这种“仍有可用网格但搜索族未覆盖”的故障。version 5 在 τ≈7.4 和 τ≈9.3 的真实冻结场上完成 38 级方向配置的无 LU 网格筛选：较晚时 `961×321` 用约 30.8 万节点把最佳相邻比从 `1.062837` 降到 `1.048762`；`961×481` 用约 46.2 万节点降到 `1.036248`；单独加到 `1281×321` 没有进一步改善。原生 H8 `t=0→τ=0.5` 完成 5 次自然自动重布，`321×161→641×161` 的真实第五版场/算子迁移及安全审计通过；H64/H128 和 H256 自动初始节点的短程原生运行通过，H256 checkpoint 续算至 τ=.008 也通过。修改后的 `ipm.verify('all','quick')` 与 `ipm.verify('equivalence','quick')` 均 exit0。更晚的大节点原生迁移和整段长跑仍待验证。
+version 4 的分层/方向增点实现已通过 baseline、四阶、六阶和新旧一致性完整回归；真实旧轨道的冻结场迁移也通过原生配对检查。此前 version 2 从 `t=0` 的 H8 已运行到 `τ=11.6731`、H64 已运行到 `τ=9.9086`，均因有限候选族耗尽停止；version 4 已自主越过这一旧边界并推进到可信 `τ=14.200201`、42 次重布。version 5 在 τ≈7.4 和 τ≈9.3 的真实冻结场上完成 38 级方向配置的无 LU 网格筛选：较晚时 `961×321` 用约 30.8 万节点把最佳相邻比从 `1.062837` 降到 `1.048762`；`961×481` 用约 46.2 万节点降到 `1.036248`；单独加到 `1281×321` 没有进一步改善。原生 H8 version 5 从 `t=0` 自主运行到可信 `τ=12.400290`，完成 37 次自动重布；H64/H128 和 H256 自动初始节点的短程原生运行通过，H256 checkpoint 续算至 τ=.008 也通过。修改后的 `ipm.verify('all','quick')` 与 `ipm.verify('equivalence','quick')` 均 exit0。不同计算域的同等长跑仍待验证。
 
 旧 H8 失败请求的 70 个基础 X 候选全部被拒；相邻步长比、局部求积权重和核心格数是主要限制，Y 方向仍有可用候选。新 version 4 原始 `t=0` H8 实跑已验证到至少 `τ≈9`：同节点自动重布至少 17 次，并在 `τ≈4.30` 自主从 `321×161` 增至 `641×161`，之后达到 `641×321`。远边界源/速度指标超过 `0.01` 告警阈值；H8 长跑可检验网格和时间推进，但最终 Profile 必须另作更大计算域的匹配比较。
 

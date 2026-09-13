@@ -2,12 +2,14 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
+冻结态的方向网格成本前沿和已知停机原因见 [网格建议](MESH_GRID_RECOMMENDATION_ZH.md)。
+
 ## 最快启动
 
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_20260913
+cd ipm_long_time_server_v5_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -18,7 +20,7 @@ nohup server/launch.sh > launcher.out 2>&1 &
 MATLAB_BIN=/opt/MATLAB/R2026a/bin/matlab nohup server/launch.sh > launcher.out 2>&1 &
 ```
 
-正式长跑建议放在 `tmux` 或批处理系统中。启动前请确认磁盘空间和内存；当前分层策略允许最多 310000 个二维网格节点，稀疏 LU 的实际内存还取决于节点形状和平台。
+正式长跑建议放在 `tmux` 或批处理系统中。启动前请确认磁盘空间和内存；`maximumTotalNodes` 是启动时登记的二维节点预算，并不是稀疏 LU 的内存保证。更高预算必须按服务器实际内存试验。
 
 ## 用户接口
 
@@ -30,20 +32,26 @@ settings.boxHeight = 4;
 settings.canonicalFinalTime = 16;
 settings.maximumSteps = 60000;
 settings.maximumAdjacentGridRatio = 2;
+settings.autonomousMeshVersion = 5;
+settings.maximumTotalNodes = 310000;
 settings.outputDirectory = fullfile(projectRoot,'runs','profile_H8_tau16');
 settings.restartCheckpoint = '';
 ```
 
 `maximumAdjacentGridRatio=2` 对应内部的 `remeshMaximumCellRatio=2`。在每次记录状态上，若 X、Y 两轴的最大相邻步长比都不超过 `2*(1+1e-10)`，程序不会因为 `grid_smoothness_failure` 停止。质量守恒、最大值原理、振荡、分辨率、时间终点、最大步数、自动网格候选耗尽等独立停止条件仍然有效；这样不会用一个网格比选项掩盖数值失效。
 
-默认自动网格是 version 4：先在原节点规模内作分层参数搜索，仍不足时按 X/Y 方向分别增加节点，节点因子为 `[1,1]`、`[2,1]`、`[1,2]`、`[2,2]`、`[3,1]`、`[1,3]`、`[3,2]`、`[2,3]`。候选必须通过原来的核心分辨率、前沿、局部平滑、求积、迁移峰跳、质量和值域门才会提交。
+服务器设置文件显式选 version 5。它依据初始 `Nx×Ny` 和启动时的 `maximumTotalNodes`，一次登记预算内的方向节点级；每轴先用整数因子 1–6，之后按至多约 4/3 的因子增长，直到预算边界。触发重网格时按节点总成本由小到大尝试，每个节点级内从已注册候选中选择最大相邻格宽比最小的合格轴对，并保留质量裕量作为次级排序。相同参考 X/Y 轴的几何试探在单次规划内复用。实际迁移仍须通过核心、前沿、模板、求积、峰跳、质量和值域门；失败不能改变已接受状态。预算 310000、初始 `321×161` 时登记 14 个节点级；改为 1000000 时登记 38 个。选更大预算只需在**新** `t=0` 算例启动前修改设置，不能在 checkpoint 续算时修改。旧 H8 轨道曾在约 τ=11.67 因固定节点族耗尽；若服务器内存允许，建议在新长跑开始前把预算提高到 1000000 并先做短程资源试跑。
+
+`ipm.config.longTimeProfile` 在未指定 `autonomousMeshVersion` 时仍默认 version 4，以便已有脚本配置逐值不变；它的注册节点族固定到 310000。version 5 是新增的自动扩容实验路径，尚需完成原生从零长跑和不同计算域验证。
 
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_20260913');
 settings = struct( ...
     'canonicalFinalTime',16, ...
+    'autonomousMeshVersion',5, ...
+    'maximumTotalNodes',1000000, ...
     'maximumAdjacentGridRatio',2, ...
     'outputDirectory','/data/ipm/run01');
 opts = ipm.config.longTimeProfile(settings);
@@ -55,7 +63,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 
 程序按 `checkpointEvery` 保存不可覆盖的原生 checkpoint，并在正常或安全停止时保存末态 checkpoint。把 `profile_settings.m` 中的 `restartCheckpoint` 设为该文件的绝对路径，同时只延长 `canonicalFinalTime` 或 `maximumSteps`，再运行同一启动命令。
 
-恢复会冻结原来的网格、物理、离散、C 规则和自动网格策略。尤其不能在恢复时把网格比从 1.5 改成 2；若需要 `2`，应在新的 `t=0` 算例启动前设置。
+恢复会冻结原来的网格、物理、离散、C 规则和自动网格策略。尤其不能在恢复时把网格比从 1.5 改成 2；若需要 `2`，应在新的 `t=0` 算例启动前设置。跨机器复制旧 checkpoint 时，先用目标机器的 `profile_status` 校验：旧数值签名含浮点归约，线程数或平台差异可能使严格校验失败。新 `t=0` 算例没有这个迁移限制。
 
 ## 输出与检查
 
@@ -70,7 +78,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -78,7 +86,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_20260913/server')
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -86,8 +94,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_v5_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 
@@ -95,8 +103,8 @@ r = ipmtests.baseline.serverInterface();
 
 ## 已验证范围
 
-version 4 的分层/方向增点实现已通过 baseline、四阶、六阶和新旧一致性完整回归；真实旧轨道的冻结场迁移也通过原生配对检查。此前 version 2 从 `t=0` 的 H8 已运行到 `τ=11.6731`、H64 已运行到 `τ=9.9086`，均因有限候选族耗尽停止；version 4 正是针对这种“仍有可用网格但搜索族未覆盖”的故障。
+version 4 的分层/方向增点实现已通过 baseline、四阶、六阶和新旧一致性完整回归；真实旧轨道的冻结场迁移也通过原生配对检查。此前 version 2 从 `t=0` 的 H8 已运行到 `τ=11.6731`、H64 已运行到 `τ=9.9086`，均因有限候选族耗尽停止；version 4 正是针对这种“仍有可用网格但搜索族未覆盖”的故障。version 5 在 τ≈7.4 的真实冻结场上完成 38 级、五种方向配置的无 LU 网格筛选：`961×321` 用约 30.8 万节点把最佳相邻比从 `1.052818` 降到 `1.041136`；`961×481` 用约 46.2 万节点降到 `1.029973`；单独加到 `1281×321` 没有进一步改善。原生 `t=0` 三步、checkpoint 和三步续算均已通过；大节点原生迁移和整段长跑仍待验证。
 
-旧 H8 失败请求的 70 个基础 X 候选全部被拒；相邻步长比、局部求积权重和核心格数是主要限制，Y 方向仍有可用候选。新 version 4 原始 `t=0` H8 实跑已验证到 `τ≈5`：同节点自动重布至少 17 次，并在 `τ≈4.30` 自主从 `321×161` 增至 `641×161`。此时远边界源/速度指标超过 `0.01` 告警阈值；H8 长跑可检验网格和时间推进，但最终 Profile 必须另作更大计算域的匹配比较。
+旧 H8 失败请求的 70 个基础 X 候选全部被拒；相邻步长比、局部求积权重和核心格数是主要限制，Y 方向仍有可用候选。新 version 4 原始 `t=0` H8 实跑已验证到至少 `τ≈9`：同节点自动重布至少 17 次，并在 `τ≈4.30` 自主从 `321×161` 增至 `641×161`，之后达到 `641×321`。远边界源/速度指标超过 `0.01` 告警阈值；H8 长跑可检验网格和时间推进，但最终 Profile 必须另作更大计算域的匹配比较。
 
-version 4 尚未完成从 `t=0` 到 `τ=16` 的整段服务器实跑，因此本包是可运行的研究版本，不代表已经获得无穷时间极限、空间收敛或奇性证明。运行中不要编辑源码或 `profile_settings.m`；需要新配置时启动新的输出目录。
+正在运行的 version 4 H8 原始 `t=0` 轨道还未到 `τ=16`，version 5 也未完成该整段原生验证。本包只支持继续实验，不代表已经获得无穷时间极限、空间收敛或奇性证明。运行中不要编辑源码或 `profile_settings.m`；需要新配置时启动新的输出目录。

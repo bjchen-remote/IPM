@@ -37,10 +37,13 @@ SSPRK54/high_order 迁移，并要求 adaptiveRemesh=true、initialAnalyticRemes
 adaptiveLevels=[.1 .5 .9]；disabled 不增加这些元组限制。它不更改 C、CFL 或 maxDt，
 配置正规化本身不证明运行期自动网格已可用。
 
+version5额外冻结 `nodeFamily.initialNodeCount` 和启动时的 `maximumTotalNodes`，由两者
+确定方向因子/节点级，记录动态成员数的有界搜索身份；旧version1--4正规化不变。
+
 `initialMeshObservationFallback` 是另一项无默认值的可选 remesh 策略，
 由纯函数 `initialMeshObservationPolicy` 正规化。显式启用的 version1 固定为
 `primitive_k8_fixed_probe_v1`：仅支持原始 `degenerate_primitive`、power8、
-anchor1、double-odd 及已启用的 autonomousMesh v2/v3/v4，要求对称箱 H>4、Ymax>4。
+anchor1、double-odd 及已启用的 autonomousMesh v2/v3/v4/v5，要求对称箱 H>4、Ymax>4。
 内区半宽4、间距.025、尾比1.05、20格平滑坡、最多600000观察节点及一次回退均由版本固定。
 省略该选项不补字段、不改变旧配置；它不更改实际求解节点预算、C或时间步规则。
 

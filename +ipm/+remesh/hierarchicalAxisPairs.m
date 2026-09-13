@@ -1,15 +1,16 @@
-function [candidates,report,searchAudit]=hierarchicalAxisPairs(view,referenceAxes,anchor,policy,maximumTotalNodes)
+function [candidates,report,searchAudit,cache]=hierarchicalAxisPairs(view,referenceAxes,anchor,policy,maximumTotalNodes,cache)
 %IPM.REMESH.HIERARCHICALAXISPAIRS Explicit bounded pure axis refinement.
 % Candidate-source module only: no configuration or automatic activation.
 % Successful primary candidates/report return exactly unchanged; the third
 % output owns search telemetry. Native field/transfer admission is external.
 % No clock, step number, field transfer, flow, checkpoint or initial sampler.
 validateattributes(maximumTotalNodes,{'numeric'},{'scalar','real','finite','integer','positive'});
+if nargin<6,cache=struct();end
 assert(numel(referenceAxes.x)*numel(referenceAxes.y)<=maximumTotalNodes, ...
     'ipm:HierarchicalResourceCap','Reference exceeds the separately registered node cap.');
 [schedule,registration]=ipm.remesh.hierarchicalAxisSchedule(policy.search);
 registration.maximumTotalNodes=maximumTotalNodes;
-[candidates,primary]=ipm.remesh.plannedAxisPairs(view,referenceAxes,anchor,policy);
+[candidates,primary,cache]=ipm.remesh.plannedAxisPairs(view,referenceAxes,anchor,policy,cache);
 assert(numel(primary.xTrials)==nnz(schedule(:,1)==0));
 searchAudit=struct('kind','ipm_hierarchical_axis_search_audit_v1','registration',registration, ...
     'primaryReport',primary,'primaryCandidates',candidates,'schedule',schedule, ...
@@ -66,13 +67,20 @@ for level=1:registration.refinementDepth
         'newTrials',numel(searchAudit.extraTrials)-before,'xAdmitted',numel(passedRows), ...
         'completeScheduledLevel',true));
     if ~isempty(passedRows)
-        pairs=zeros(numel(passedRows)*numel(yIndices),4);k=0;
+        pairs=zeros(numel(passedRows)*numel(yIndices),5);k=0;
         for i=1:numel(passedRows)
             for j=yIndices
-                k=k+1;pairs(k,:)=[i,j,min(passedRows(i).qualityMargin,primary.yTrials(j).qualityMargin),passedIndices(i)];
+                k=k+1;pairs(k,:)=[i,j,min(passedRows(i).qualityMargin,primary.yTrials(j).qualityMargin), ...
+                    passedIndices(i),max(passedRows(i).quality.maximumAdjacentCellRatio, ...
+                    primary.yTrials(j).quality.maximumAdjacentCellRatio)];
             end
         end
-        pairs=sortrows(pairs,[-3,4,2]);pairs=pairs(1:min(policy.search.maximumPairCandidates,size(pairs,1)),:);
+        if policy.version==5
+            pairs=sortrows(pairs,[5,-3,4,2]);
+        else
+            pairs=sortrows(pairs,[-3,4,2]);
+        end
+        pairs=pairs(1:min(policy.search.maximumPairCandidates,size(pairs,1)),:);
         candidates=struct([]);meshLimits=rmfield(limits,{'minWeightToControlWidth','maxWeightToControlWidth'});
         for k=1:size(pairs,1)
             i=pairs(k,1);j=pairs(k,2);sigma=primary.yTrials(j).sigma;
@@ -109,7 +117,11 @@ for k=1:numel(candidates)
 end
 report.admittedAxisPairCount=nnz([report.xTrials.admissible])*nnz([report.yTrials.admissible]);
 report.status=audit.status;
-report.ranking='weakest dimensionless quality margin; stable schedule index then original Y order';
+if primary.policy.version==5
+    report.ranking='minimax adjacent ratio, then quality margin, schedule index, Y index';
+else
+    report.ranking='weakest dimensionless quality margin; stable schedule index then original Y order';
+end
 report.hierarchicalRegistration=audit.registration;
 report.originalPrimaryXTrialCount=numel(primary.xTrials);
 report.completedRefinementLevel=audit.lastCompletedLevel;

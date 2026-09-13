@@ -4,14 +4,21 @@ function value=searchEvidence(action,varargin)
 value=[];id='ipm:AutonomousMeshSearchEvidence';
 switch action
  case 'registration'
+  maximumMembers=8;
+  if ~isempty(varargin),maximumMembers=varargin{1};end
+  validateattributes(maximumMembers,{'numeric'},{'scalar','integer','>=',1,'<=',192});
+  rankingRule='quality_margin_then_schedule_index_then_y_index';
+  if numel(varargin)>=2 && varargin{2}==5
+   rankingRule='minimax_adjacent_ratio_then_quality_margin_then_schedule_and_y';
+  end
   value=struct('version',1,'algorithm','primary_then_lower_octave_dyadic_v1', ...
    'activation','evolved_remesh_only','lowerExtensionOctaves',1,'refinementDepth',2, ...
-   'maximumAxisTrialsPerMember',500,'maximumPairsPerMember',3,'maximumMembers',8, ...
-   'maximumTotalPairDescriptors',24,'stageCounts',[70,260,170], ...
+   'maximumAxisTrialsPerMember',500,'maximumPairsPerMember',3,'maximumMembers',maximumMembers, ...
+   'maximumTotalPairDescriptors',3*maximumMembers,'stageCounts',[70,260,170], ...
    'stopRule','first_completed_stage_with_qualified_pair', ...
-   'rankingRule','quality_margin_then_schedule_index_then_y_index');
+   'rankingRule',rankingRule);
  case 'empty'
-  p=varargin{1};initial=varargin{2};assert(p.version==4&&islogical(initial)&&isscalar(initial),id);
+  p=varargin{1};initial=varargin{2};assert(any(p.version==[4,5])&&islogical(initial)&&isscalar(initial),id);
   phase='not_requested';if initial,phase='initial_original_planner';end
   value=struct('version',1,'rule',p.axisSearchPolicy,'phase',phase, ...
    'members',struct([]),'candidates',struct([]),'filteredCandidateIndices',zeros(1,0));
@@ -26,7 +33,12 @@ end
 
 function validate_evidence(e,p,family,sourceLevel,initial,requested)
 id='ipm:AutonomousMeshSearchEvidence';
-need(p.version==4&&same(p.axisSearchPolicy,ipm.remesh.searchEvidence('registration')),id);
+if p.version==5
+ expectedRule=ipm.remesh.searchEvidence('registration',size(p.nodeFamily.cellFactors,1),5);
+else
+ expectedRule=ipm.remesh.searchEvidence('registration');
+end
+need(any(p.version==[4,5])&&same(p.axisSearchPolicy,expectedRule),id);
 fields(e,{'version','rule','phase','members','candidates','filteredCandidateIndices'},id);
 need(same(e.version,1)&&same(e.rule,p.axisSearchPolicy)&&ischar(e.phase)&&isrow(e.phase),id);
 need(islogical(initial)&&isscalar(initial)&&islogical(requested)&&isscalar(requested),id);
@@ -34,7 +46,8 @@ if initial||~requested
  expected=ipm.remesh.searchEvidence('empty',p,initial);need(same(e,expected),id);return
 end
 need(strcmp(e.phase,'evolved_requested')&&isstruct(e.members)&&isrow(e.members)&& ...
- numel(e.members)<=8&&isstruct(e.candidates)&&numel(e.candidates)<=24,id);
+ numel(e.members)<=p.axisSearchPolicy.maximumMembers&&isstruct(e.candidates)&& ...
+ numel(e.candidates)<=p.axisSearchPolicy.maximumTotalPairDescriptors,id);
 need(scalar_integer(sourceLevel)&&sourceLevel>=1&&sourceLevel<=numel(family.members),id);
 factors=vertcat(family.members.cellFactors);counts=vertcat(family.members.nodeCount);
 ids=find(all(factors>=family.members(sourceLevel).cellFactors,2)& ...

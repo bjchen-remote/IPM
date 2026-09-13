@@ -56,7 +56,7 @@ if isfield(state.config.remesh,'autonomousMesh') && ...
         state.runMetadata.autonomousMesh.lastFailure = struct( ...
             'kind','planning_exception','attemptedStep',failedStep, ...
             'identifier',exception.identifier,'message',exception.message);
-        if any(state.config.remesh.autonomousMesh.version == [2,3,4])
+        if any(state.config.remesh.autonomousMesh.version == [2,3,4,5])
             state.runMetadata.autonomousMesh.lastFailure.sourceCanonicalTime=failureClock(1);
             state.runMetadata.autonomousMesh.lastFailure.sourcePhysicalTime=failureClock(2);
             state.runMetadata.autonomousMesh.lastFailure.sourceNormalizedTime=failureClock(3);
@@ -67,7 +67,7 @@ if isfield(state.config.remesh,'autonomousMesh') && ...
     end
     if ~isempty(meshPlan.stopReason)
         failedPlan = rmfield(meshPlan,{'candidates','axisReport'});
-        if any(state.config.remesh.autonomousMesh.version == [2,3,4])
+        if any(state.config.remesh.autonomousMesh.version == [2,3,4,5])
             failedPlan.axisReport=meshPlan.axisReport;
         end
         state = acceptedState;
@@ -81,7 +81,7 @@ if isfield(state.config.remesh,'autonomousMesh') && ...
             policy.endpointCoreFloor)
         failureDecision=rmfield(meshPlan,{'candidates','axisReport'});
         state = acceptedState;
-        if any(policy.version == [2,3,4])
+        if any(policy.version == [2,3,4,5])
             state.runMetadata.autonomousMesh.lastFailure=failureDecision;
             state.runMetadata.autonomousMesh.lastFailure.stopReason='autonomous_mesh_resolution_failure';
         end

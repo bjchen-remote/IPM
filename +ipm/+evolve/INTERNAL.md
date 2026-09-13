@@ -121,6 +121,9 @@ version1当前仅固定节点数/箱；时间窗有限不等于记录数有固�
 各级独立最多3提案，不同N禁止keep；原始config N和物理epoch不变。
 apply只接受来源时钟/step/level/N匹配的计划，audit和flow通过后同步提交新base/currentLevel、计数和真实决策账本。
 原生跨尺寸恢复及每级历史合同见../../research/longtime_lab/AUTONOMOUS_NODE_GROWTH_RUNTIME_V2.md。
+version5仍由同一 `advance → planAutonomousMesh → applyAutonomousMesh` 路径运行，
+方向族由初始节点数与预设资源上限确定。规划按目标总节点数递增，成员内按最大相邻比
+排序；实际迁移失败继续尝试已注册后备，不触碰C率或原接受场。
 
 显式 `initialMeshObservationFallback` 只在原始零时刻启用。先执行原初选；仅有限族耗尽，
 或原解析候选全部仅因核心/前沿分辨率失败时，才用固定解析观察格重测并重新规划一次。

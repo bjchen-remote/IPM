@@ -13,8 +13,8 @@ version = 1;
 if isfield(input,'version')
     value = input.version;
     if ~isnumeric(value) || ~isreal(value) || ~isscalar(value) || ...
-            ~isfinite(value) || ~any(value == [1,2,3,4])
-        error(identifier,'autonomousMesh.version must be 1, 2, 3, or 4.');
+            ~isfinite(value) || ~any(value == [1,2,3,4,5])
+        error(identifier,'autonomousMesh.version must be 1, 2, 3, 4, or 5.');
     end
     version = double(value);
 end
@@ -47,14 +47,23 @@ defaults = struct('version',version,'enabled',true,'targetCoreCells',target, ...
     'maximumMassRelativeDefect',5e-12,'maximumRelativeRangeViolation',2e-4, ...
     'qualityLimits',quality,'search',search,'timeUnit','native_canonical', ...
     'trendWindow',.35,'maximumReviewInterval',.2);
-if any(version == [2,3,4])
+if any(version == [2,3,4,5])
     if ~isfield(input,'nodeFamily')
-        error(identifier,'Versions 2, 3 and 4 require an explicit nodeFamily.maximumTotalNodes.');
+        error(identifier,'Versions 2 through 5 require an explicit nodeFamily.maximumTotalNodes.');
     end
     defaults.nodeFamily = node_family(input.nodeFamily,identifier,version);
+    if version == 5 && nargin >= 2 && isfield(choices,'nx') && isfield(choices,'ny') && ...
+            ~isequal(defaults.nodeFamily.initialNodeCount,double([choices.nx,choices.ny]))
+        error(identifier,'Version-5 nodeFamily.initialNodeCount must match the configured initial grid.');
+    end
 end
-if version == 4
-    defaults.axisSearchPolicy = ipm.remesh.searchEvidence('registration');
+if any(version == [4,5])
+    if version == 5
+        members=size(defaults.nodeFamily.cellFactors,1);
+        defaults.axisSearchPolicy = ipm.remesh.searchEvidence('registration',members,5);
+    else
+        defaults.axisSearchPolicy = ipm.remesh.searchEvidence('registration');
+    end
 end
 names = fieldnames(defaults);
 reject_unknown(input,names,'autonomousMesh',identifier);
@@ -78,7 +87,7 @@ for index = 1:numel(names)
         policy.(name) = fixed_group(value,defaults.(name),label,identifier);
     elseif strcmp(name,'axisSearchPolicy')
         if ~isequaln(value,defaults.axisSearchPolicy)
-            error(identifier,'axisSearchPolicy must equal the registered v4 descriptor.');
+            error(identifier,'axisSearchPolicy must equal the registered descriptor.');
         end
         policy.axisSearchPolicy=defaults.axisSearchPolicy;
     elseif strcmp(name,'nodeFamily')
@@ -124,6 +133,40 @@ if any(version == [3,4])
     group.cellFactors = [1,1;2,1;1,2;2,2;3,1;1,3;3,2;2,3];
     group.maximumAcceptedGrowthTransitions = 3;
 end
+if version == 5
+    if ~isfield(input,'initialNodeCount')
+        error(identifier,'%s.initialNodeCount is required for version 5.',label);
+    end
+    initial=input.initialNodeCount;
+    if ~isnumeric(initial)||~isreal(initial)||~isequal(size(initial),[1,2])|| ...
+            any(~isfinite(initial))||any(initial<17)||any(mod(initial,1)~=0)|| ...
+            mod(initial(1),2)~=1
+        error(identifier,'%s.initialNodeCount must be [odd Nx, Ny] with both >=17.',label);
+    end
+    initial=double(initial);
+    if cap<prod(initial)
+        error(identifier,'%s.maximumTotalNodes must cover the initial grid.',label);
+    end
+    xFactors=factor_schedule(floor((cap/initial(2)-1)/(initial(1)-1)));
+    yFactors=factor_schedule(floor((cap/initial(1)-1)/(initial(2)-1)));
+    rows=zeros(numel(xFactors)*numel(yFactors),4);count=0;
+    for fx=xFactors
+        for fy=yFactors
+            nodes=[(initial(1)-1)*fx+1,(initial(2)-1)*fy+1];
+            if prod(nodes)>cap,continue;end
+            count=count+1;rows(count,:)=[fx,fy,prod(nodes),count];
+        end
+    end
+    rows=sortrows(rows(1:count,:),[3,4]);
+    if count>192
+        error(identifier,'%s creates more than 192 registered levels.',label);
+    end
+    group.generator='selected_base_index_pchip_geometric_budget_v3';
+    group.cellFactors=rows(:,1:2);
+    group.ordering='node_product_then_registration_index';
+    group.maximumAcceptedGrowthTransitions=numel(xFactors)+numel(yFactors)-2;
+    group.initialNodeCount=initial;
+end
 names = fieldnames(group);
 reject_unknown(input,names,label,identifier);
 for index = 1:numel(names)
@@ -148,6 +191,16 @@ for index = 1:numel(names)
     if ~valid
         error(identifier,'%s.%s differs from its registered version-two value.',label,name);
     end
+end
+end
+
+function factors=factor_schedule(maximum)
+% Every integer through six, then bounded multiplicative growth. The
+% resource cap, not a fixed family endpoint, terminates this registration.
+factors=1:min(maximum,6);
+while factors(end)<maximum
+    next=min(maximum,max(factors(end)+1,ceil(4*factors(end)/3)));
+    factors(end+1)=next; %#ok<AGROW>
 end
 end
 

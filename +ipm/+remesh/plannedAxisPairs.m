@@ -1,9 +1,20 @@
-function [candidates,report]=plannedAxisPairs(view,referenceAxes,anchor,policy)
+function [candidates,report,cache]=plannedAxisPairs(view,referenceAxes,anchor,policy,cache)
 %IPM.REMESH.PLANNEDAXISPAIRS Bounded no-LU, no-transfer axis proposals.
 % policy is already resolved by config; this function never resolves config,
 % modifies a source/reference, builds a flow, or certifies a native transfer.
 feature=ipm.diagnostics.meshFeatureIntervals(view);
+if nargin<5,cache=struct();end
+assert(isstruct(cache)&&isscalar(cache),'ipm:AutonomousMeshAxisCache');
 validate_policy(policy);x=view.x(:)';y=view.y(:);validate_reference(referenceAxes,x,y,anchor,policy);
+context=struct('sourceX',x,'sourceY',y,'feature',feature, ...
+    'anchor',anchor,'policy',policy);
+if isfield(cache,'context')
+    assert(isequaln(cache.context,context),'ipm:AutonomousMeshAxisCache', ...
+        'Axis trials may only be reused within the same source and policy.');
+else
+    assert(isempty(fieldnames(cache)),'ipm:AutonomousMeshAxisCache');
+    cache.context=context;
+end
 newNx=numel(referenceAxes.x);newNy=numel(referenceAxes.y);
 sameN=newNx==numel(x)&&newNy==numel(y);
 search=policy.search;limits=policy.qualityLimits;
@@ -15,12 +26,21 @@ report=struct('kind','ipm_bounded_planned_axis_pairs_v1','policy',policy,'featur
     'anchor',anchor,'inputAnchorExact',any(x==anchor)&&any(x==-anchor), ...
     'xTrials',struct([]),'yTrials',struct([]),'selectedPairs',struct([]),'status','planning', ...
     'noLU',true,'noTransfer',true,'noFlow',true,'sameBoxSameNodeCount',sameN,'globalFeasibilityClaim',false);
-if isfield(policy,'version')&&any(policy.version == [2,3,4])
+if isfield(policy,'version')&&any(policy.version == [2,3,4,5])
     report.kind='ipm_bounded_planned_axis_pairs_v2';
-    report.actualSourceNodeCount=[numel(x),numel(y)];if policy.version == 3,report.kind='ipm_bounded_planned_axis_pairs_v3';end;if policy.version == 4,report.kind='ipm_bounded_planned_axis_pairs_v4';end
+    report.actualSourceNodeCount=[numel(x),numel(y)];if policy.version == 3,report.kind='ipm_bounded_planned_axis_pairs_v3';end;if policy.version == 4,report.kind='ipm_bounded_planned_axis_pairs_v4';end;if policy.version == 5,report.kind='ipm_bounded_planned_axis_pairs_v5';end
 end
 candidates=struct('x',{},'y',{},'unchanged',{},'xIndex',{},'yIndex',{},'predictedCells',{},'quality',{});
 xRows=struct([]);xAxes={};yRows=struct([]);yAxes={};
+reuseY=false;
+if isfield(cache,'yEntries')
+    for entry=cache.yEntries
+        if isequal(entry.reference,referenceAxes.y)
+            yRows=entry.rows;yAxes=entry.axes;reuseY=true;break
+        end
+    end
+end
+if ~reuseY
 for sigma=search.ySigma
     [v,info]=ipm.remesh.equalizedAxis(referenceAxes.y(:)/anchor, ...
         [0,feature.yCoreWidth/anchor],policy.targetCoreCells(2)*search.yPadding, ...
@@ -32,6 +52,22 @@ for sigma=search.ySigma
         'reasons',{reasons},'qualityMargin',margin,'equalizerInfo',info);
     yRows=append_row(yRows,row);yAxes{end+1}=v; %#ok<AGROW>
 end
+    entry=struct('reference',referenceAxes.y,'rows',yRows,'axes',{yAxes});
+    if ~isfield(cache,'yEntries')||isempty(cache.yEntries)
+        cache.yEntries=entry;
+    else
+        cache.yEntries(end+1)=entry;
+    end
+end
+reuseX=false;
+if isfield(cache,'xEntries')
+    for entry=cache.xEntries
+        if isequal(entry.reference,referenceAxes.x)
+            xRows=entry.rows;xAxes=entry.axes;reuseX=true;break
+        end
+    end
+end
+if ~reuseX
 for fine=search.fineCells
  for rounding=search.roundingCells
   for fraction=search.coreFineCellFractions
@@ -62,17 +98,26 @@ for fine=search.fineCells
   end
  end
 end
+    entry=struct('reference',referenceAxes.x,'rows',xRows,'axes',{xAxes});
+    if ~isfield(cache,'xEntries')||isempty(cache.xEntries)
+        cache.xEntries=entry;
+    else
+        cache.xEntries(end+1)=entry;
+    end
+end
 report.xTrials=xRows;report.yTrials=yRows;
-pairIndex=[];ranks=[];
+pairIndex=[];ranks=[];ratios=[];
 [xQuality,xReasons]=axis_quality(x,limits);[yQuality,yReasons]=axis_quality(y,limits);
 oldCounts=[interval_count(x(x>=0),core),interval_count(y,[0,min(y(end),feature.yCoreWidth)]),interval_count(x(x>=0),front)];
 if sameN&&any(x==anchor)&&any(x==-anchor)&&isempty(xReasons)&&isempty(yReasons)&& ...
         all(oldCounts>=[policy.targetCoreCells,policy.minimumFrontCells]-1e-6)
-    pairIndex=[0,0];ranks=Inf;
+    pairIndex=[0,0];ranks=Inf;ratios=-Inf;
 end
 for i=find([xRows.admissible])
  for j=find([yRows.admissible])
     pairIndex(end+1,:)=[i,j];ranks(end+1,1)=min(xRows(i).qualityMargin,yRows(j).qualityMargin); %#ok<AGROW>
+    ratios(end+1,1)=max(xRows(i).quality.maximumAdjacentCellRatio, ...
+        yRows(j).quality.maximumAdjacentCellRatio); %#ok<AGROW>
  end
 end
 report.admittedAxisPairCount=size(pairIndex,1);
@@ -81,7 +126,13 @@ if isempty(pairIndex)
     else,report.status='registered_x_family_infeasible';end
     return
 end
-[~,order]=sort(ranks,'descend');report.ranking='weakest dimensionless quality margin, stable enumeration ties; qualified keep first';
+if isfield(policy,'version')&&policy.version==5
+    [~,order]=sortrows([ratios(:),-ranks(:),(1:numel(ranks))'],[1,2,3]);
+    report.ranking='minimax adjacent ratio, then quality margin; qualified keep first';
+else
+    [~,order]=sort(ranks,'descend');
+    report.ranking='weakest dimensionless quality margin, stable enumeration ties; qualified keep first';
+end
 for k=1:min(search.maximumPairCandidates,numel(order))
     ij=pairIndex(order(k),:);unchanged=all(ij==0);
     if unchanged
@@ -129,7 +180,7 @@ function validate_reference(r,x,y,a,policy)
 assert(isstruct(r)&&isscalar(r)&&all(isfield(r,{'x','y'})));
 validateattributes(a,{'numeric'},{'scalar','finite','positive','<',x(end)});
 rx=r.x(:)';ry=r.y(:);
-if isfield(policy,'version')&&any(policy.version == [2,3,4])
+if isfield(policy,'version')&&any(policy.version == [2,3,4,5])
     validateattributes(rx,{'numeric'},{'vector','real','finite','increasing'});
     validateattributes(ry,{'numeric'},{'vector','real','finite','increasing'});
     assert(numel(rx)>=7&&mod(numel(rx),2)==1&&numel(ry)>=7, ...

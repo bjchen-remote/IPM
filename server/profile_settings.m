@@ -15,6 +15,9 @@ settings.checkpointEvery = 0.1;
 % The run remains admissible while both adjacent-cell ratios are <= 2.
 % This controls the grid-smoothness stop. Other numerical safety stops stay on.
 settings.maximumAdjacentGridRatio = 2;
+% Version 5 generates additional directional node levels automatically up to
+% the resource cap chosen before the t=0 run. Version 4 remains available.
+settings.autonomousMeshVersion = 5;
 settings.maximumTotalNodes = 310000;
 
 settings.outputDirectory = fullfile(projectRoot,'runs','profile_H8_tau16');

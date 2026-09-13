@@ -46,7 +46,7 @@ require(integer(current.step) && integer(current.remeshCount) && ...
     number(current.normalizedTime) && current.normalizedTime == current.canonicalTime && ...
     pair(current.coreCells) && number(current.safety) && current.safety >= 0,id, ...
     'Current projected counts, clocks, core or safety are invalid.');
-versionTwo = any(policy.version == [2,3,4]);
+versionTwo = any(policy.version == [2,3,4,5]);
 if versionTwo
     fields(current,{'levelId','nodeCount','snapshots'},id,'version-two current projection');
     require(same_value(current.nodeCount,[numel(current.x),numel(current.y)]),id, ...
@@ -201,7 +201,7 @@ if versionTwo
     level_observations(current,w,family,levelIds,config.output.storeSnapshots,id);
     last_decision(memory.lastDecision,current,family,levelIds,transactions,policy,id);
 end
-if policy.version==4
+if any(policy.version==[4,5])
     failure_search(memory.lastFailure,policy,family,current,levelIds,transactions,config.time,id);
 end
 report.checked = true;report.transactions = n;report.windowRecords = m;
@@ -285,7 +285,7 @@ for k=1:numel(a.attemptSummary)
 end
 require(isempty(row.errorIdentifier) && isempty(row.auditReasons),id, ...
     'An accepted candidate must have no error or audit rejection reasons.');
-if any(policy.version == [3,4])
+if any(policy.version == [3,4,5])
     % V3 records each attempted level and its original local pair position.
     % Only the source level can omit local pair one (a filtered valid keep).
     factors=vertcat(family.members.cellFactors);counts=vertcat(family.members.nodeCount);
@@ -316,7 +316,7 @@ if any(policy.version == [3,4])
     require(same_value(a.attemptSummary(end).targetLevelId,a.targetLevelId),id, ...
         'The final successful attempt must identify the actually committed target member.');
 end
-if policy.version==4
+if any(policy.version==[4,5])
     fields(d,{'axisSearchEvidence'},id,'v4 committed search evidence');
     ipm.remesh.searchEvidence('validate',d.axisSearchEvidence,policy,family,a.sourceLevelId,false,true);
     ipm.remesh.searchEvidence('attempts',a.attemptSummary,d.axisSearchEvidence,a.targetLevelId);
@@ -373,7 +373,7 @@ end
 
 function last_decision(d,c,family,levels,transactions,policy,id)
 decision_observation(d,policy,c.history,id);
-if policy.version==4
+if any(policy.version==[4,5])
     fields(d,{'axisSearchEvidence'},id,'v4 current search evidence');
     ipm.remesh.searchEvidence('validate',d.axisSearchEvidence,policy,family,d.sourceLevelId,d.initial,d.requested);
 end

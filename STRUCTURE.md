@@ -97,6 +97,8 @@ config schema 4 固定
 可选`remesh.autonomousMesh`仅显式启用，不给旧配置注入默认；省略版本仍是固定节点数/箱的version1。
 显式version2允许在零时刻冻结的方向增点参考族中自动迁移，并预先登记节点资源上限；
 version3加入三倍单轴与3×2/2×3方向成员，version4再在每个成员内部作固定层级参数搜索。
+显式version5按初始方向节点数和启动时节点预算登记更多整数/渐进因子，仍在每个成员内作
+有界搜索，但先按最差相邻比选择合格轴对；实际迁移仍经过原审计。
 已实际从原始t=0跨过两个方向的自然增长，但有限箱、有限族的运行尚不构成长时误差验收。
 配置Nx/Ny保留初始预算，当前实际节点数、参考族成员与各时刻场/网格配对单独记录。
 可选 `initialMeshObservationFallback` 为原始k8初值提供一次自动解析重测，
@@ -143,7 +145,7 @@ checkpoint 不是普通 result：它额外保存 `baseX/baseY`、完整 `ops.res
 值域和末态流场 overlap 检查；它不能补回旧 result 未保存的 bitwise 对数尺度。
 当前 checkpoint/config 版本均为 4，且续算时必须重放同一
 `exact_gauge_no_feedback_v1` 运行期契约。schema 3 及更早产物只读分析，不可续算或隐式升级。
-autonomousMesh version2--4的原生检查点保存并验证实际参考族、级别、方向增点账本、触发证据和
+autonomousMesh version2--5的原生检查点保存并验证实际参考族、级别、方向增点账本、触发证据和
 逐记录节点数；支持从保存的实际网格恢复。这些版本暂不支持result→checkpoint桥接，明确拒绝，
 不能从普通结果猜补变量网格运行状态。
 

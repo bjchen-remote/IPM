@@ -49,6 +49,10 @@ version3把冻结方向族扩展到三倍单轴与3×2/2×3组合；version4在�
 层级扩大参数搜索。`hierarchicalAxisSchedule`和`hierarchicalAxisPairs`只补充候选生成，
 每层仍应用同一质量门，整个尝试前缀与来源身份写入controller账本并由
 `validateController`重读。默认和旧version1/2不注入这些字段，也不升级旧checkpoint。
+version5从初始网格尺寸与显式节点预算构造更多方向级别；每一级仅在既有质量门内按
+最大相邻比、质量裕量、稳定索引排序。其参考族和搜索上限都随冻结政策持久化，
+不允许续算时改预算。同一来源、政策、特征区间下完全相同的参考轴试探在一次规划中缓存，
+不跨接受步或续算使用；缓存结果的候选、报告与审计需逐值等价。几何候选不是实际迁移通过或长时容量保证。
 
 `planInitialAnalyticFallback` 是显式初始观察策略的纯计划入口，仅在原始t0使用。
 它保留真实粗格的source/clock/step/node字段，将新候选和观察证据另列；每阶段最多3个候选，

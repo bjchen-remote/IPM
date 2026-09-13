@@ -33,10 +33,10 @@ end
 plan=struct('initial',initial,'requested',requested,'reason',reason,'candidates',struct([]), ...
     'axisReport',struct(),'trendAvailable',trend,'coreCells',core,'predictedCoreCells',predicted, ...
     'decayEstimate',decay,'stopReason','');
-if policy.version==4
+if any(policy.version==[4,5])
     plan.axisSearchEvidence=ipm.remesh.searchEvidence('empty',policy,initial);
 end
-if any(policy.version == [2,3,4])
+if any(policy.version == [2,3,4,5])
     plan.sourceStep=state.step;plan.sourceCanonicalTime=state.scale.canonicalTime;
     plan.sourcePhysicalTime=state.scale.physicalTime;plan.sourceNormalizedTime=state.normalizedTime;
     plan.sourceRemeshCount=state.ops.remeshCount;plan.sourceLevelId=memory.currentLevelId;
@@ -51,8 +51,8 @@ elseif requested
     ops=state.ops;
     view=struct('rho',state.rho,'x',ops.x,'y',ops.y,'Dx',ops.Dx, ...
         'source',state.rho*ops.Dx','trusted',true);
-    if any(policy.version == [2,3,4]) && ~initial
-        if policy.version==4
+    if any(policy.version == [2,3,4,5]) && ~initial
+        if any(policy.version==[4,5])
             [plan.candidates,plan.axisReport,plan.axisSearchEvidence]=family_candidates( ...
                 view,memory,state.config.scaling.transportAnchorX,policy);
         else
@@ -63,7 +63,7 @@ elseif requested
         reference=struct('x',ops.baseX,'y',ops.baseY);
         [plan.candidates,plan.axisReport]=ipm.remesh.plannedAxisPairs( ...
             view,reference,state.config.scaling.transportAnchorX,policy);
-        if any(policy.version == [2,3,4])
+        if any(policy.version == [2,3,4,5])
             for k=1:numel(plan.candidates),plan.candidates(k).nodeFamilyIndex=1;end
         end
     end
@@ -74,7 +74,7 @@ elseif requested
     end
     if isempty(plan.candidates),plan.stopReason='autonomous_mesh_axis_capacity';end
 end
-if policy.version==4
+if any(policy.version==[4,5])
     ipm.remesh.searchEvidence('validate',plan.axisSearchEvidence,policy, ...
         memory.referenceFamily,memory.currentLevelId,initial,plan.requested);
 end
@@ -109,15 +109,15 @@ eligible=find(all(factors>=source.cellFactors,2) & [family.members.resourceAdmit
 [~,order]=sortrows([prod(counts(eligible,:),2),eligible],[1,2]);eligible=eligible(order);
 assert(~isempty(eligible) && eligible(1)==memory.currentLevelId, ...
     'ipm:AutonomousMeshFamily','The admitted current level must be planned first.');
-candidates=struct([]);reports=struct([]);evidence=[];
-if policy.version==4
+candidates=struct([]);reports=struct([]);evidence=[];cache=struct();
+if any(policy.version==[4,5])
     evidence=ipm.remesh.searchEvidence('empty',policy,false);evidence.phase='evolved_requested';
 end
 for index=eligible(:)'
     member=family.members(index);
-    if policy.version==4
-        [pairs,detail,searchAudit]=ipm.remesh.hierarchicalAxisPairs(view, ...
-            struct('x',member.baseX,'y',member.baseY),anchor,policy,policy.nodeFamily.maximumTotalNodes);
+    if any(policy.version==[4,5])
+        [pairs,detail,searchAudit,cache]=ipm.remesh.hierarchicalAxisPairs(view, ...
+            struct('x',member.baseX,'y',member.baseY),anchor,policy,policy.nodeFamily.maximumTotalNodes,cache);
         phase='primary';if searchAudit.fallbackUsed,phase='refined';end
         summary=struct('levelId',index,'nodeCount',member.nodeCount,'phase',phase, ...
             'evaluatedAxisTrials',searchAudit.axisTrialsEvaluated, ...
@@ -138,7 +138,7 @@ for index=eligible(:)'
         struct('x',member.baseX,'y',member.baseY),anchor,policy);
     end
     for k=1:numel(pairs),pairs(k).nodeFamilyIndex=index;end
-    if any(policy.version == [3,4])
+    if any(policy.version == [3,4,5])
         for k=1:numel(pairs)
             pairs(k).targetLevelId=index;pairs(k).localPairIndex=k;
         end
@@ -157,10 +157,16 @@ report=struct('kind','registered_node_family_planning_v2','sourceLevelId',memory
     'eligibleLevelOrder',eligible(:)','maximumPairsPerLevel',policy.search.maximumPairCandidates, ...
     'levels',reports,'noLU',true,'noTransfer',true);
 if policy.version == 3,report.kind='registered_node_family_planning_v3';end
-if policy.version==4
+if any(policy.version==[4,5])
     report.kind='registered_node_family_planning_v4';
+    if policy.version==5,report.kind='registered_node_family_planning_v5';end
     if ~isempty(evidence.candidates),evidence.filteredCandidateIndices=find(~[evidence.candidates.unchanged]);end
     report.fullTrialArtifactWritten=false;
     report.evidenceBoundary='Compact identities persisted; full trial construction arrays are transient request-time diagnostics.';
+end
+if policy.version==5
+    report.distinctXReferenceTrials=numel(cache.xEntries);
+    report.distinctYReferenceTrials=numel(cache.yEntries);
+    report.axisTrialCacheScope='one immutable source planning request';
 end
 end

@@ -12,7 +12,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_v5_rhs_c_20260913
+cd ipm_long_time_server_v5_mesh_cost_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -53,7 +53,7 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_rhs_c_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913');
 settings = struct( ...
     'canonicalFinalTime',16, ...
     'autonomousMeshVersion',5, ...
@@ -85,7 +85,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_rhs_c_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -94,7 +94,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_rhs_c_20260913
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_rhs_c_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -102,14 +102,22 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_rhs_c_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_v5_rhs_c_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 
 完整验证使用 `ipm.verify('all','quick')`。新旧一致性检查需要另行提供旧版目录，服务器发布包本身不依赖旧版。
 
 ## 已验证范围
+
+本机两条仍在运行的原始 `t=0` H8 轨道最近一次只读验签：version 4 于
+`τ=13.7000587`、step 17220，`641×321`、41 次自动重布，核心 X/Y=
+32.649/35.307，格宽比 1.078718/1.063232，物理梯度最大值 205.391；
+version 5 于 `τ=11.600117`、step 10758，`641×321`、34 次自动重布，
+核心 X/Y=31.158/34.562，格宽比 1.078522/1.075857。两者均未达到
+`τ=16`，远边界告警仍在。下述数值是各阶段的历史验收记录；部署时请用
+`profile_status` 查看最新 checkpoint，再用作业系统检查进程是否仍在运行。
 
 2026-09-13 更新：原始 `t=0` version-4 H8 主轨道已在 τ11.932175 自动完成第 35 次
 重布，一级分层 X 回退候选在真实场迁移中通过；τ12.00025 的验签 checkpoint 为
@@ -130,6 +138,11 @@ H8 的远边界告警仍在，尚无大箱与时空收敛证据。
 预测明显偏长，具体限制见 `research/longtime_lab/AMORTIZED_MESH_LIFETIME_HOLDOUT_20260913.md`。
 第38次的前瞻预测间隔为 0.41017，随后验签的第39次实际请求间隔为
 0.24994；拟合寿命目前不能当作准确的重布时钟。
+同一次请求的跨级 `961×321` 真实迁移也通过；相邻比降到 1.060356，
+但比原选网格多 49.92% 节点，预测重布间隔只多 7.13%，本次原 RHS 计时
+较慢。原始方程的墙面归一化形状导数在两候选间仍相差 16.67%，
+因此暂不把跨级最小网格比改成正式选择规则。证据见
+`research/longtime_lab/CROSS_LEVEL_MESH_COST_AND_RHS_20260913.md`。
 
 原始 `t=0` H8 到 τ13 的实际剖面图及研究审计也随包提供，见
 `research/acceleration_lab/ORIGINAL_T0_TAU13_SHAPE_AND_REMESH_20260913.md`。

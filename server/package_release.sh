@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_v5_rhs_c_20260913}"
+release_name="${2:-ipm_long_time_server_v5_mesh_cost_20260913}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -29,6 +29,7 @@ cp "$project_root/CHANGELOG.md" "$stage/CHANGELOG.md"
 mkdir -p "$stage/research/longtime_lab/evidence"
 cp "$project_root/research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/AMORTIZED_MESH_LIFETIME_HOLDOUT_20260913.md" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/CROSS_LEVEL_MESH_COST_AND_RHS_20260913.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/evidence/"*.json "$stage/research/longtime_lab/evidence/"
 cp "$project_root/research/longtime_lab/audit_frozen_pair_ratio.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/verify_continuous_vertical_shadow.m" "$stage/research/longtime_lab/"
@@ -39,6 +40,7 @@ cp "$project_root/research/longtime_lab/audit_alternative_candidate_transfer.m" 
 cp "$project_root/research/longtime_lab/replay_requested_alternative_transfer.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/rollout_alternative_mesh_interval.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/audit_candidate_lifetime_at_request.m" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/audit_cross_level_mesh_at_request.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/verify_ranked_lifetime_followup.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/continuous_inner_geometry.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/render_continuous_profile_progress.m" "$stage/research/longtime_lab/"

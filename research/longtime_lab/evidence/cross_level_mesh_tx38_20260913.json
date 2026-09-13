@@ -1,0 +1,336 @@
+{
+  "kind": "frozen_cross_level_original_rhs_mesh_comparison_v1",
+  "beforeCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000013770.mat",
+  "afterCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000014098.mat",
+  "transactionIndex": 38,
+  "sourceTau": 12.709490955270562,
+  "sourceStep": 13796,
+  "sourceDecisionEqualsSigned": true,
+  "baselineAuditEqualsSigned": true,
+  "rows": [
+    {
+      "candidateIndex": 1,
+      "xScheduleIndex": 83,
+      "yTrialIndex": 4,
+      "targetLevelId": 4,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "totalNodes": 205761,
+      "predictedCoreCells": [
+        34.344920426730951,
+        36.800000113701358
+      ],
+      "maximumAdjacentRatio": 1.0756233086222748,
+      "auditPassed": true,
+      "auditReasons": [],
+      "postFlowPassed": true,
+      "actualCoreCells": [
+        34.335047940322028,
+        36.556054681866215
+      ],
+      "relativePeakJump": 7.5650422512685682E-5,
+      "massRelativeDefect": 2.836822460879229E-16,
+      "relativeRangeViolation": 4.2576259902074387E-9,
+      "safetyFactor": 0.14933254462561585,
+      "transferSeconds": 2.8286131666666665,
+      "flowSeconds": 0.35041258333333336,
+      "geometry": {
+        "peakX": 0.98190407006852887,
+        "peak": 0.68511938331306133,
+        "wallWidth": 0.00025485494259336328,
+        "verticalWidth": 5.5565868931325209E-5
+      },
+      "c1": {
+        "valid": true,
+        "peakPrime": -0.00068845717828351638,
+        "relativePeakRate": -0.0010048718443117378,
+        "phaseRate": 0.00032482130893180542,
+        "logWidthRates": [
+          -0.49490358662075062,
+          -0.6860845987404447
+        ]
+      },
+      "nativeCOmega": -0.31381098997871082,
+      "tangentRefinement": {
+        "wall": {
+          "preNorm": 0.58405353466087329,
+          "postNorm": 0.58373238866860389,
+          "differenceNorm": 0.00033205573900498112,
+          "relativeDifferenceToPre": 0.00056853647705049331,
+          "cosine": 0.99999998954881453
+        },
+        "vertical": {
+          "preNorm": 0.1366884445283415,
+          "postNorm": 0.13659831549805471,
+          "differenceNorm": 9.0225325153681565E-5,
+          "relativeDifferenceToPre": 0.00066008012209820639,
+          "cosine": 0.99999999953492535
+        }
+      }
+    },
+    {
+      "candidateIndex": 8,
+      "xScheduleIndex": 2,
+      "yTrialIndex": 4,
+      "targetLevelId": 7,
+      "nodeCount": [
+        961,
+        321
+      ],
+      "totalNodes": 308481,
+      "predictedCoreCells": [
+        35.033591147520532,
+        36.800000113701358
+      ],
+      "maximumAdjacentRatio": 1.0603562041040553,
+      "auditPassed": true,
+      "auditReasons": [],
+      "postFlowPassed": true,
+      "actualCoreCells": [
+        35.021045402281658,
+        36.549473388845136
+      ],
+      "relativePeakJump": 7.6581026548615781E-5,
+      "massRelativeDefect": 1.4184112304396145E-16,
+      "relativeRangeViolation": 5.9186533587592342E-9,
+      "safetyFactor": 0.1493375137288129,
+      "transferSeconds": 5.2116153333333335,
+      "flowSeconds": 0.8357879583333333,
+      "geometry": {
+        "peakX": 0.98190406591638191,
+        "peak": 0.68511947998633149,
+        "wallWidth": 0.00025486525588036546,
+        "verticalWidth": 5.5564443809917126E-5
+      },
+      "c1": {
+        "valid": true,
+        "peakPrime": -0.00065914150497857482,
+        "relativePeakRate": -0.00096208256257977818,
+        "phaseRate": 0.00032328124015708283,
+        "logWidthRates": [
+          -0.49276361359435883,
+          -0.69540495037548367
+        ]
+      },
+      "nativeCOmega": -0.31371169886274014,
+      "tangentRefinement": {
+        "wall": {
+          "preNorm": 0.62211688373376173,
+          "postNorm": 0.62181487642945477,
+          "differenceNorm": 0.00031281555388065605,
+          "relativeDifferenceToPre": 0.00050282440817749476,
+          "cosine": 0.99999999141100626
+        },
+        "vertical": {
+          "preNorm": 0.14407622618694069,
+          "postNorm": 0.14398978554448469,
+          "differenceNorm": 8.65245273159812E-5,
+          "relativeDifferenceToPre": 0.0006005468744282249,
+          "cosine": 0.99999999965030617
+        }
+      }
+    }
+  ],
+  "baselineToGrowthShape": {
+    "wall": {
+      "preNorm": 15.004864162531922,
+      "postNorm": 15.004677235703895,
+      "differenceNorm": 0.00040896543328035074,
+      "relativeDifferenceToPre": 2.7255523865491753E-5,
+      "cosine": 0.99999999970616249
+    },
+    "vertical": {
+      "preNorm": 17.174128449411093,
+      "postNorm": 17.174140009923004,
+      "differenceNorm": 2.0576997575926349E-5,
+      "relativeDifferenceToPre": 1.1981392614209743E-6,
+      "cosine": 0.999999999999509
+    }
+  },
+  "baselineToGrowthTangent": {
+    "wall": {
+      "preNorm": 0.58373238866860389,
+      "postNorm": 0.62181487642945477,
+      "differenceNorm": 0.097308381243875072,
+      "relativeDifferenceToPre": 0.16670032900833076,
+      "cosine": 0.98895422729348015
+    },
+    "vertical": {
+      "preNorm": 0.13659831549805471,
+      "postNorm": 0.14398978554448469,
+      "differenceNorm": 0.0074042502923238789,
+      "relativeDifferenceToPre": 0.054204550512406011,
+      "cosine": 0.99999519306444851
+    }
+  },
+  "preToBaselineTangent": {
+    "wall": {
+      "preNorm": 2.7110460156317138,
+      "postNorm": 0.58373238866860389,
+      "differenceNorm": 2.1383450263005708,
+      "relativeDifferenceToPre": 0.78875275962525659,
+      "cosine": 0.98513256563284557
+    },
+    "vertical": {
+      "preNorm": 0.59137981645881865,
+      "postNorm": 0.13659831549805471,
+      "differenceNorm": 0.45496949516140006,
+      "relativeDifferenceToPre": 0.76933551416373425,
+      "cosine": 0.99894141641742917
+    }
+  },
+  "preToGrowthTangent": {
+    "wall": {
+      "preNorm": 2.7110460156317138,
+      "postNorm": 0.62181487642945477,
+      "differenceNorm": 2.0976515449176549,
+      "relativeDifferenceToPre": 0.77374250854568072,
+      "cosine": 0.98954327186775415
+    },
+    "vertical": {
+      "preNorm": 0.59137981645881865,
+      "postNorm": 0.14398978554448469,
+      "differenceNorm": 0.44756525238019423,
+      "relativeDifferenceToPre": 0.75681523096309611,
+      "cosine": 0.99907921027008162
+    }
+  },
+  "baselineToGrowthFields": {
+    "rho": {
+      "wall": {
+        "preNorm": 0.014938416185844907,
+        "postNorm": 0.014938413893030779,
+        "differenceNorm": 3.3654142934629082E-9,
+        "relativeDifferenceToPre": 2.2528588383096804E-7,
+        "cosine": 0.99999999999998668
+      },
+      "vertical": {
+        "preNorm": 0.013587103538224461,
+        "postNorm": 0.013587101288977225,
+        "differenceNorm": 2.25006966358333E-9,
+        "relativeDifferenceToPre": 1.6560333534319745E-7,
+        "cosine": 1
+      }
+    },
+    "omega": {
+      "wall": {
+        "preNorm": 10.280377482960422,
+        "postNorm": 10.2803825398401,
+        "differenceNorm": 0.00020657860768791967,
+        "relativeDifferenceToPre": 2.0094457429245253E-5,
+        "cosine": 0.99999999979822751
+      },
+      "vertical": {
+        "preNorm": 11.766016557221949,
+        "postNorm": 11.766017795208052,
+        "differenceNorm": 1.2425671771080084E-6,
+        "relativeDifferenceToPre": 1.0560644471856739E-7,
+        "cosine": 1
+      }
+    },
+    "rhoRate": {
+      "wall": {
+        "preNorm": 0.008732809496743375,
+        "postNorm": 0.0087311974114163,
+        "differenceNorm": 1.6942823480779136E-6,
+        "relativeDifferenceToPre": 0.00019401343275720633,
+        "cosine": 0.99999999821782859
+      },
+      "vertical": {
+        "preNorm": 0.0093230366858410383,
+        "postNorm": 0.0093215118156946865,
+        "differenceNorm": 1.5249298110271818E-6,
+        "relativeDifferenceToPre": 0.00016356578467004247,
+        "cosine": 0.99999999999895317
+      }
+    },
+    "omegaRate": {
+      "wall": {
+        "preNorm": 6.6571616158692146,
+        "postNorm": 6.6567579929086236,
+        "differenceNorm": 0.059501496933909125,
+        "relativeDifferenceToPre": 0.00893796791594643,
+        "cosine": 0.99996005578094471
+      },
+      "vertical": {
+        "preNorm": 4.6172666433764853,
+        "postNorm": 4.6162554838472349,
+        "differenceNorm": 0.0011034801589883355,
+        "relativeDifferenceToPre": 0.00023898991421067022,
+        "cosine": 0.99999999542037066
+      }
+    }
+  },
+  "sourceToGrowthFields": {
+    "rho": {
+      "wall": {
+        "preNorm": 0.014938413524183574,
+        "postNorm": 0.014938413893030779,
+        "differenceNorm": 9.71587343714436E-10,
+        "relativeDifferenceToPre": 6.5039526596418536E-8,
+        "cosine": 0.99999999999999822
+      },
+      "vertical": {
+        "preNorm": 0.013587100964803043,
+        "postNorm": 0.013587101288977225,
+        "differenceNorm": 3.2438471594326526E-10,
+        "relativeDifferenceToPre": 2.3874461283799515E-8,
+        "cosine": 1
+      }
+    },
+    "omega": {
+      "wall": {
+        "preNorm": 10.280383111161841,
+        "postNorm": 10.2803825398401,
+        "differenceNorm": 0.00035232823405799239,
+        "relativeDifferenceToPre": 3.4271897287121033E-5,
+        "cosine": 0.99999999941272022
+      },
+      "vertical": {
+        "preNorm": 11.765761139660036,
+        "postNorm": 11.766017795208052,
+        "differenceNorm": 0.00025684275873559255,
+        "relativeDifferenceToPre": 2.1829676438851608E-5,
+        "cosine": 0.99999999999965261
+      }
+    },
+    "rhoRate": {
+      "wall": {
+        "preNorm": 0.00866404534438019,
+        "postNorm": 0.0087311974114163,
+        "differenceNorm": 6.81348952525127E-5,
+        "relativeDifferenceToPre": 0.0078640972599142087,
+        "cosine": 0.99999912116156564
+      },
+      "vertical": {
+        "preNorm": 0.0092584286163721018,
+        "postNorm": 0.0093215118156946865,
+        "differenceNorm": 6.30898432117486E-5,
+        "relativeDifferenceToPre": 0.0068143143751396374,
+        "cosine": 0.99999999514336679
+      }
+    },
+    "omegaRate": {
+      "wall": {
+        "preNorm": 6.6406948564492181,
+        "postNorm": 6.6567579929086236,
+        "differenceNorm": 0.091672832462237827,
+        "relativeDifferenceToPre": 0.013804704845488914,
+        "cosine": 0.99990786345450977
+      },
+      "vertical": {
+        "preNorm": 4.6208272198952542,
+        "postNorm": 4.6162554838472349,
+        "differenceNorm": 0.0056205811959777249,
+        "relativeDifferenceToPre": 0.001216358225163228,
+        "cosine": 0.99999974942095826
+      }
+    }
+  },
+  "growthNodeMultiplier": 1.499219968798752,
+  "alternativeTransactionCommitted": false,
+  "futureLifetimeOrContinuumAccuracyCertified": false,
+  "interpretation": "Same-time discrete comparison on frozen original RHS. Lower ratio or closer tangent alone does not certify continuum accuracy or amortized runtime."
+}

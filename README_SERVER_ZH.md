@@ -12,7 +12,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_v5_observer_20260913
+cd ipm_long_time_server_v5_observer_amortized_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -53,7 +53,7 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_amortized_20260913');
 settings = struct( ...
     'canonicalFinalTime',16, ...
     'autonomousMeshVersion',5, ...
@@ -85,7 +85,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_observer_amortized_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -94,7 +94,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_amortized_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -102,8 +102,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_amortized_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_amortized_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 

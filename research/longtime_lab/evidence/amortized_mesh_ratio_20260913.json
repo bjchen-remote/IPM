@@ -1,0 +1,84 @@
+{
+  "kind": "pre_frozen_amortized_mesh_ratio_audit_v1",
+  "signedCheckpoints": true,
+  "noPoissonFactor": true,
+  "noTransfer": true,
+  "sameMeshEpoch": 34,
+  "preFrozenTimes": [
+    11.400088761930814,
+    11.50013546116133,
+    11.600278208796354,
+    11.700398998076828
+  ],
+  "preFrozenXCoreCells": [
+    32.901603038444591,
+    31.988643491379563,
+    30.717206630402309,
+    29.271774325960909
+  ],
+  "preFrozenContinuousYCoreCells": [
+    36.551251077830109,
+    35.574981356740963,
+    34.482302084226653,
+    33.397943706162842
+  ],
+  "maximumPreFrozenLogSecantDecayByAxis": [
+    0.48141106714688942,
+    0.31913329066374468
+  ],
+  "triggerCoreCells": [
+    26,
+    26
+  ],
+  "forecastNativeTriggerTau": 11.946606840399685,
+  "heldOutActualTriggerTau": 11.932175464785104,
+  "forecastTriggerError": 0.014431375614581299,
+  "candidateRows": [
+    {
+      "xScheduleIndex": 82,
+      "yTrialIndex": 4,
+      "predictedCoreCells": [
+        34.277251546808436,
+        36.800000033671118
+      ],
+      "predictedFrontCells": 38.203810288740236,
+      "maxAdjacentRatio": 1.071646131692563,
+      "estimatedLifetimeByAxis": [
+        0.57411512691419064,
+        1.0885774634975931
+      ],
+      "estimatedBottleneckLifetime": 0.57411512691419064
+    },
+    {
+      "xScheduleIndex": 81,
+      "yTrialIndex": 4,
+      "predictedCoreCells": [
+        34.301429327520765,
+        36.800000033671118
+      ],
+      "predictedFrontCells": 38.1517421232464,
+      "maxAdjacentRatio": 1.0717082020647413,
+      "estimatedLifetimeByAxis": [
+        0.57557980185347368,
+        1.0885774634975931
+      ],
+      "estimatedBottleneckLifetime": 0.57557980185347368
+    },
+    {
+      "xScheduleIndex": 89,
+      "yTrialIndex": 4,
+      "predictedCoreCells": [
+        35.200900886550606,
+        36.800000033671118
+      ],
+      "predictedFrontCells": 37.420625316822736,
+      "maxAdjacentRatio": 1.0742478706339995,
+      "estimatedLifetimeByAxis": [
+        0.629348094173612,
+        1.0885774634975931
+      ],
+      "estimatedBottleneckLifetime": 0.629348094173612
+    }
+  ],
+  "futureCandidateLifetimeOrTransferCertified": false
+}

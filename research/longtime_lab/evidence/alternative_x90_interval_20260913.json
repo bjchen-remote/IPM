@@ -1,0 +1,26 @@
+{
+  "kind": "research_only_alternative_mesh_interval_v1",
+  "sourceCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000011463.mat",
+  "signedLaterCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000012593.mat",
+  "sourceStep": 11533,
+  "sourceTau": 11.932175464785104,
+  "acceptedAlternativeXScheduleIndex": 90,
+  "alternativeActualCoreAtTransfer": [
+    34.522511871764443,
+    37.433624972000459
+  ],
+  "baselineSignedNextRequestTau": 12.083838534152356,
+  "baselineSignedInterval": 0.15166306936725249,
+  "alternativeNextRequestTau": 12.171526633727217,
+  "alternativeInterval": 0.23935116894211284,
+  "alternativeMinusBaselineInterval": 0.087688099574860345,
+  "terminalStep": 12207,
+  "terminalReason": "next_mesh_requested",
+  "terminalCoreCells": [
+    27.873569020267912,
+    33.185718730648546
+  ],
+  "researchOnlyCandidateOrderOverride": true,
+  "nativeCheckpointWritten": false,
+  "originalLineageOrAccuracyCertified": false
+}

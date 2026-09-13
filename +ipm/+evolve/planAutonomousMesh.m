@@ -80,6 +80,26 @@ if any(policy.version==[4,5])
 end
 memory.lastDecision=rmfield(plan,{'candidates','axisReport'});
 state.runMetadata.autonomousMesh=memory;
+if ~initial && any(policy.version==[4,5])
+    shadow=[];
+    if isfield(state.runMetadata,'continuousVerticalShadow')
+        shadow=state.runMetadata.continuousVerticalShadow;
+    end
+    try
+        state.runMetadata.continuousVerticalShadow= ...
+            ipm.remesh.continuousVerticalShadow(shadow,state,policy,plan);
+    catch exception
+        % This experimental observer cannot veto a native accepted step.
+        count=0;
+        if isfield(state.runMetadata,'continuousVerticalShadowFailure')
+            count=state.runMetadata.continuousVerticalShadowFailure.count;
+        end
+        state.runMetadata.continuousVerticalShadowFailure=struct( ...
+            'count',count+1,'lastStep',state.step, ...
+            'lastCanonicalTime',state.scale.canonicalTime, ...
+            'identifier',exception.identifier,'message',exception.message);
+    end
+end
 end
 
 function rows=decay_evidence(w,trend)

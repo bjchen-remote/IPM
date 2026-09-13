@@ -15,8 +15,9 @@ settings.minimumTimeStep = 1e-12;
 settings.outputEvery = 0.01;
 settings.checkpointEvery = 0.1;
 
-% The run remains admissible while both adjacent-cell ratios are <= 2.
-% This controls the grid-smoothness stop. Other numerical safety stops stay on.
+% Ratios <= 2 do not trigger the outer grid-smoothness stop. Automatic
+% candidate axes still obey the stricter 1.08 quality gate and all other
+% numerical safety stops remain active.
 settings.maximumAdjacentGridRatio = 2;
 % Version 5 generates additional directional node levels automatically up to
 % the resource cap chosen before the t=0 run. Version 4 remains available.

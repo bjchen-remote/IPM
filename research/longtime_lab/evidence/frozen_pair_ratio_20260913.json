@@ -1,0 +1,164 @@
+{
+  "kind": "frozen_registered_pair_ratio_audit_v1",
+  "signedCheckpoints": true,
+  "noPoissonFactor": true,
+  "noTransfer": true,
+  "actualTransferOrFutureGridLifetimeCertified": false,
+  "rows": [
+    {
+      "step": 7912,
+      "tau": 10.300032529861459,
+      "remeshCount": 31,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "currentRatio": [
+        1.0676458660817745,
+        1.0518694209011539
+      ],
+      "currentCoreCells": [
+        32.450872975165431,
+        35.745053484452633
+      ],
+      "admissibleX": 12,
+      "admissibleY": 2,
+      "minimumNewPairMinimaxRatio": 1.0679315901775481,
+      "minimumRatioPairPredictedCoreCells": [
+        35.156810589152279,
+        36.800000054993482
+      ],
+      "nativeFirstPairRatio": 1.0676458660817745,
+      "nativePairCount": 3,
+      "proposalStatus": "axes_proposed_require_actual_transfer",
+      "fallbackStatus": "not_needed",
+      "fallbackPairCount": 0,
+      "fallbackFirstPairRatio": null,
+      "fallbackCandidates": []
+    },
+    {
+      "step": 8693,
+      "tau": 10.700110867044998,
+      "remeshCount": 32,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "currentRatio": [
+        1.0701114246664287,
+        1.053411257416448
+      ],
+      "currentCoreCells": [
+        33.114667541714226,
+        35.780232990718382
+      ],
+      "admissibleX": 4,
+      "admissibleY": 2,
+      "minimumNewPairMinimaxRatio": 1.0733290546975056,
+      "minimumRatioPairPredictedCoreCells": [
+        33.410138418738526,
+        36.800000068409844
+      ],
+      "nativeFirstPairRatio": 1.0701114246664287,
+      "nativePairCount": 3,
+      "proposalStatus": "axes_proposed_require_actual_transfer",
+      "fallbackStatus": "not_needed",
+      "fallbackPairCount": 0,
+      "fallbackFirstPairRatio": null,
+      "fallbackCandidates": []
+    },
+    {
+      "step": 9328,
+      "tau": 11.000155230966989,
+      "remeshCount": 32,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "currentRatio": [
+        1.0701114246664287,
+        1.053411257416448
+      ],
+      "currentCoreCells": [
+        28.770910026432546,
+        31.429511497783395
+      ],
+      "admissibleX": 4,
+      "admissibleY": 2,
+      "minimumNewPairMinimaxRatio": 1.07134790695346,
+      "minimumRatioPairPredictedCoreCells": [
+        35.162474462609275,
+        36.800000040868234
+      ],
+      "nativeFirstPairRatio": 1.07134790695346,
+      "nativePairCount": 3,
+      "proposalStatus": "axes_proposed_require_actual_transfer",
+      "fallbackStatus": "not_needed",
+      "fallbackPairCount": 0,
+      "fallbackFirstPairRatio": null,
+      "fallbackCandidates": []
+    },
+    {
+      "step": 11011,
+      "tau": 11.700398998076828,
+      "remeshCount": 34,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "currentRatio": [
+        1.0766536866023526,
+        1.0758580984956549
+      ],
+      "currentCoreCells": [
+        29.271774325960909,
+        33.783779760488635
+      ],
+      "admissibleX": 0,
+      "admissibleY": 2,
+      "minimumNewPairMinimaxRatio": null,
+      "minimumRatioPairPredictedCoreCells": [
+        null,
+        null
+      ],
+      "nativeFirstPairRatio": null,
+      "nativePairCount": 0,
+      "proposalStatus": "registered_x_family_infeasible",
+      "fallbackStatus": "refined_axes_proposed_require_actual_transfer",
+      "fallbackPairCount": 3,
+      "fallbackFirstPairRatio": 1.071646131692563,
+      "fallbackCandidates": [
+        {
+          "xIndex": 82,
+          "yIndex": 4,
+          "minimaxRatio": 1.071646131692563,
+          "predictedCells": [
+            34.277251546808436,
+            36.800000033671118,
+            38.203810288740236
+          ]
+        },
+        {
+          "xIndex": 81,
+          "yIndex": 4,
+          "minimaxRatio": 1.0717082020647413,
+          "predictedCells": [
+            34.301429327520765,
+            36.800000033671118,
+            38.1517421232464
+          ]
+        },
+        {
+          "xIndex": 89,
+          "yIndex": 4,
+          "minimaxRatio": 1.0742478706339995,
+          "predictedCells": [
+            35.200900886550606,
+            36.800000033671118,
+            37.420625316822736
+          ]
+        }
+      ]
+    }
+  ]
+}

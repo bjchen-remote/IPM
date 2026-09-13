@@ -38,6 +38,10 @@ run(fullfile(projectRoot,'examples','quick_start.m'));
 [README_SERVER_ZH.md](README_SERVER_ZH.md)。该辅助函数只构造并校验配置，数值求解仍统一调用
 `ipm.solve`。
 
+本次实验包附有连续峰值 X 处的竖向核心**影子观测**。它在 `result.metadata.continuousVerticalShadow`
+中记录与原网格请求的分歧，不修改正式触发、硬停机或 C 规则。冻结数据、当前自适应网格的容量
+问题和验证范围见 [自动网格研究说明](research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md)。
+
 ## 数值选择与边界
 
 | 路径 | 空间离散 | 输运 | 时间推进 |

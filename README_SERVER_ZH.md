@@ -3,13 +3,16 @@
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
 冻结态的方向网格成本前沿和已知停机原因见 [网格建议](MESH_GRID_RECOMMENDATION_ZH.md)。
+本次实验包还把连续 X 峰值的竖向核心影子观测写入结果/断点元数据，
+用于评估正式网格触发的误差；它不改变正式网格决策或 C 规则。
+网格问题和新证据见 [研究说明](research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md)。
 
 ## 最快启动
 
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_v5_auto_20260913
+cd ipm_long_time_server_v5_observer_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -50,7 +53,7 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_auto_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913');
 settings = struct( ...
     'canonicalFinalTime',16, ...
     'autonomousMeshVersion',5, ...
@@ -82,15 +85,16 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_auto_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
+若 checkpoint 来自本实验包，状态还会显示连续峰值影子 Y 核心格数及累计请求分歧。
 
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_auto_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -98,14 +102,24 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_auto_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_v5_auto_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_observer_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 
 完整验证使用 `ipm.verify('all','quick')`。新旧一致性检查需要另行提供旧版目录，服务器发布包本身不依赖旧版。
 
 ## 已验证范围
+
+2026-09-13 更新：原始 `t=0` version-4 H8 主轨道已在 τ11.932175 自动完成第 35 次
+重布，一级分层 X 回退候选在真实场迁移中通过；τ12.00025 的验签 checkpoint 为
+641×321、核心 X/Y=30.780/36.208、格宽比 1.072844/1.057942。
+旧固定候选族的 τ≈11.67 边界已由同一原生轨道跨越。第五版原始 `t=0` 轨道已
+原生验证至 τ6.5，之后继续运行。影子观察器在八个冻结 checkpoint 上与整轴 PCHIP
+逐值一致，并通过早期 12 步、晚期 47 步、跨第 35 次自动重布的 123 步隔离原生
+续跑与签名结果/断点验收；三个窗口没有影子/原生网格请求分歧。
+跨重布轨道与主轨道共同的自由步上，180 个数值历史字段和重布事务账本逐值相等。
+H8 的远边界告警仍在，尚无大箱与时空收敛证据。
 
 version 4 的分层/方向增点实现已通过 baseline、四阶、六阶和新旧一致性完整回归；真实旧轨道的冻结场迁移也通过原生配对检查。此前 version 2 从 `t=0` 的 H8 已运行到 `τ=11.6731`、H64 已运行到 `τ=9.9086`，均因有限候选族耗尽停止；version 4 正是针对这种“仍有可用网格但搜索族未覆盖”的故障。version 5 在 τ≈7.4 和 τ≈9.3 的真实冻结场上完成 38 级方向配置的无 LU 网格筛选：较晚时 `961×321` 用约 30.8 万节点把最佳相邻比从 `1.062837` 降到 `1.048762`；`961×481` 用约 46.2 万节点降到 `1.036248`；单独加到 `1281×321` 没有进一步改善。原生 H8 `t=0→τ=0.5` 完成 5 次自然自动重布，`321×161→641×161` 的真实第五版场/算子迁移及安全审计通过；H64/H128 和 H256 自动初始节点的短程原生运行通过，H256 checkpoint 续算至 τ=.008 也通过。修改后的 `ipm.verify('all','quick')` 与 `ipm.verify('equivalence','quick')` 均 exit0。更晚的大节点原生迁移和整段长跑仍待验证。
 

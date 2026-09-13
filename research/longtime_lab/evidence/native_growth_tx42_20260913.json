@@ -1,0 +1,35 @@
+{
+  "kind": "signed_original_t0_native_cross_level_growth_v1",
+  "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000018341.mat",
+  "checkpointTrusted": true,
+  "fullHistoryTrusted": true,
+  "transactionIndex": 42,
+  "sourceStep": 18076,
+  "sourceTau": 13.93587639778649,
+  "sourceLevelId": 4,
+  "targetLevelId": 7,
+  "sourceNodeCount": [
+    641,
+    321
+  ],
+  "targetNodeCount": [
+    961,
+    321
+  ],
+  "actualCoreCells": [
+    34.670839247694005,
+    37.150821488115447
+  ],
+  "relativePeakJump": 7.3934530231622241E-5,
+  "massRelativeDefect": 4.1606235147823419E-16,
+  "relativeRangeViolation": 7.5964195215904243E-7,
+  "migrationPassed": true,
+  "checkpointStep": 18341,
+  "checkpointTau": 14.000035030696747,
+  "checkpointNodeCount": [
+    961,
+    321
+  ],
+  "checkpointRemeshCount": 42,
+  "manualMidRunGridChange": false
+}

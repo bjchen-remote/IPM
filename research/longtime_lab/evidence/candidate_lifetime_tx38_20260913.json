@@ -1,0 +1,228 @@
+{
+  "kind": "independent_late_mesh_lifetime_rank_audit_v1",
+  "sourceCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000013770.mat",
+  "signedLaterCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000014098.mat",
+  "transactionIndex": 38,
+  "sourceStep": 13796,
+  "sourceTau": 12.709490955270562,
+  "baselineSelectedCandidateIndex": 1,
+  "fitDecayByAxis": [
+    0.67863161837262975,
+    0.35083300718473942
+  ],
+  "triggerCoreCells": [
+    26,
+    26
+  ],
+  "selectionRule": "max fitted bottleneck lifetime within same node level and original quality gates",
+  "rankedSelectedCandidateIndex": 1,
+  "rankingUsesLaterOutcome": false,
+  "baselineSignedNextRequestTau": null,
+  "rows": [
+    {
+      "candidateIndex": 1,
+      "xScheduleIndex": 83,
+      "yTrialIndex": 4,
+      "targetLevelId": 4,
+      "predictedCoreCells": [
+        34.344920426730951,
+        36.800000113701358
+      ],
+      "maxAdjacentRatio": 1.0756233086222748,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.41017480651497529,
+        0.9902184319281615
+      ],
+      "estimatedBottleneckLifetime": 0.41017480651497529,
+      "eligibleForSameCostRank": true
+    },
+    {
+      "candidateIndex": 2,
+      "xScheduleIndex": 84,
+      "yTrialIndex": 4,
+      "targetLevelId": 4,
+      "predictedCoreCells": [
+        34.342296451436326,
+        36.800000113701358
+      ],
+      "maxAdjacentRatio": 1.0756263295702888,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.4100622217234931,
+        0.9902184319281615
+      ],
+      "estimatedBottleneckLifetime": 0.4100622217234931,
+      "eligibleForSameCostRank": true
+    },
+    {
+      "candidateIndex": 3,
+      "xScheduleIndex": 83,
+      "yTrialIndex": 3,
+      "targetLevelId": 4,
+      "predictedCoreCells": [
+        34.344920426730951,
+        32.337789669115729
+      ],
+      "maxAdjacentRatio": 1.0799999999674246,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.41017480651497529,
+        0.6217772064416075
+      ],
+      "estimatedBottleneckLifetime": 0.41017480651497529,
+      "eligibleForSameCostRank": true
+    },
+    {
+      "candidateIndex": 4,
+      "xScheduleIndex": 83,
+      "yTrialIndex": 2,
+      "targetLevelId": 8,
+      "predictedCoreCells": [
+        34.344920426730951,
+        36.800000015163548
+      ],
+      "maxAdjacentRatio": 1.0756233086222748,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.41017480651497529,
+        0.99021842429587514
+      ],
+      "estimatedBottleneckLifetime": 0.41017480651497529,
+      "eligibleForSameCostRank": false
+    },
+    {
+      "candidateIndex": 5,
+      "xScheduleIndex": 83,
+      "yTrialIndex": 3,
+      "targetLevelId": 8,
+      "predictedCoreCells": [
+        34.344920426730951,
+        36.800000195070851
+      ],
+      "maxAdjacentRatio": 1.0756233086222748,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.41017480651497529,
+        0.99021843823066824
+      ],
+      "estimatedBottleneckLifetime": 0.41017480651497529,
+      "eligibleForSameCostRank": false
+    },
+    {
+      "candidateIndex": 6,
+      "xScheduleIndex": 83,
+      "yTrialIndex": 4,
+      "targetLevelId": 8,
+      "predictedCoreCells": [
+        34.344920426730951,
+        36.800000034393065
+      ],
+      "maxAdjacentRatio": 1.0756233086222748,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.41017480651497529,
+        0.99021842578530528
+      ],
+      "estimatedBottleneckLifetime": 0.41017480651497529,
+      "eligibleForSameCostRank": false
+    },
+    {
+      "candidateIndex": 7,
+      "xScheduleIndex": 1,
+      "yTrialIndex": 4,
+      "targetLevelId": 7,
+      "predictedCoreCells": [
+        35.030157612526338,
+        36.800000113701358
+      ],
+      "maxAdjacentRatio": 1.0603562041040553,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.43928515923133116,
+        0.9902184319281615
+      ],
+      "estimatedBottleneckLifetime": 0.43928515923133116,
+      "eligibleForSameCostRank": false
+    },
+    {
+      "candidateIndex": 8,
+      "xScheduleIndex": 2,
+      "yTrialIndex": 4,
+      "targetLevelId": 7,
+      "predictedCoreCells": [
+        35.033591147520532,
+        36.800000113701358
+      ],
+      "maxAdjacentRatio": 1.0603562041040553,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.439429584775769,
+        0.9902184319281615
+      ],
+      "estimatedBottleneckLifetime": 0.439429584775769,
+      "eligibleForSameCostRank": false
+    },
+    {
+      "candidateIndex": 9,
+      "xScheduleIndex": 3,
+      "yTrialIndex": 4,
+      "targetLevelId": 7,
+      "predictedCoreCells": [
+        34.845695107401269,
+        36.800000113701358
+      ],
+      "maxAdjacentRatio": 1.0603562041040553,
+      "fitDecayByAxis": [
+        0.67863161837262975,
+        0.35083300718473942
+      ],
+      "estimatedLifetimeByAxis": [
+        0.43150518970412094,
+        0.9902184319281615
+      ],
+      "estimatedBottleneckLifetime": 0.43150518970412094,
+      "eligibleForSameCostRank": false
+    }
+  ],
+  "nativeTransferAudits": {
+    "candidateIndex": 1,
+    "passed": true,
+    "reasons": [],
+    "postTransferFlowPassed": true,
+    "actualCoreCells": [
+      34.335047940322028,
+      36.556054681866215
+    ],
+    "relativePeakJump": 7.5650422512685682E-5,
+    "massRelativeDefect": 2.836822460879229E-16,
+    "relativeRangeViolation": 4.2576259902074387E-9,
+    "postTransferSafety": 0.14933254462561585
+  },
+  "alternativeTransactionCommitted": false,
+  "alternativeFutureLifetimeCertified": false
+}

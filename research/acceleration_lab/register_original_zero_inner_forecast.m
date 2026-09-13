@@ -1,22 +1,31 @@
-function registration = register_original_zero_inner_forecast(dataFile,outputDirectory)
+function registration = register_original_zero_inner_forecast(dataFile,outputDirectory,windows,trainingIndices)
 %REGISTER_ORIGINAL_ZERO_INNER_FORECAST Freeze shape predictors before new frames.
-% Reads only the first three training profiles. Future field/clock is absent.
+% Defaults preserve the original first-three-frame future-window protocol.
+% Optional indices and windows permit a later prospective registration.
 assert(~isfolder(outputDirectory),'Refusing to overwrite forecast registration.');
 data = load(dataFile,'profiles','report');
-assert(numel(data.profiles)>=3 && numel(data.report.records)>=3 && ...
-    data.report.sameCaseId && all([data.report.records(1:3).fullHistoryTrusted]));
-training = data.report.records(1:3);
+if nargin<4,trainingIndices=1:3;end
+if nargin<3,windows=[7.15,7.25;7.45,7.55];end
+assert(isequal(size(trainingIndices),[1,3])&& ...
+    all(trainingIndices==fix(trainingIndices))&& ...
+    all(diff(trainingIndices)>0)&&trainingIndices(1)>=1&& ...
+    trainingIndices(3)<=numel(data.profiles)&& ...
+    numel(data.report.records)==numel(data.profiles)&& ...
+    data.report.sameCaseId);
+training = data.report.records(trainingIndices);
+assert(all([training.fullHistoryTrusted]));
 times = [training.tau];
 assert(all(diff(times)>0));
-windows = [7.15,7.25;7.45,7.55];
-assert(all(windows(:,1)>times(3)));
+assert(isnumeric(windows)&&isequal(size(windows),[2,2])&& ...
+    all(isfinite(windows),'all')&&all(windows(:,2)>windows(:,1))&& ...
+    all(windows(:,1)>times(3))&&windows(2,1)>windows(1,2));
 
 axes = {linspace(-1,1,401),linspace(0,2,401)};
 shape = cell(1,2);
 for kind=1:2
     values=zeros(3,numel(axes{kind}));
     for k=1:3
-        p=data.profiles{k};
+        p=data.profiles{trainingIndices(k)};
         if kind==1
             values(k,:)=interp1(p.innerX,p.wallRX/p.peak,axes{kind},'pchip');
         else
@@ -34,6 +43,7 @@ for kind=1:2
 end
 registration=struct('kind','original_zero_frozen_inner_shape_forecast_v1', ...
     'sourceProfileData',dataFile, ...
+    'trainingIndices',trainingIndices, ...
     'trainingCheckpoints',{ {training.checkpointFile} }, ...
     'trainingTimes',times, ...
     'futureCanonicalWindows',windows, ...

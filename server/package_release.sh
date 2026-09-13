@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="ipm_long_time_server_20260910"
+release_name="ipm_long_time_server_20260913"
 stage="$release_parent/$release_name"
 archive="$release_parent/$release_name.zip"
 

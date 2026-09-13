@@ -11,6 +11,7 @@ matlab_crash_dump.*
 # Simulation products are large and should stay out of source history.
 result/
 !result/README.md
+runs/
 
 # Common image/video artifacts when batch rendering is local.
 *.png

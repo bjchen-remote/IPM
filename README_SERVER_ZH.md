@@ -7,7 +7,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_20260910
+cd ipm_long_time_server_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -41,7 +41,7 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_20260910');
+addpath('/absolute/path/to/ipm_long_time_server_20260913');
 settings = struct( ...
     'canonicalFinalTime',16, ...
     'maximumAdjacentGridRatio',2, ...
@@ -67,10 +67,18 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 - `result*.mat` 与 `manifest.jsonl`：末态结果；
 - `launcher_result_pointer.mat`：启动器返回的结果结构。
 
+运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
+
+```bash
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_20260913/server'); profile_status('/data/ipm/run01');"
+```
+
+`profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
+
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_20260910');
+addpath('/absolute/path/to/ipm_long_time_server_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -78,8 +86,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_20260910');
-addpath('/absolute/path/to/ipm_long_time_server_20260910/tests');
+addpath('/absolute/path/to/ipm_long_time_server_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 
@@ -88,5 +96,7 @@ r = ipmtests.baseline.serverInterface();
 ## 已验证范围
 
 version 4 的分层/方向增点实现已通过 baseline、四阶、六阶和新旧一致性完整回归；真实旧轨道的冻结场迁移也通过原生配对检查。此前 version 2 从 `t=0` 的 H8 已运行到 `τ=11.6731`、H64 已运行到 `τ=9.9086`，均因有限候选族耗尽停止；version 4 正是针对这种“仍有可用网格但搜索族未覆盖”的故障。
+
+旧 H8 失败请求的 70 个基础 X 候选全部被拒；相邻步长比、局部求积权重和核心格数是主要限制，Y 方向仍有可用候选。新 version 4 原始 `t=0` H8 实跑已验证到 `τ≈5`：同节点自动重布至少 17 次，并在 `τ≈4.30` 自主从 `321×161` 增至 `641×161`。此时远边界源/速度指标超过 `0.01` 告警阈值；H8 长跑可检验网格和时间推进，但最终 Profile 必须另作更大计算域的匹配比较。
 
 version 4 尚未完成从 `t=0` 到 `τ=16` 的整段服务器实跑，因此本包是可运行的研究版本，不代表已经获得无穷时间极限、空间收敛或奇性证明。运行中不要编辑源码或 `profile_settings.m`；需要新配置时启动新的输出目录。

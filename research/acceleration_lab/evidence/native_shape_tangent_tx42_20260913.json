@@ -1,0 +1,100 @@
+{
+  "kind": "signed_native_remesh_shape_tangent_v1",
+  "beforeCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000017950.mat",
+  "afterCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000018341.mat",
+  "transactionIndex": 42,
+  "sourceStep": 18076,
+  "sourceTau": 13.93587639778649,
+  "sourceDecisionEqualsSigned": true,
+  "nativeAuditEqualsSigned": true,
+  "originalAcceptedRhsCaches": true,
+  "additionalPoissonSolve": false,
+  "checkpointWritten": false,
+  "epsilons": [
+    1E-5,
+    5E-6
+  ],
+  "preFlow": {
+    "cL": 0.0054862403303785655,
+    "cOmega": -0.30579828394579739,
+    "safetyFactor": 0.16457022071009336,
+    "coreCells": [
+      28.27542346703407,
+      31.990687969970569
+    ]
+  },
+  "postFlow": {
+    "cL": 0.0054873523201338431,
+    "cOmega": -0.30598042035879713,
+    "safetyFactor": 0.1514705098423603,
+    "coreCells": [
+      34.670839247694005,
+      37.150821488115447
+    ]
+  },
+  "sameTimeShapeJump": {
+    "wall": {
+      "preNorm": 15.019022327094497,
+      "postNorm": 15.020546847010742,
+      "differenceNorm": 0.0028483335339108272,
+      "relativeDifferenceToPre": 0.00018964839866922624,
+      "cosine": 0.99999998716977234
+    },
+    "vertical": {
+      "preNorm": 17.164322787717094,
+      "postNorm": 17.164100913303315,
+      "differenceNorm": 0.00038480476702476638,
+      "relativeDifferenceToPre": 2.2418872668843964E-5,
+      "cosine": 0.99999999983224208
+    }
+  },
+  "shapeTangentChange": {
+    "wall": {
+      "preNorm": 0.581852616950509,
+      "postNorm": 0.4771274484441253,
+      "differenceNorm": 1.0374709933201414,
+      "relativeDifferenceToPre": 1.7830477394044033,
+      "cosine": -0.91878635290877564
+    },
+    "vertical": {
+      "preNorm": 0.14640828497424757,
+      "postNorm": 0.093049921225432861,
+      "differenceNorm": 0.23927261085849849,
+      "relativeDifferenceToPre": 1.6342832709268145,
+      "cosine": -0.99673903005200193
+    }
+  },
+  "preFiniteDifferenceRefinement": {
+    "wall": {
+      "preNorm": 0.582438150771449,
+      "postNorm": 0.581852616950509,
+      "differenceNorm": 0.00062048573205863067,
+      "relativeDifferenceToPre": 0.0010653246722193369,
+      "cosine": 0.99999993780829355
+    },
+    "vertical": {
+      "preNorm": 0.14649177451749582,
+      "postNorm": 0.14640828497424757,
+      "differenceNorm": 8.39476853998513E-5,
+      "relativeDifferenceToPre": 0.00057305391839475089,
+      "cosine": 0.99999999821168772
+    }
+  },
+  "postFiniteDifferenceRefinement": {
+    "wall": {
+      "preNorm": 0.47637527191758783,
+      "postNorm": 0.4771274484441253,
+      "differenceNorm": 0.00077206038800890244,
+      "relativeDifferenceToPre": 0.0016206978689323481,
+      "cosine": 0.99999993332859649
+    },
+    "vertical": {
+      "preNorm": 0.092918763643334124,
+      "postNorm": 0.093049921225432861,
+      "differenceNorm": 0.00013179511376872947,
+      "relativeDifferenceToPre": 0.0014183907383294621,
+      "cosine": 0.99999999030539843
+    }
+  },
+  "interpretation": "Canonical normalized-shape tangent of the discrete original RHS, measured at two transferred representations of the same time; not a continuum error bound."
+}

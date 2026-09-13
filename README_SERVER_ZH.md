@@ -12,7 +12,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_v5_open_horizon_20260913
+cd ipm_long_time_server_v5_tau14_growth_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -55,7 +55,7 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -88,7 +88,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -97,7 +97,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_2
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -105,8 +105,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 
@@ -114,13 +114,19 @@ r = ipmtests.baseline.serverInterface();
 
 ## 已验证范围
 
-本机两条仍在运行的原始 `t=0` H8 轨道最近一次只读验签：version 4 于
-`τ=14.000035`、step 18341，已自主增至 `961×321`、42 次自动重布，核心 X/Y=
-33.249/36.545，格宽比 1.055504/1.064449，物理梯度最大值 226.488；
-version 5 于 `τ=12.1000363`、step 12014，`641×321`、35 次自动重布，
-核心 X/Y=29.808/34.464，格宽比 1.070754/1.057950。两者均未达到
-`τ=16`，远边界告警仍在。下述数值是各阶段的历史验收记录；部署时请用
-`profile_status` 查看最新 checkpoint，再用作业系统检查进程是否仍在运行。
+2026-09-13 按用户指令暂停本机两条原始 `t=0` H8 长跑，进程已退出。
+暂停后只读验签的最新完整 checkpoint 如下；周期保存意味着中断前最后几个
+接受步可能未保存。重启必须使用各自原来的源码、配置和线程条件，不要把
+研究分支的设置强加到旧 checkpoint；本发布包不包含这些大型 checkpoint。
+
+| 轨道 | 最新可信时间、步数 | 网格、重布 | 核心 X/Y、相邻格比 X/Y | 本机 checkpoint |
+| --- | --- | --- | --- | --- |
+| version 4 主线 | `τ=14.2002012595`，step 19135 | `961×321`，42 次 | 28.139/33.731，1.055504/1.064449 | `../ipm_structured/runs/profile_H8_tau16/checkpoint_*_step0000019135.mat` |
+| version 5 | `τ=12.4002900296`，step 12890 | `641×321`，37 次 | 32.656/35.149，1.073693/1.059257 | `../ipm_grid_v5/runs/v5_H8_tau16_continuation_20260913/checkpoint_*_step0000012890.mat` |
+
+两者均未达到 `τ=16`，远边界指标仍高于 0.01 告警阈值。
+继续前以 `profile_status` 重新验签具体文件；从各自运行目录的
+`checkpoint_manifest.jsonl` 获取完整文件名。下述数值是各阶段的历史验收记录。
 
 2026-09-13 更新：原始 `t=0` version-4 H8 主轨道已在 τ11.932175 自动完成第 35 次
 重布，一级分层 X 回退候选在真实场迁移中通过；τ12.00025 的验签 checkpoint 为
@@ -146,9 +152,15 @@ H8 的远边界告警仍在，尚无大箱与时空收敛证据。
 较慢。原始方程的墙面归一化形状导数在两候选间仍相差 16.67%，
 因此暂不把跨级最小网格比改成正式选择规则。证据见
 `research/longtime_lab/CROSS_LEVEL_MESH_COST_AND_RHS_20260913.md`。
+该跨级候选的隔离原方程续跑随后到 `τ=13.039977` 才再次请求网格，
+间隔比主轨道同轮长 32.23%，明显高于冻结态预测的 7.13%；单位时间步数
+接近，而更大网格单次 RHS 成本明显更高。该收益不能直接换算为计算加速，
+也没有独立精度认证。
 主轨道随后在第42次请求 `τ=13.935876` 自主将 `641×321` 增至
 `961×321`，真实迁移通过；见
 `research/longtime_lab/evidence/native_growth_tx42_20260913.json`。
+第42次增长的同时间墙面形状跳变仅 0.01896%，原 RHS 形状导数却几乎反向，
+见 `research/acceleration_lab/ORIGINAL_T0_TX42_GROWTH_SHAPE_20260913.md`。
 
 原始 `t=0` H8 到 τ13 的实际剖面图及研究审计也随包提供，见
 `research/acceleration_lab/ORIGINAL_T0_TAU13_SHAPE_AND_REMESH_20260913.md`。
@@ -167,4 +179,4 @@ version 4 的分层/方向增点实现已通过 baseline、四阶、六阶和新
 
 旧 H8 失败请求的 70 个基础 X 候选全部被拒；相邻步长比、局部求积权重和核心格数是主要限制，Y 方向仍有可用候选。新 version 4 原始 `t=0` H8 实跑已验证到至少 `τ≈9`：同节点自动重布至少 17 次，并在 `τ≈4.30` 自主从 `321×161` 增至 `641×161`，之后达到 `641×321`。远边界源/速度指标超过 `0.01` 告警阈值；H8 长跑可检验网格和时间推进，但最终 Profile 必须另作更大计算域的匹配比较。
 
-正在运行的 version 4 H8 原始 `t=0` 轨道还未到 `τ=16`，version 5 也未完成该整段原生验证。本包只支持继续实验，不代表已经获得无穷时间极限、空间收敛或奇性证明。运行中不要编辑源码或 `profile_settings.m`；需要新配置时启动新的输出目录。
+已暂停的 version 4 H8 原始 `t=0` 轨道还未到 `τ=16`，version 5 也未完成该整段原生验证。本包只支持继续实验，不代表已经获得无穷时间极限、空间收敛或奇性证明。运行中不要编辑源码或 `profile_settings.m`；需要新配置时启动新的输出目录。

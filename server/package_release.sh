@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_v5_mesh_holdout_20260913}"
+release_name="${2:-ipm_long_time_server_v5_mesh_followup_20260913}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -39,6 +39,7 @@ cp "$project_root/research/longtime_lab/audit_alternative_candidate_transfer.m" 
 cp "$project_root/research/longtime_lab/replay_requested_alternative_transfer.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/rollout_alternative_mesh_interval.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/audit_candidate_lifetime_at_request.m" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/verify_ranked_lifetime_followup.m" "$stage/research/longtime_lab/"
 chmod +x "$stage/server/launch.sh" "$stage/server/package_release.sh"
 
 commit="$(git -C "$project_root" rev-parse HEAD)"

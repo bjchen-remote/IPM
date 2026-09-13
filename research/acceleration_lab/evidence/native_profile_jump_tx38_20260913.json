@@ -1,0 +1,125 @@
+{
+  "kind": "signed_native_remesh_profile_jump_v1",
+  "beforeCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000013770.mat",
+  "afterCheckpoint": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000014098.mat",
+  "transactionIndex": 38,
+  "sourceStep": 13796,
+  "sourceTau": 12.709490955270562,
+  "sourceDecisionEqualsSigned": true,
+  "nativeAuditEqualsSigned": true,
+  "sameTimeTransfer": true,
+  "checkpointWritten": false,
+  "start": {
+    "tau": 12.700107613892099,
+    "physicalTime": 2.3158348723834945,
+    "peak": 107.55771756959619,
+    "peakX": 0.19370833627445705,
+    "physicalWidths": [
+      5.0517674944815313E-5,
+      1.1093533181945598E-5
+    ]
+  },
+  "preTransfer": {
+    "tau": 12.709490955270562,
+    "physicalTime": 2.3158945507316759,
+    "peak": 107.88143306905627,
+    "peakX": 0.19369417626276611,
+    "physicalWidths": [
+      5.0274720674374513E-5,
+      1.0971133360345421E-5
+    ]
+  },
+  "postTransfer": {
+    "tau": 12.709490955270562,
+    "physicalTime": 2.3158945507316759,
+    "peak": 107.88402840054407,
+    "peakX": 0.19369414758373218,
+    "physicalWidths": [
+      5.0273659482516764E-5,
+      1.0961135558437262E-5
+    ]
+  },
+  "end": {
+    "tau": 12.800169587136329,
+    "physicalTime": 2.3164621276722426,
+    "peak": 111.05877386627139,
+    "peakX": 0.19356151398104682,
+    "physicalWidths": [
+      4.8049806068676163E-5,
+      1.0499688208348026E-5
+    ]
+  },
+  "startToPre": {
+    "deltaTau": 0.0093833413784629727,
+    "deltaPhysicalTime": 5.9678348181435581E-5,
+    "wall": {
+      "relativeL2": 0.001480795744901337,
+      "relativeSampledInf": 0.001972071191220226
+    },
+    "vertical": {
+      "relativeL2": 0.00029112494425504522,
+      "relativeSampledInf": 0.0005264839059310189
+    },
+    "relativePeakChange": 0.0030096910456529624,
+    "relativeWidthChange": [
+      -0.0048092924052066666,
+      -0.01103343899483511
+    ],
+    "peakShiftOverAfterWallWidth": -0.28165271732989544
+  },
+  "preToPost": {
+    "deltaTau": 0,
+    "deltaPhysicalTime": 0,
+    "wall": {
+      "relativeL2": 0.00022874125685179889,
+      "relativeSampledInf": 0.00032351818205411675
+    },
+    "vertical": {
+      "relativeL2": 4.2962978061813817E-5,
+      "relativeSampledInf": 7.8014770716228226E-5
+    },
+    "relativePeakChange": 2.4057258176446439E-5,
+    "relativeWidthChange": [
+      -2.1107861834179786E-5,
+      -0.00091128250653627063
+    ],
+    "peakShiftOverAfterWallWidth": -0.00057045845121783743
+  },
+  "postToEnd": {
+    "deltaTau": 0.0906786318657673,
+    "deltaPhysicalTime": 0.00056757694056663865,
+    "wall": {
+      "relativeL2": 0.0015812322442937399,
+      "relativeSampledInf": 0.0018855403104006687
+    },
+    "vertical": {
+      "relativeL2": 0.00025345136745548138,
+      "relativeSampledInf": 0.00047760065369861776
+    },
+    "relativePeakChange": 0.029427390808399956,
+    "relativeWidthChange": [
+      -0.0442349619409339,
+      -0.042098498611673474
+    ],
+    "peakShiftOverAfterWallWidth": -2.7603358585006084
+  },
+  "startToEnd": {
+    "deltaTau": 0.10006197324423027,
+    "deltaPhysicalTime": 0.00062725528874807424,
+    "wall": {
+      "relativeL2": 0.00053740063292997573,
+      "relativeSampledInf": 0.00093366689797003144
+    },
+    "vertical": {
+      "relativeL2": 9.33117935199661E-5,
+      "relativeSampledInf": 0.00012689802294862942
+    },
+    "relativePeakChange": 0.032550488944782741,
+    "relativeWidthChange": [
+      -0.048851592612585759,
+      -0.053530733974279543
+    ],
+    "peakShiftOverAfterWallWidth": -3.0556271798554753
+  },
+  "interpretation": "Same-time transfer jump is a native mesh interpolation effect, not a physical-time derivative or a spatial-convergence bound."
+}

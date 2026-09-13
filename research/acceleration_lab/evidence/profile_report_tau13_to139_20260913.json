@@ -1,0 +1,254 @@
+{
+  "kind": "actual_native_continuous_profile_progress",
+  "records": [
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000014751.mat",
+      "caseId": "20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2",
+      "freshCase": false,
+      "step": 14751,
+      "tau": 13.000216678018507,
+      "absolutePhysicalTime": 2.3176576524254129,
+      "physicalPeak": 118.33184356819235,
+      "physicalGridGradientMaximum": 118.32861332994993,
+      "physicalWidths": [
+        4.357554155805927E-5,
+        9.63531089143771E-6
+      ],
+      "physicalPeakX": 0.19328243591360089,
+      "cLParentUnits": 0.0073302794836305717,
+      "cOmegaParentUnits": -0.31407527776978966,
+      "coreCells": [
+        32.696346184772523,
+        36.639903357975456
+      ],
+      "safety": 0.15749308034120379,
+      "geometry": {
+        "kind": "continuous_C1_inner_geometry_only",
+        "peakX": 0.98200526769619656,
+        "peak": 0.68500781369190422,
+        "peakCell": 461,
+        "peakFraction": 0.73190231968230057,
+        "wallCurvature": -1.0942225335422611E+7,
+        "level": 0.9,
+        "wallCrossings": [
+          0.98190458183700513,
+          0.98212597500783549
+        ],
+        "wallCrossingSlopes": [
+          1392.5038015678588,
+          -823.83927852637009
+        ],
+        "wallWidth": 0.00022139317083036403,
+        "verticalWidth": 4.89538845397827E-5,
+        "verticalCrossingSlope": -1407.0975052295305,
+        "window": [
+          0.8,
+          1.15
+        ],
+        "pdeDerivativeEvaluated": false,
+        "nativeGaugeChanged": false
+      },
+      "fullHistoryTrusted": true
+    },
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000015763.mat",
+      "caseId": "20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2",
+      "freshCase": false,
+      "step": 15763,
+      "tau": 13.300243558513897,
+      "absolutePhysicalTime": 2.3193143111929944,
+      "physicalPeak": 130.15395452442402,
+      "physicalGridGradientMaximum": 130.15390824044488,
+      "physicalWidths": [
+        3.7618261640523691E-5,
+        8.1792153221237014E-6
+      ],
+      "physicalPeakX": 0.19289484182058372,
+      "cLParentUnits": 0.0066740567852062,
+      "cOmegaParentUnits": -0.30602016701810242,
+      "coreCells": [
+        34.281200437507948,
+        35.921368441040769
+      ],
+      "safety": 0.15184935397006202,
+      "geometry": {
+        "kind": "continuous_C1_inner_geometry_only",
+        "peakX": 0.98209546525872249,
+        "peak": 0.68512270302455447,
+        "peakCell": 463,
+        "peakFraction": 0.97732383911775944,
+        "wallCurvature": -3.11067831723669E+7,
+        "level": 0.9,
+        "wallCrossings": [
+          0.98200988472118489,
+          0.98220141251850379
+        ],
+        "wallCrossingSlopes": [
+          1549.4786478391341,
+          -1003.5772614002359
+        ],
+        "wallWidth": 0.00019152779731890224,
+        "verticalWidth": 4.1643261174935033E-5,
+        "verticalCrossingSlope": -1653.29742668179,
+        "window": [
+          0.8,
+          1.15
+        ],
+        "pdeDerivativeEvaluated": false,
+        "nativeGaugeChanged": false
+      },
+      "fullHistoryTrusted": true
+    },
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000016479.mat",
+      "caseId": "20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2",
+      "freshCase": false,
+      "step": 16479,
+      "tau": 13.500254463018726,
+      "absolutePhysicalTime": 2.3203348865412607,
+      "physicalPeak": 138.57149234976151,
+      "physicalGridGradientMaximum": 138.56765002861167,
+      "physicalWidths": [
+        3.39986143217742E-5,
+        7.38309380612961E-6
+      ],
+      "physicalPeakX": 0.19265638417009939,
+      "cLParentUnits": 0.0062743730950571572,
+      "cOmegaParentUnits": -0.30611844244912761,
+      "coreCells": [
+        30.584326464417472,
+        33.09537875026345
+      ],
+      "safety": 0.15813179741575106,
+      "geometry": {
+        "kind": "continuous_C1_inner_geometry_only",
+        "peakX": 0.98215197537019128,
+        "peak": 0.68517768519103373,
+        "peakCell": 474,
+        "peakFraction": 0.23672808974686219,
+        "wallCurvature": -2.2416035689987328E+7,
+        "level": 0.9,
+        "wallCrossings": [
+          0.98207423581170306,
+          0.98224755893494042
+        ],
+        "wallCrossingSlopes": [
+          1688.0370090083775,
+          -1047.1059672989497
+        ],
+        "wallWidth": 0.00017332312323736776,
+        "verticalWidth": 3.7638618607267713E-5,
+        "verticalCrossingSlope": -1834.8486672635547,
+        "window": [
+          0.8,
+          1.15
+        ],
+        "pdeDerivativeEvaluated": false,
+        "nativeGaugeChanged": false
+      },
+      "fullHistoryTrusted": true
+    },
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000017220.mat",
+      "caseId": "20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2",
+      "freshCase": false,
+      "step": 17220,
+      "tau": 13.700058715153002,
+      "absolutePhysicalTime": 2.3212927870830469,
+      "physicalPeak": 147.46675032234376,
+      "physicalGridGradientMaximum": 147.46372408128755,
+      "physicalWidths": [
+        3.0846630723722012E-5,
+        6.6466542583016015E-6
+      ],
+      "physicalPeakX": 0.19243259578311489,
+      "cLParentUnits": 0.0059006512291999505,
+      "cOmegaParentUnits": -0.30861408795720591,
+      "coreCells": [
+        32.648637846167283,
+        35.306685367388326
+      ],
+      "safety": 0.15343873655106419,
+      "geometry": {
+        "kind": "continuous_C1_inner_geometry_only",
+        "peakX": 0.982204722286565,
+        "peak": 0.68521134787264093,
+        "peakCell": 464,
+        "peakFraction": 0.27534370724893781,
+        "wallCurvature": -1.6288890201046899E+7,
+        "level": 0.9,
+        "wallCrossings": [
+          0.98213426270633264,
+          0.98229170851867109
+        ],
+        "wallCrossingSlopes": [
+          1873.0416824030556,
+          -1099.5758641888156
+        ],
+        "wallWidth": 0.00015744581233845256,
+        "verticalWidth": 3.3925516481978338E-5,
+        "verticalCrossingSlope": -2039.4016679663091,
+        "window": [
+          0.8,
+          1.15
+        ],
+        "pdeDerivativeEvaluated": false,
+        "nativeGaugeChanged": false
+      },
+      "fullHistoryTrusted": true
+    },
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000017950.mat",
+      "caseId": "20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2",
+      "freshCase": false,
+      "step": 17950,
+      "tau": 13.900068393775856,
+      "absolutePhysicalTime": 2.3221936672066024,
+      "physicalPeak": 156.94801586550042,
+      "physicalGridGradientMaximum": 156.93623247500838,
+      "physicalWidths": [
+        2.8061692217088386E-5,
+        5.9556953731819728E-6
+      ],
+      "physicalPeakX": 0.19222213453126591,
+      "cLParentUnits": 0.0055471307964615572,
+      "cOmegaParentUnits": -0.30543179276311094,
+      "coreCells": [
+        29.183263170456996,
+        33.458754101388536
+      ],
+      "safety": 0.16232792867755594,
+      "geometry": {
+        "kind": "continuous_C1_inner_geometry_only",
+        "peakX": 0.982253993430867,
+        "peak": 0.68506954756454264,
+        "peakCell": 474,
+        "peakFraction": 0.59134972433189847,
+        "wallCurvature": -2.8051684808047224E+7,
+        "level": 0.9,
+        "wallCrossings": [
+          0.98219071792758661,
+          0.98233411301218432
+        ],
+        "wallCrossingSlopes": [
+          2060.1451307899056,
+          -1437.30622141298
+        ],
+        "wallWidth": 0.00014339508459770833,
+        "verticalWidth": 3.04335688407112E-5,
+        "verticalCrossingSlope": -2273.8660794469874,
+        "window": [
+          0.8,
+          1.15
+        ],
+        "pdeDerivativeEvaluated": false,
+        "nativeGaugeChanged": false
+      },
+      "fullHistoryTrusted": true
+    }
+  ],
+  "nativeSignatureValidated": true,
+  "geometryUniversalFourthOrderClaim": false,
+  "pdeAdvanced": false,
+  "interpretation": "Actual native finite-time profiles, paired with their own axes. Center and additive density level are aligned; physical density and gradient amplitudes are retained. Inner normalization is a shape diagnostic, not an evolved extrapolated state or a singularity proof."
+}

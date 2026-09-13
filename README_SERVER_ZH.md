@@ -12,7 +12,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_v5_mesh_cost_20260913
+cd ipm_long_time_server_v5_open_horizon_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -27,22 +27,24 @@ MATLAB_BIN=/opt/MATLAB/R2026a/bin/matlab nohup server/launch.sh > launcher.out 2
 
 ## 用户接口
 
-新算例只需编辑 `server/profile_settings.m`。默认设置是小箱 H8、启动前自动选出的原始 `321×161` 均匀网格、目标 canonical 时间 `τ=16`、自动 checkpoint、无中途人工换网格：
+新算例只需编辑 `server/profile_settings.m`。默认设置是小箱 H8、启动前自动选出的原始 `321×161` 均匀网格、自动 checkpoint、无中途人工换网格。时间和步数设成较远的**运行上限**，避免新服务器作业仅因达到旧 `τ=16` 里程碑而停止：
 
 ```matlab
 settings.boxHalfWidth = 8;
 settings.boxHeight = 4;
 settings.initialNodeCount = 'auto';
-settings.canonicalFinalTime = 16;
-settings.maximumSteps = 60000;
+settings.canonicalFinalTime = 1000;
+settings.maximumSteps = 10000000;
 settings.maximumAdjacentGridRatio = 2;
 settings.autonomousMeshVersion = 5;
 settings.maximumTotalNodes = 310000;
-settings.outputDirectory = fullfile(projectRoot,'runs','profile_H8_tau16');
+settings.outputDirectory = fullfile(projectRoot,'runs','profile_H8_long');
 settings.restartCheckpoint = '';
 ```
 
 `maximumAdjacentGridRatio=2` 对应内部的 `remeshMaximumCellRatio=2`。在每次记录状态上，若 X、Y 两轴的最大相邻步长比都不超过 `2*(1+1e-10)`，程序不会因为 `grid_smoothness_failure` 停止。质量守恒、最大值原理、振荡、分辨率、时间终点、最大步数、自动网格候选耗尽等独立停止条件仍然有效；这样不会用一个网格比选项掩盖数值失效。
+
+`τ=1000` 和一千万步不是已验证可达的时间或奇异性判据，只是避免**人为的短时间上限**；作业可能更早因严格的数值安全门或注册节点预算停止。请根据服务器的磁盘、内存和预计运行时间在启动前调整这些上限，并用 checkpoint 检查进展。当前 H8 的远边界告警意味着长跑主要检验网格和时间推进，最终 Profile 还必须做大箱与时空误差比较。
 
 `initialNodeCount='auto'` 对默认 H8 使用已验证的 `321×161` 起点；对更高的计算箱，在构造任何求解器 LU 之前，用原始解析 `t=0` 数据和原质量门按已登记的二维节点成本搜索初始 X/Y 数量，并把选中的数量冻结进配置和 checkpoint。实测 H64/H128 选 `321×161`；H256/Y128 的固定 `321×161` 在初始 X 候选族耗尽，自动模式选 `401×161`，随后原生初始化及短程推进通过。可改为 `[Nx,Ny]` 明确固定初始节点；旧 `ipm.config.longTimeProfile` 未指定此项时保持原 numeric 默认。自动选择不保证稀疏 LU 内存、未来长时容量或计算域收敛。
 
@@ -53,9 +55,10 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913');
 settings = struct( ...
-    'canonicalFinalTime',16, ...
+    'canonicalFinalTime',1000, ...
+    'maximumSteps',10000000, ...
     'autonomousMeshVersion',5, ...
     'initialNodeCount','auto', ...
     'maximumTotalNodes',1000000, ...
@@ -85,7 +88,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -94,7 +97,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_2026
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -102,8 +105,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_v5_mesh_cost_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_v5_open_horizon_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 
@@ -146,6 +149,9 @@ H8 的远边界告警仍在，尚无大箱与时空收敛证据。
 
 原始 `t=0` H8 到 τ13 的实际剖面图及研究审计也随包提供，见
 `research/acceleration_lab/ORIGINAL_T0_TAU13_SHAPE_AND_REMESH_20260913.md`。
+同一轨道更晚的 τ13.0–13.9 五帧显示物理墙面峰继续增长至 156.948，
+墙核宽收缩到 2.8062e−5；归一化墙面形状首尾仍相差 0.46094%，见
+`research/acceleration_lab/ORIGINAL_T0_TAU139_PROFILE_20260913.md`。
 第38、39次真实重网格的同一时刻归一化剖面跳变很小，但缓存原 RHS
 给出的形状导数变化显著；这提示必须先做空间/时间与更大箱的误差检验，
 不能把光滑的有限时曲线直接外推为极限 Profile。

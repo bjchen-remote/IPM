@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_v5_profile_tau13_20260913}"
+release_name="${2:-ipm_long_time_server_v5_rhs_c_20260913}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -44,9 +44,14 @@ cp "$project_root/research/longtime_lab/continuous_inner_geometry.m" "$stage/res
 cp "$project_root/research/longtime_lab/render_continuous_profile_progress.m" "$stage/research/longtime_lab/"
 mkdir -p "$stage/research/acceleration_lab/evidence"
 cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TAU13_SHAPE_AND_REMESH_20260913.md" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/REMESH_RHS_C1_DECOMPOSITION_20260913.md" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_native_remesh_profile_jump.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_native_remesh_shape_tangent.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_original_t0_shape_train.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/audit_native_remesh_rhs_c_decomposition.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/ipm_accellab_continuous_inner_rates.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/ipm_accellab_hermite_level_roots.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/ipm_accellab_hermite_line.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/ipm_accellab_hermite_peak.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/ipm_accellab_tensor_hermite.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/evidence/"*.json "$stage/research/acceleration_lab/evidence/"

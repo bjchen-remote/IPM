@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_v5_mesh_followup_20260913}"
+release_name="${2:-ipm_long_time_server_v5_profile_tau13_20260913}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -40,6 +40,18 @@ cp "$project_root/research/longtime_lab/replay_requested_alternative_transfer.m"
 cp "$project_root/research/longtime_lab/rollout_alternative_mesh_interval.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/audit_candidate_lifetime_at_request.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/verify_ranked_lifetime_followup.m" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/continuous_inner_geometry.m" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/render_continuous_profile_progress.m" "$stage/research/longtime_lab/"
+mkdir -p "$stage/research/acceleration_lab/evidence"
+cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TAU13_SHAPE_AND_REMESH_20260913.md" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/audit_native_remesh_profile_jump.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/audit_native_remesh_shape_tangent.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/audit_original_t0_shape_train.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/ipm_accellab_hermite_peak.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/ipm_accellab_tensor_hermite.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/evidence/"*.json "$stage/research/acceleration_lab/evidence/"
+cp "$project_root/research/acceleration_lab/evidence/"*.png "$stage/research/acceleration_lab/evidence/"
+cp "$project_root/research/acceleration_lab/evidence/"*.mat "$stage/research/acceleration_lab/evidence/"
 chmod +x "$stage/server/launch.sh" "$stage/server/package_release.sh"
 
 commit="$(git -C "$project_root" rev-parse HEAD)"

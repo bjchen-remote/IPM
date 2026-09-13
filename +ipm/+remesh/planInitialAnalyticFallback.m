@@ -1,5 +1,7 @@
 function [candidates,evidence] = planInitialAnalyticFallback(config,originalAxes,originalAttempt)
 %IPM.REMESH.PLANINITIALANALYTICFALLBACK One fixed observation of original t0.
+% Omit ORIGINALATTEMPT for a pure preflight before any solver operator is
+% built; supply it for the original bounded failure and controller ledger.
 % No incoming rho or checkpoint is accepted. Actual source state is untouched.
 id='ipm:InitialObservationContext';
 assert(isfield(config.remesh,'initialMeshObservationFallback'),id,'Explicit initial observation policy is required.');
@@ -14,9 +16,17 @@ assert(numel(x)*numel(y)<=p.nodeFamily.maximumTotalNodes,id,'Initial solver node
 if isfield(config.grid,'customX')&&~isempty(config.grid.customX)
     assert(isequal(x,config.grid.customX)&&isequal(y,config.grid.customY),id,'Explicit original axes must be unchanged.');
 end
-assert(isstruct(originalAttempt)&&isscalar(originalAttempt)&& ...
-    all(isfield(originalAttempt,{'plan','attempts'})),id,'Original bounded failure evidence is required.');
+preflight=nargin<3||isempty(originalAttempt);
+if preflight
+    originalAttempt=struct('plan',struct('coreCells',[NaN,NaN]), ...
+        'attempts',struct([]));
+else
+    assert(isstruct(originalAttempt)&&isscalar(originalAttempt)&& ...
+        all(isfield(originalAttempt,{'plan','attempts'})),id,'Original bounded failure evidence is required.');
+end
 plan=originalAttempt.plan;attempts=originalAttempt.attempts;
+coreFailure=false;
+if ~preflight
 assert(plan.initial&&plan.requested&&plan.sourceStep==0&&plan.sourceCanonicalTime==0&& ...
     plan.sourcePhysicalTime==0&&plan.sourceNormalizedTime==0&&plan.sourceRemeshCount==0&& ...
     plan.sourceLevelId==1&&isequal(plan.sourceNodeCount,[numel(x),numel(y)])&& ...
@@ -42,6 +52,7 @@ if coreFailure
 end
 assert(capacity||coreFailure,'ipm:InitialObservationIneligibleFailure', ...
     'Only original finite-family exhaustion or solely actual core/front rejection permits observation fallback.');
+end
 evidence=struct('version',1,'policy',rule,'used',true,'attemptCount',1, ...
     'selectedPhase','fixed_observation','status','planning', ...
     'originalAxes',originalAxes,'originalAttempt',originalAttempt, ...
@@ -51,6 +62,11 @@ evidence=struct('version',1,'policy',rule,'used',true,'attemptCount',1, ...
     'selectedLocalCandidateIndex',0,'selectedOriginalPairIndex',0, ...
     'noSourceFieldInterpolation',true,'noNativeQualificationClaim',true);
 if coreFailure,evidence.originalFailureClass='actual_analytic_core_or_front';end
+if preflight
+    evidence.used=false;evidence.attemptCount=0;
+    evidence.selectedPhase='analytic_preflight';
+    evidence.originalFailureClass='none_preflight';
+end
 positive=observation_axis(config.grid.xlim(2),rule);ox=[-fliplr(positive(2:end)),positive];
 oy=observation_axis(config.grid.ymax,rule)';
 count=[numel(ox),numel(oy)];assert(prod(count)<=rule.maximumObservationNodes, ...

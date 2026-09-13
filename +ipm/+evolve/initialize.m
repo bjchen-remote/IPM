@@ -70,7 +70,8 @@ if autonomous
             evidence.status='native_candidates_rejected';
             exception=MException('ipm:AutonomousMeshInitialization', ...
                 'The observed initial candidates failed their unchanged native gates.');
-            throw(addCause(exception,MException('ipm:InitialObservationEvidence','%s',jsonencode(evidence))));
+            throw(addCause(exception,MException('ipm:InitialObservationEvidence','%s', ...
+                initial_failure_message(state,evidence))));
         end
         error('ipm:AutonomousMeshInitialization', ...
             'Zero-time automatic mesh candidates failed: %s',detail);
@@ -102,11 +103,56 @@ end
 if isempty(pairs)
     exception=MException('ipm:InitialObservationCapacity', ...
         'The one registered initial observation fallback has no qualified candidates.');
-    cause=MException('ipm:InitialObservationEvidence','%s',jsonencode(evidence));
+    cause=MException('ipm:InitialObservationEvidence','%s', ...
+        initial_failure_message(state,evidence));
     throw(addCause(exception,cause));
 end
 plan.candidates=pairs;plan.axisReport=evidence.axisReport;plan.stopReason='';
 plan.observationFallback=evidence;
 state.runMetadata.autonomousMesh.lastDecision=rmfield(plan, ...
     {'candidates','axisReport','observationFallback'});
+end
+
+function message=initial_failure_message(state,evidence)
+% Version five keeps a bounded console diagnostic. The original analytic
+% datum and policy reproduce the complete trial arrays without logging them.
+if state.config.remesh.autonomousMesh.version~=5
+    message=jsonencode(evidence);return
+end
+original=evidence.originalAttempt;
+summary=struct('version',evidence.version,'status',evidence.status, ...
+    'sourceNodeCount',evidence.sourceNodeCount, ...
+    'observationNodeCount',evidence.observation.nodeCount, ...
+    'originalFailureClass',evidence.originalFailureClass, ...
+    'originalStopReason',original.plan.stopReason, ...
+    'xAdmitted',sum([evidence.axisReport.xTrials.admissible]), ...
+    'yAdmitted',sum([evidence.axisReport.yTrials.admissible]), ...
+    'xRejections',rejection_counts(evidence.axisReport.xTrials), ...
+    'yRejections',rejection_counts(evidence.axisReport.yTrials), ...
+    'candidateAudits',struct([]));
+for k=1:numel(evidence.candidateAudits)
+    a=evidence.candidateAudits(k);
+    row=struct('originalPairIndex',a.originalPairIndex, ...
+        'geometryPassed',a.geometryPassed,'familyPassed',a.familyPassed, ...
+        'actualCoreCells',a.features.actualCoreCells, ...
+        'actualFrontCells',a.features.leftFrontCells);
+    if isempty(summary.candidateAudits),summary.candidateAudits=row;
+    else,summary.candidateAudits(end+1)=row;end %#ok<AGROW>
+end
+if isfield(evidence,'nativeAttempts')
+    summary.nativeAttemptCount=numel(evidence.nativeAttempts);
+end
+message=jsonencode(summary);
+end
+
+function rows=rejection_counts(trials)
+names={};
+for k=1:numel(trials)
+    names=[names,trials(k).reasons]; %#ok<AGROW>
+end
+uniqueNames=unique(names);rows=struct([]);
+for k=1:numel(uniqueNames)
+    row=struct('reason',uniqueNames{k},'count',sum(strcmp(names,uniqueNames{k})));
+    if isempty(rows),rows=row;else,rows(end+1)=row;end %#ok<AGROW>
+end
 end

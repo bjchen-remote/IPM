@@ -2,7 +2,9 @@ function opts = longTimeProfile(settings)
 %IPM.CONFIG.LONGTIMEPROFILE Build the supported long-time server options.
 %   OPTS = IPM.CONFIG.LONGTIMEPROFILE(SETTINGS) maps a small, user-facing
 %   settings structure to the flat options consumed by IPM.SOLVE.  It does
-%   not create files, build operators, or start a solve.
+%   not create files, build a two-dimensional Poisson operator, or start a
+%   solve. Version-5 initialNodeCount='auto' samples the original analytic
+%   datum and a one-dimensional derivative for a bounded no-LU preflight.
 
 if nargin < 1 || isempty(settings)
     settings = struct();
@@ -48,6 +50,18 @@ validateattributes(s.boxHalfWidth,{'numeric'}, ...
     {'real','scalar','finite','>',4},mfilename,'boxHalfWidth');
 validateattributes(s.boxHeight,{'numeric'}, ...
     {'real','scalar','finite','>=',4},mfilename,'boxHeight');
+validateattributes(s.maximumTotalNodes,{'numeric'}, ...
+    {'real','scalar','finite','integer','positive'},mfilename,'maximumTotalNodes');
+autoInitial=(ischar(s.initialNodeCount)&&strcmpi(s.initialNodeCount,'auto'))|| ...
+    (isstring(s.initialNodeCount)&&isscalar(s.initialNodeCount)&& ...
+    ~ismissing(s.initialNodeCount)&&strcmpi(s.initialNodeCount,"auto"));
+if autoInitial
+    if ~isscalar(s.autonomousMeshVersion)||s.autonomousMeshVersion~=5
+        error('ipm:BadLongTimeProfileSettings', ...
+            'initialNodeCount=auto requires autonomousMeshVersion=5.');
+    end
+    s.initialNodeCount=automatic_initial_node_count(s);
+end
 validateattributes(s.initialNodeCount,{'numeric'}, ...
     {'real','vector','numel',2,'finite','integer','>=',9}, ...
     mfilename,'initialNodeCount');
@@ -73,8 +87,6 @@ validateattributes(s.checkpointEvery,{'numeric'}, ...
     {'real','scalar','finite','positive'},mfilename,'checkpointEvery');
 validateattributes(s.maximumAdjacentGridRatio,{'numeric'}, ...
     {'real','scalar','finite','>',1},mfilename,'maximumAdjacentGridRatio');
-validateattributes(s.maximumTotalNodes,{'numeric'}, ...
-    {'real','scalar','finite','integer','positive'},mfilename,'maximumTotalNodes');
 if ~isscalar(s.autonomousMeshVersion) || ~any(s.autonomousMeshVersion == [4,5])
     error('ipm:BadLongTimeProfileSettings', ...
         'autonomousMeshVersion must be 4 or 5.');
@@ -145,6 +157,11 @@ opts = struct( ...
         'maximumAdjacentGridRatio',double(s.maximumAdjacentGridRatio), ...
         'autonomousMeshVersion',double(s.autonomousMeshVersion)));
 
+if autoInitial
+    opts.caseMetadata.initialNodeCountSelection='analytic_no_LU_preflight_v1';
+    opts.caseMetadata.selectedInitialNodeCount=double(s.initialNodeCount(:)');
+end
+
 if s.boxHeight > 4
     opts.initialMeshObservationFallback = struct();
 end
@@ -158,6 +175,60 @@ assert(config.remesh.remeshMaximumCellRatio == ...
     s.maximumTotalNodes, ...
     'ipm:LongTimeProfileResolution', ...
     'The long-time profile settings did not survive configuration resolution.');
+end
+
+function selected=automatic_initial_node_count(settings)
+% The original physical t=0 analytic datum is screened before a solver LU.
+% Both axes grow only within the user's frozen node budget; the first
+% cost-ordered pair with a qualified analytic initial family is selected.
+cap=settings.maximumTotalNodes;
+start=[321,161];
+if cap<prod(start)
+    error('ipm:LongTimeInitialNodeCapacity', ...
+        'The node cap must cover the automatic 321x161 starting grid.');
+end
+if settings.boxHeight==4
+    selected=start;return
+end
+xs=initial_count_schedule(start(1),floor(cap/start(2)),80,641);
+ys=initial_count_schedule(start(2),floor(cap/start(1)),40,321);
+rows=zeros(numel(xs)*numel(ys),3);count=0;
+for nx=xs
+    for ny=ys
+        if nx*ny>cap,continue;end
+        count=count+1;rows(count,:)=[nx*ny,nx,ny];
+    end
+end
+rows=sortrows(rows(1:count,:),[1,2,3]);
+for k=1:size(rows,1)
+    trial=settings;trial.initialNodeCount=rows(k,2:3);
+    opts=ipm.config.longTimeProfile(trial);
+    config=ipm.config.resolve(opts);
+    axes=struct('x',linspace(config.grid.xlim(1), ...
+        config.grid.xlim(2),config.grid.nx), ...
+        'y',linspace(0,config.grid.ymax,config.grid.ny)');
+    [candidates,~]=ipm.remesh.planInitialAnalyticFallback(config,axes);
+    if ~isempty(candidates)
+        selected=rows(k,2:3);return
+    end
+end
+error('ipm:LongTimeInitialNodeCapacity', ...
+    'No registered initial node pair under maximumTotalNodes passed the analytic no-LU preflight.');
+end
+
+function values=initial_count_schedule(first,maximum,step,linearEnd)
+values=first;
+while values(end)<maximum
+    if values(end)<linearEnd
+        next=values(end)+step;
+    else
+        next=2*ceil((1.25*(values(end)-1)+1)/2)-1;
+    end
+    next=min(maximum,next);
+    if mod(next,2)~=1,next=next-1;end
+    if next<=values(end),break;end
+    values(end+1)=next; %#ok<AGROW>
+end
 end
 
 function value = normalize_directory(value)

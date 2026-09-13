@@ -4,7 +4,10 @@ function settings = profile_settings(projectRoot)
 settings = struct();
 settings.boxHalfWidth = 8;
 settings.boxHeight = 4;
-settings.initialNodeCount = [321,161];
+% Version 5 uses the known H8 starting grid; on larger boxes it screens the
+% analytic t=0 datum before any LU for an affordable qualified X/Y pair.
+% To pin an initial grid explicitly, replace 'auto' with [Nx,Ny].
+settings.initialNodeCount = 'auto';
 settings.canonicalFinalTime = 16;
 settings.maximumSteps = 60000;
 settings.maximumTimeStep = 0.005;

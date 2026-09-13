@@ -1,6 +1,6 @@
 # config：配置解析
 
-将用户的平铺 `opts` 变成唯一一份冻结分组配置，不构造场、不推进时间。
+`resolve` 将用户的平铺 `opts` 变成唯一一份冻结分组配置，不构造场、不推进时间。
 总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
 
 ## 接口
@@ -8,8 +8,9 @@
 - `schema()`：选项名、分组、原始默认值、类型及合法取值的唯一清单。
 - `resolve(opts)`：覆盖、规范化、推导、校验，返回 `schemaVersion=4`、`frozen=true` 的配置。
 - `activeCase()`：无参数求解时使用的生产覆盖项；不等于空结构体的配置默认值。
-- `longTimeProfile(settings)`：把服务器长跑的少量公开设置映射为显式 version-4
-  自动网格选项；只解析配置，不创建目录或启动求解。
+- `longTimeProfile(settings)`：把服务器长跑的少量公开设置映射为 version-4 默认或
+  显式 version-5 自动网格选项；不创建目录或启动求解。`initialNodeCount='auto'`
+  仅对 version 5 在原始解析 `t=0` 数据上做有限一维 FD/几何预飞，不构造二维 Poisson/LU。
 - `sixthOrder(overrides)`：构造完整六阶覆盖项；仍由 `resolve` 作最终校验。
 - `tupleViolation(...)`：统一检查耦合数值选择，供解析与持久化结果校验共用。
 - `outputPaths(opts)`：推导默认结果和视频路径，不创建文件。
@@ -39,6 +40,9 @@ adaptiveLevels=[.1 .5 .9]；disabled 不增加这些元组限制。它不更改 
 
 version5额外冻结 `nodeFamily.initialNodeCount` 和启动时的 `maximumTotalNodes`，由两者
 确定方向因子/节点级，记录动态成员数的有界搜索身份；旧version1--4正规化不变。
+服务器自动初始节点预飞按节点成本检查注册 X/Y 数量，选中后才生成普通冻结配置；
+数值 `initialNodeCount` 完全跳过预飞，checkpoint 只保存实际选中的节点数。该预飞
+不是运行中网格增长，也不能替代原生初始流场与完整求解验收。
 
 `initialMeshObservationFallback` 是另一项无默认值的可选 remesh 策略，
 由纯函数 `initialMeshObservationPolicy` 正规化。显式启用的 version1 固定为

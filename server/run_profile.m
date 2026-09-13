@@ -41,6 +41,7 @@ diary(diaryFile);
 fprintf('IPM long-time profile\n');
 fprintf('  project: %s\n',projectRoot);
 fprintf('  output: %s\n',settings.outputDirectory);
+fprintf('  selected initial grid: %d x %d\n',config.grid.nx,config.grid.ny);
 fprintf('  canonical target: %.17g\n',config.time.finalTime);
 fprintf('  maximum steps: %d\n',config.time.maxSteps);
 fprintf('  adjacent-grid-ratio stop: max(r_x,r_y) > %.17g*(1+1e-10)\n', ...

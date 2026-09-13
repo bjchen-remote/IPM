@@ -2,6 +2,7 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
+本次第二发行版的成本收益判断和未验证范围见 [R2 发行说明](RELEASE_NOTES_R2_ZH.md)。
 冻结态的方向网格成本前沿和已知停机原因见 [网格建议](MESH_GRID_RECOMMENDATION_ZH.md)。
 本次实验包还把连续 X 峰值的竖向核心影子观测写入结果/断点元数据，
 用于评估正式网格触发的误差；它不改变正式网格决策或 C 规则。
@@ -12,7 +13,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_v5_tau14_growth_20260913
+cd ipm_long_time_server_r2_20260913
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -55,7 +56,7 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_20260913');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -88,7 +89,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_20260913/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -97,7 +98,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_2
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_20260913');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -105,8 +106,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_v5_tau14_growth_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_r2_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_20260913/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 

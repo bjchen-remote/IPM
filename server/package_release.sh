@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_v5_tau14_growth_20260913}"
+release_name="${2:-ipm_long_time_server_r2_20260913}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -23,6 +23,7 @@ cp -R "$project_root/examples" "$stage/examples"
 cp -R "$project_root/server" "$stage/server"
 cp "$project_root/README.md" "$stage/README.md"
 cp "$project_root/README_SERVER_ZH.md" "$stage/README_SERVER_ZH.md"
+cp "$project_root/RELEASE_NOTES_R2_ZH.md" "$stage/RELEASE_NOTES_R2_ZH.md"
 cp "$project_root/MESH_GRID_RECOMMENDATION_ZH.md" "$stage/MESH_GRID_RECOMMENDATION_ZH.md"
 cp "$project_root/STRUCTURE.md" "$stage/STRUCTURE.md"
 cp "$project_root/CHANGELOG.md" "$stage/CHANGELOG.md"

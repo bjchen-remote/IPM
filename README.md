@@ -41,6 +41,8 @@ run(fullfile(projectRoot,'examples','quick_start.m'));
 本次实验包附有连续峰值 X 处的竖向核心**影子观测**。它在 `result.metadata.continuousVerticalShadow`
 中记录与原网格请求的分歧，不修改正式触发、硬停机或 C 规则。冻结数据、当前自适应网格的容量
 问题和验证范围见 [自动网格研究说明](research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md)。
+R2.2 新算例的服务器默认幅值规范改为 `(2,0)` 外壁面密度窗；旧峰值规范仍可显式选择。
+这项 C 规则变更和短测试范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
 
 ## 数值选择与边界
 

@@ -22,6 +22,11 @@ settings.checkpointEvery = 0.1;
 % candidate axes still obey the stricter 1.08 quality gate and all other
 % numerical safety stops remain active.
 settings.maximumAdjacentGridRatio = 2;
+% The outer-density window is centered at (2,0), away from the shrinking
+% gradient core. The previous quadratic-peak gauge is available for a new
+% comparison run, but cannot replace the gauge of an existing checkpoint.
+settings.amplitudeGauge = 'outer_wall_density_window_l2';
+settings.omegaGaugeWindowRadius = 0.5;
 % Version 5 generates additional directional node levels automatically up to
 % the resource cap chosen before the t=0 run. Version 4 remains available.
 settings.autonomousMeshVersion = 5;

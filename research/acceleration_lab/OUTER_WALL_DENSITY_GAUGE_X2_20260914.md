@@ -23,6 +23,14 @@ cancel transfer error. The point-rule comparator is
 `c_omega=-B(2,0)/R(2,0)`; it was not selected as the implementation because
 linear interpolation at a single point can switch cells after remeshing.
 
+If the wall gradient near `X=1` eventually behaves like
+`|X-1|^(-p)`, a wall gradient `q`-moment crossing that point can diverge
+when `p*q>=1`. No upper bound on `p` has been established. The selected
+density window has positive distance from the putative local singularity;
+its integral remains finite if the singularity stays localized and the
+outer density stays finite. This is a conditional integrability argument,
+not a proof of the asymptotic profile.
+
 The screening used four signed original-`t0` H8 checkpoints, at
 `tau=12.3003,13.0002,13.9001,14.2002`. The old quadratic wall-gradient
 peak rule kept its peak near `0.685`, while `R(2,0)` fell from `0.01569693`
@@ -43,10 +51,9 @@ the proposed separation of an almost stationary outer wall field from a
 still-evolving core, but do not prove a power-law limit or a stable
 long-time new-gauge trajectory.
 
-The optional selector is `outer_wall_density_window_l2`. The current
-long-time preset and existing release remain on the quadratic peak gauge.
-For a **new experimental run from time zero**, construct the usual flat
-long-time options, then set:
+The selector is `outer_wall_density_window_l2`. R2.2 now makes it the
+default for **new** long-time server runs; R2/R2.1 keep the old quadratic
+peak gauge for their checkpoints. A flat options user can set explicitly:
 
 ```matlab
 opts.cOmegaGauge = 'outer_wall_density_window_l2';
@@ -55,7 +62,21 @@ opts.omegaGaugeWindowRadius = 0.5;
 
 An old peak-gauge checkpoint cannot be resumed under a different frozen
 gauge configuration. Do not treat the frozen-state RHS audit as such a
-resume. The candidate is not yet qualified for an unattended long run.
+resume. The candidate is not yet qualified for a scientifically certified
+unattended long run.
+
+R2.2's server configuration completed a bounded original-`t0` version-5
+autonomous-mesh run: 10 steps to `tau=0.01` on the selected `321 x 161`
+starting grid, with `2.22e-16` relative window drift, minimum window
+condition `0.3345`, 38 support nodes, and zero normalized gauge residual.
+No subsequent adaptive remesh occurred in that short interval. Separately,
+three `2e-5` SSPRK54 steps from the signed `tau=14.2002` state were
+evaluated **in memory** under the new gauge: relative window drift was
+`2.22e-16`, point-value drift `2.05e-10`, and the inner peak increased
+`1.7878e-5`. This branch is not an accepted new-`t0` checkpoint chain.
+The mesh-transfer check from the bounded test preserved the frozen
+reference exactly, but long-time adaptive remesh behavior under this gauge
+is still untested.
 
 Evidence:
 
@@ -70,3 +91,7 @@ The bounded MATLAB check is `test_outer_wall_density_gauge(checkpointFile,
 outputFile)`. It advances a tiny `129 x 65` test state, then only evaluates
 the latest signed checkpoint's candidate RHS. It does not advance the
 production checkpoint or restart a paused campaign.
+`run_outer_wall_auto_smoke(outputFile)` reproduces the short original-`t0`
+server run; `probe_outer_wall_late_branch(checkpointFile,outputFile)` makes
+the three-step in-memory late probe. Both wrote their local outputs under
+`result/verification/outer_wall_release_20260914/`.

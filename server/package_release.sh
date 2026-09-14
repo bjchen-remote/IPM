@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_r2_1_20260913}"
+release_name="${2:-ipm_long_time_server_r2_2_20260914}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -53,6 +53,12 @@ cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TAU13_SHAPE_AND_REMESH_2
 cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TAU139_PROFILE_20260913.md" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TX42_GROWTH_SHAPE_20260913.md" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/REMESH_RHS_C1_DECOMPOSITION_20260913.md" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/OUTER_WALL_DENSITY_GAUGE_X2_20260914.md" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/audit_outer_gauge_frozen.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/audit_outer_wall_gauge_rhs.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/test_outer_wall_density_gauge.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/run_outer_wall_auto_smoke.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/probe_outer_wall_late_branch.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_native_remesh_profile_jump.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_native_remesh_shape_tangent.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_original_t0_shape_train.m" "$stage/research/acceleration_lab/"

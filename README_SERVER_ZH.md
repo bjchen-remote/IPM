@@ -2,10 +2,10 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
-本次第二发行版的自动长跑验收、成本收益判断和未验证范围见 [R2.1 发行说明](RELEASE_NOTES_R2_ZH.md)。
+本次修订第二发行版的自动长跑验收、新幅值规范和未验证范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
 冻结态的方向网格成本前沿和已知停机原因见 [网格建议](MESH_GRID_RECOMMENDATION_ZH.md)。
 本次实验包还把连续 X 峰值的竖向核心影子观测写入结果/断点元数据，
-用于评估正式网格触发的误差；它不改变正式网格决策或 C 规则。
+用于评估正式网格触发的误差；它不改变正式网格决策。R2.2 新算例的默认 C 规则另见下文。
 网格问题和新证据见 [研究说明](research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md)。
 
 ## 最快启动
@@ -13,7 +13,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_r2_1_20260913
+cd ipm_long_time_server_r2_2_20260914
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -37,11 +37,15 @@ settings.initialNodeCount = 'auto';
 settings.canonicalFinalTime = 1000;
 settings.maximumSteps = 10000000;
 settings.maximumAdjacentGridRatio = 2;
+settings.amplitudeGauge = 'outer_wall_density_window_l2';
+settings.omegaGaugeWindowRadius = 0.5;
 settings.autonomousMeshVersion = 5;
 settings.maximumTotalNodes = 310000;
 settings.outputDirectory = fullfile(projectRoot,'runs','profile_H8_long');
 settings.restartCheckpoint = '';
 ```
+
+R2.2 默认的幅值规范保持 `(2,0)` 附近壁面密度平滑窗的加权 `L2` 值，窗支撑为 `1.5<X<2.5`。它远离 `X≈1` 的收缩尖峰，因此不以可能在最终幂律下发散的全域梯度积分来定幅值。点值 `R(2,0)` 在短测试中与窗值几乎同步，但单点插值在重网格时更容易切换单元，所以本版选窗口。旧二次峰值规范可在**新算例**启动前显式设为 `settings.amplitudeGauge='wall_omega_quadratic_peak'`；旧 R2/R2.1 检查点应使用原发布包续算，不能直接套用新的默认设置。短测试与仍未验证的长时范围见 [发行说明](RELEASE_NOTES_R2_ZH.md)。
 
 `maximumAdjacentGridRatio=2` 对应内部的 `remeshMaximumCellRatio=2`。在每次记录状态上，若 X、Y 两轴的最大相邻步长比都不超过 `2*(1+1e-10)`，程序不会因为 `grid_smoothness_failure` 停止。质量守恒、最大值原理、振荡、分辨率、时间终点、最大步数、自动网格候选耗尽等独立停止条件仍然有效；这样不会用一个网格比选项掩盖数值失效。
 
@@ -56,7 +60,7 @@ settings.restartCheckpoint = '';
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -64,6 +68,8 @@ settings = struct( ...
     'initialNodeCount','auto', ...
     'maximumTotalNodes',1000000, ...
     'maximumAdjacentGridRatio',2, ...
+    'amplitudeGauge','outer_wall_density_window_l2', ...
+    'omegaGaugeWindowRadius',0.5, ...
     'outputDirectory','/data/ipm/run01');
 opts = ipm.config.longTimeProfile(settings);
 config = ipm.config.resolve(opts);  % 只检查，不启动计算
@@ -89,7 +95,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -98,7 +104,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913/ser
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913');
+addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -106,8 +112,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913');
-addpath('/absolute/path/to/ipm_long_time_server_r2_1_20260913/tests');
+addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 

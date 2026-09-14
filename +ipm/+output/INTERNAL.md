@@ -71,7 +71,8 @@ schema 4，且固定 `scalingContract=exact_gauge_no_feedback_v1`。schema 3 保
 重建不回写历史。
 checkpoint 运行期 reference 白名单对应包含
 `referenceAnchorWallTemplate`、`referenceAnchorWallTemplateProjection`、
-`referenceAnchorBulkGradientL2` 和 `referenceAnchorWallWindowValue`；不得从结果诊断反推补写。
+`referenceAnchorBulkGradientL2`、`referenceAnchorWallWindowValue` 和
+`referenceOuterWallDensityWindowValue`；不得从结果诊断反推补写。
 
 `saveResults=false` 时不写结果文件；绘图、在线图、视频有各自独立开关。
 请求路径在 `config.output`，实际路径在 `metadata`；默认相对 MATLAB 当前工作目录。

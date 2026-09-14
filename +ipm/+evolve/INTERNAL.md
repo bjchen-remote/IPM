@@ -54,6 +54,13 @@ schema 4 的运行期边界是 `exact_gauge_no_feedback_v1`：`c_l`、`c_omega`�
 `(X_a,0)` 为圆心的开半圆。窗必须严格留在正 `X` 与计算域内，每个相关坐标
 至少有三个正权节点。
 
+R2.2 的 `outer_wall_density_window_l2` 另取 `X=2,Y=0` 附近的平滑余弦平方
+窗，默认支撑 `1.5<X<2.5`，以 `R` 本身而非 `R_X` 定幅值：
+`M=⟨R^2⟩_w`，`c_omega=-⟨R B⟩_w/M`。在固定网格的半离散方程上
+`d_tau M=0`；重网格重新计算求积权和窗值，但保留原始 reference。
+窗与 `X≈1` 的局部尖峰分离，避免用可能在幂律下不可积的全域梯度量。
+该规范只固定一个积分量，不推出所有外区斜率逐点不变。
+
 - `anchor_wall_template_projection`：初始壁面梯度在窗内归一化为冻结模板
   `T=R_X(0)/||R_X(0)||_w`。令 `P=⟨R_X,T⟩_w`、`F=⟨B_X,T⟩_w`，则
   `c_omega=-F/P` 且原始残差为 `F+c_omega P`。条件数诊断为

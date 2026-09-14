@@ -26,6 +26,12 @@ options = struct('rescalingMode','dynamic','dynamicScaleGeometry','isotropic', .
 c = ipm.config.resolve(options);
 assert(isequaln(c.remesh.autonomousMesh,p) && isequaln(ipm.config.resolve(flatten(c)),c) && ...
     isequaln(ipm.config.autonomousMeshPolicy(p,flatten(c)),p));
+outerOptions = options;
+outerOptions.cOmegaGauge = 'outer_wall_density_window_l2';
+outerOptions.omegaGaugeWindowRadius = 0.5;
+outerConfig = ipm.config.resolve(outerOptions);
+assert(isequaln(outerConfig.remesh.autonomousMesh,p) && ...
+    isequaln(ipm.config.resolve(flatten(outerConfig)),outerConfig));
 without = c;without.remesh = rmfield(without.remesh,'autonomousMesh');
 assert(isequaln(without,ipm.config.resolve(rmfield(options,'autonomousMesh'))));
 disabled = ipm.config.resolve(struct('autonomousMesh',struct('enabled',0)));

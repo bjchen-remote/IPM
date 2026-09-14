@@ -33,7 +33,8 @@ canonical 预测窗。第二参数可选；提供时统一核对允许的数值�
 分别为 target×26/32、22/32、20/32；完整显式派生字段重读必须与目标逐值一致。
 历史 core14、安全 .70、峰跳/守恒/范围、网格质量和搜索范围固定为已注册值；
 目标允许不等两轴，但不保证给定节点预算可行。enabled 只允许 dynamic/isotropic/
-double_odd_omega、transport_anchor 与 wall_omega_quadratic_peak、高阶/WENO5-FD/
+double_odd_omega、transport_anchor 与 wall_omega_quadratic_peak 或
+outer_wall_density_window_l2、高阶/WENO5-FD/
 SSPRK54/high_order 迁移，并要求 adaptiveRemesh=true、initialAnalyticRemesh=true、
 adaptiveLevels=[.1 .5 .9]；disabled 不增加这些元组限制。它不更改 C、CFL 或 maxDt，
 配置正规化本身不证明运行期自动网格已可用。
@@ -68,6 +69,8 @@ hard-stop 门，不是比例率控制器输入。
 `anchor_wall_template_projection`、`anchor_bulk_gradient_l2` 和
 `anchor_wall_window_l4`。它们与 L2 窗共用
 `transportAnchorX=1` 和 `omegaGaugeWindowRadius`；解析器不从网格计数推导或移动窗。
+R2.2 的 `outer_wall_density_window_l2` 独立固定于 `X=2,Y=0`；使用同一个
+`omegaGaugeWindowRadius` 选项但不改变旧锚点窗的中心。服务器辅助函数默认半径 `0.5`。
 
 外部 result-v2 读取器仍可原样校验历史 config schema 1--3；旧结构不注入
 新字段、不升级，也不能用于 schema-4 checkpoint 续算。

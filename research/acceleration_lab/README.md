@@ -5,6 +5,25 @@ without altering registered checkpoints. Earlier acceleration trials call the
 maintained `ipm.evolve.flow` and leave their source trajectory unchanged.
 The optional experimental `(2,0)` wall-density amplitude gauge is documented
 in [OUTER_WALL_DENSITY_GAUGE_X2_20260914.md](OUTER_WALL_DENSITY_GAUGE_X2_20260914.md).
+The new read-only outer convergence diagnostic is in
+[OUTER_CUTOFF_MIXED_DERIVATIVE_20260914.md](OUTER_CUTOFF_MIXED_DERIVATIVE_20260914.md).
+It tests cutoff bulk and wall `L^1/L²/L⁴/L∞` norms of the fixed-rescaled-frame
+mixed derivative `R_{X tau}`, plus common-grid profile increments. From this
+worktree, an accepted new-C run can be audited without changing its
+checkpoint chain:
+
+```matlab
+restoredefaultpath
+addpath('../releases/ipm_long_time_server_r2_2_20260914')
+addpath('research/acceleration_lab')
+report = analyze_outer_cutoff_checkpoints( ...
+    'result/verification/outer_c_long_20260914/run', ...
+    'result/verification/outer_c_long_20260914/cutoff_later.json', 8);
+```
+
+Use a new output filename for each audit. `test_outer_cutoff_norms()` checks
+analytic identities, and `test_outer_c_continuous_vertical_core()` checks
+the gauge-independent observer fallback proposed for the next source version.
 An extrapolated density is a stationary-profile **candidate**, with no assigned
 physical or canonical evolution time. It must never be substituted into the
 accepted checkpoint chain.

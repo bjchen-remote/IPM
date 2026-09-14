@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_r2_2_20260914}"
+release_name="${2:-ipm_long_time_server_r2_3_cutoff_20260914}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -24,6 +24,7 @@ cp -R "$project_root/server" "$stage/server"
 cp "$project_root/README.md" "$stage/README.md"
 cp "$project_root/README_SERVER_ZH.md" "$stage/README_SERVER_ZH.md"
 cp "$project_root/RELEASE_NOTES_R2_ZH.md" "$stage/RELEASE_NOTES_R2_ZH.md"
+cp "$project_root/RELEASE_NOTES_R2_3_ZH.md" "$stage/RELEASE_NOTES_R2_3_ZH.md"
 cp "$project_root/MESH_GRID_RECOMMENDATION_ZH.md" "$stage/MESH_GRID_RECOMMENDATION_ZH.md"
 cp "$project_root/STRUCTURE.md" "$stage/STRUCTURE.md"
 cp "$project_root/CHANGELOG.md" "$stage/CHANGELOG.md"
@@ -54,6 +55,14 @@ cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TAU139_PROFILE_20260913.
 cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TX42_GROWTH_SHAPE_20260913.md" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/REMESH_RHS_C1_DECOMPOSITION_20260913.md" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/OUTER_WALL_DENSITY_GAUGE_X2_20260914.md" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/OUTER_CUTOFF_MIXED_DERIVATIVE_20260914.md" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/outer_cutoff_norms.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/outer_cutoff_pair_norms.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/analyze_outer_cutoff_checkpoints.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/audit_outer_cutoff_frozen_old.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/test_outer_cutoff_norms.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/test_outer_c_continuous_vertical_core.m" "$stage/research/acceleration_lab/"
+cp "$project_root/research/acceleration_lab/test_outer_c_shadow_integration.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_outer_gauge_frozen.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/audit_outer_wall_gauge_rhs.m" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/test_outer_wall_density_gauge.m" "$stage/research/acceleration_lab/"
@@ -71,6 +80,10 @@ cp "$project_root/research/acceleration_lab/ipm_accellab_tensor_hermite.m" "$sta
 cp "$project_root/research/acceleration_lab/evidence/"*.json "$stage/research/acceleration_lab/evidence/"
 cp "$project_root/research/acceleration_lab/evidence/"*.png "$stage/research/acceleration_lab/evidence/"
 cp "$project_root/research/acceleration_lab/evidence/"*.mat "$stage/research/acceleration_lab/evidence/"
+cp "$project_root/result/verification/outer_c_long_20260914/cutoff_old_frozen_v2.json" "$stage/research/acceleration_lab/evidence/"
+cp "$project_root/result/verification/outer_c_long_20260914/cutoff_tau3_v1.json" "$stage/research/acceleration_lab/evidence/"
+cp "$project_root/result/verification/outer_c_long_20260914/status_tau3.log" "$stage/research/acceleration_lab/evidence/"
+cp "$project_root/result/verification/outer_c_long_20260914/shadow_integration_v1.json" "$stage/research/acceleration_lab/evidence/"
 chmod +x "$stage/server/launch.sh" "$stage/server/package_release.sh"
 
 commit="$(git -C "$project_root" rev-parse HEAD)"

@@ -2,7 +2,12 @@ function observation=continuousVerticalCore(flow,x,y,levels)
 %IPM.REMESH.CONTINUOUSVERTICALCORE Observe the Y core at the gauge's
 % continuous wall peak. PCHIP needs only the four neighboring X columns.
 % This is a diagnostic; it does not change the wall gauge or the flow.
+% The quadratic amplitude gauge exposes its own continuous vertex. Other
+% amplitude gauges still have the independently tracked wall-gradient peak.
 peakX=flow.omegaGaugeQuadraticPeakX;
+if ~isfinite(peakX)
+    peakX=flow.trackedPeakX;
+end
 x=x(:)';y=y(:)';
 assert(isfinite(peakX) && peakX>=x(1) && peakX<=x(end) && ...
     numel(x)>=4 && size(flow.source,2)==numel(x) && ...

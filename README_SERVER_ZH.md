@@ -2,7 +2,8 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
-本次修订第二发行版的自动长跑验收、新幅值规范和未验证范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
+本包新增的外区截断范数分析与观察器修复见 [R2.3 发行说明](RELEASE_NOTES_R2_3_ZH.md)。
+第二发行版的自动长跑验收、新幅值规范和未验证范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
 冻结态的方向网格成本前沿和已知停机原因见 [网格建议](MESH_GRID_RECOMMENDATION_ZH.md)。
 本次实验包还把连续 X 峰值的竖向核心影子观测写入结果/断点元数据，
 用于评估正式网格触发的误差；它不改变正式网格决策。R2.2 新算例的默认 C 规则另见下文。
@@ -13,7 +14,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_r2_2_20260914
+cd ipm_long_time_server_r2_3_cutoff_20260914
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -60,7 +61,7 @@ R2.2 默认的幅值规范保持 `(2,0)` 附近壁面密度平滑窗的加权 `L
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -95,16 +96,30 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
 若 checkpoint 来自本实验包，状态还会显示连续峰值影子 Y 核心格数及累计请求分歧。
 
+R2.3 的外区收敛筛查从最近八个验签的**新 C** checkpoint 计算
+避开 `(1,0)` 的重标定 `R_{X\tau}` 截断 `L^p` 范数，并比较相邻
+Profile。报告默认写入运行目录下新的 `analysis/outer_cutoff_*.json`；
+此命令不推进 PDE，也不改写原 checkpoint：
+
+```bash
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914/server'); analyze_outer_profile('/data/ipm/run01');"
+```
+
+可用第二个参数指定输出 JSON，第三个参数指定最多读取的 checkpoint 数。
+建议先看 bulk、半径 `0.2` 的 `L²`，并同时检查半径 `0.1` 与
+`L⁴/L∞`；某一个范数下降不代表无穷时间收敛。完整数学说明和初步实验
+见 [截断范数研究记录](research/acceleration_lab/OUTER_CUTOFF_MIXED_DERIVATIVE_20260914.md)。
+
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -112,8 +127,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914');
-addpath('/absolute/path/to/ipm_long_time_server_r2_2_20260914/tests');
+addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 

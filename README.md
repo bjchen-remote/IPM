@@ -43,6 +43,10 @@ run(fullfile(projectRoot,'examples','quick_start.m'));
 问题和验证范围见 [自动网格研究说明](research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md)。
 R2.2 新算例的服务器默认幅值规范改为 `(2,0)` 外壁面密度窗；旧峰值规范仍可显式选择。
 这项 C 规则变更和短测试范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
+R2.3 增加了只读的外区截断 `L^p` 收敛诊断入口
+`server/analyze_outer_profile.m`，并修复新 C 下影子纵向核心观测缺失；
+正式 C 和网格决策不变。初步数据和未验证范围见
+[R2.3 发行说明](RELEASE_NOTES_R2_3_ZH.md)。
 
 ## 数值选择与边界
 

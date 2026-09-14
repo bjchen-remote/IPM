@@ -60,3 +60,10 @@ version5从初始网格尺寸与显式节点预算构造更多方向级别；每
 它保留真实粗格的source/clock/step/node字段，将新候选和观察证据另列；每阶段最多3个候选，
 第二阶段索引仍局部编号，原失败账本不改写。`validateController` 同时核对观察规则、
 使用次数、阶段索引和实际初选轴；保存的观察轴不属于求解referenceFamily。
+
+`continuousVerticalCore` 是不参与原生决策的只读纵向观察器。二次峰幅值规范
+提供 `omegaGaugeQuadraticPeakX` 时保持原评估点；其他幅值规范（包括 R2.2 的
+外壁面密度窗）没有该专有点，改用 `trackFeatures` 已计算的连续
+`trackedPeakX`。旧 R2.2 实验中观察器对新 C 每步产生
+`ipm:ContinuousVerticalCoreInput`，异常被隔离、原生重网格仍运行；这项后备
+修复只恢复观察数据，不改变网格请求、场迁移或 C 率。

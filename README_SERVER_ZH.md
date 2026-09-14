@@ -2,7 +2,7 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
-R2.6 search-repair **候选包**的密度函数与验证边界见 [R2.6 候选说明](RELEASE_NOTES_R2_6_SEARCH_REPAIR_ZH.md)；服务器设置默认 `meshDensityVersion=2`。R2.5 保留以复现其首次补充搜索停机，旧运行目录均不改动。
+R2.7 增加 `1281×321` 的 4:1 高分辨率 [`main.m`](main.m)，用 R2.6 已修复的自动网格与 `meshDensityVersion=2`；选择依据和验证边界见 [R2.7 说明](RELEASE_NOTES_R2_7_HIGH_RES_4TO1_ZH.md)。R2.5 保留以复现其首次补充搜索停机，旧运行目录均不改动。
 
 本包新增的外区截断范数分析与观察器修复见 [R2.3 发行说明](RELEASE_NOTES_R2_3_ZH.md)。
 第二发行版的自动长跑验收、新幅值规范和未验证范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
@@ -13,25 +13,30 @@ R2.6 search-repair **候选包**的密度函数与验证边界见 [R2.6 候选�
 
 ## 最快启动
 
-需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
+需要 MATLAB，建议使用与本机验证相同的 R2026a。若把完整包解压到 `/workspace/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914`，按 **`main.m` 的绝对路径**启动 4:1 高分辨率新算例：
 
 ```bash
-cd ipm_long_time_server_r2_6_search_repair_candidate_20260914
-chmod +x server/launch.sh
-nohup server/launch.sh > launcher.out 2>&1 &
+/opt/MATLAB/R2026a/bin/matlab -batch "run('/workspace/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914/main.m')"
 ```
 
-如果 MATLAB 不在 `PATH`：
+在真正启动前，可给同一命令加 `IPM_PREFLIGHT_ONLY=1`，只解析并打印绝对路径、网格、节点预算与输出位置，不装配 LU 或推进时间：
 
 ```bash
-MATLAB_BIN=/opt/MATLAB/R2026a/bin/matlab nohup server/launch.sh > launcher.out 2>&1 &
+IPM_PREFLIGHT_ONLY=1 /opt/MATLAB/R2026a/bin/matlab -batch "run('/workspace/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914/main.m')"
 ```
 
-正式长跑建议放在 `tmux` 或批处理系统中。启动前请确认磁盘空间和内存；`maximumTotalNodes` 是启动时登记的二维节点预算，并不是稀疏 LU 的内存保证。更高预算必须按服务器实际内存试验。
+`main.m` 根据自身路径得到真正的绝对源码及输出目录，默认原始 `t=0` 网格 `1281×321`、节点上限 1,700,000、结果目录 `<发布目录>/runs/profile_H8_4to1_n320/`。服务器安装位置不同时，修改上面命令中的绝对路径即可。长跑可在 `tmux` 中执行；也可用自动生成绝对路径的启动脚本：
+
+```bash
+MATLAB_BIN=/opt/MATLAB/R2026a/bin/matlab \
+  /workspace/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914/server/launch_high_res.sh
+```
+
+原来的低节点启动方式仍可用 `server/launch.sh`，对应下一节 `server/profile_settings.m` 的 `321×161` 设置。高分辨率参数在 `main.m` 顶部编辑 `n`、`maximumTotalNodes`、输出目录和续算路径；`n=320` 给出 1280×320 单元，严格 4:1。每条新轨道使用独立输出目录。启动前请确认磁盘空间和内存；`maximumTotalNodes` 是二维节点预算，并不是稀疏 LU 的内存保证。高分辨率真实 PDE 仍需在目标服务器先短程资源试跑。
 
 ## 用户接口
 
-新算例只需编辑 `server/profile_settings.m`。默认设置是小箱 H8、启动前自动选出的原始 `321×161` 均匀网格、自动 checkpoint、无中途人工换网格。时间和步数设成较远的**运行上限**，避免新服务器作业仅因达到旧 `τ=16` 里程碑而停止：
+标准低节点新算例只需编辑 `server/profile_settings.m`。默认设置是小箱 H8、启动前自动选出的原始 `321×161` 均匀网格、自动 checkpoint、无中途人工换网格。高分辨率 `main.m` 继承相同的时间、C、质量门和 checkpoint 规则，只覆盖初始 4:1 网格与节点预算。时间和步数设成较远的**运行上限**，避免新服务器作业仅因达到旧 `τ=16` 里程碑而停止：
 
 ```matlab
 settings.boxHalfWidth = 8;
@@ -61,12 +66,12 @@ R2.2 默认的幅值规范保持 `(2,0)` 附近壁面密度平滑窗的加权 `L
 
 `ipm.config.longTimeProfile` 在未指定 `autonomousMeshVersion` 时仍默认 version 4，以便已有脚本配置逐值不变；它的注册节点族固定到 310000。version 5 已完成 H8 从原始 `t=0` 到可信 `τ=12.400290` 的无人工换网格长跑、37 次自主重布，主动暂停前没有网格停机；不同计算域的同等长跑仍需验证。
 
-R2.6 候选包默认 `meshDensityVersion=2`，仅与自动网格 version 5 配套。`0` 保留旧密度策略，`1` 是 R2.4 的均摊密度，`2` 保持相同的 Y 密度和 70 个 X 候选，但给 X 核心更大的同节点设计余量。全轴相邻比仍须小于 1.08，真实迁移仍须通过所有原质量门。R2.5 从零长跑在 τ≈2.065 首次进入补充搜索时因候选数账本不一致停机；本包补齐登记的 70/260/170 阶段，同一检查点隔离续算到 τ=2.2 已通过。密度版本写入新算例的冻结配置，**旧检查点不能切换版本**；旧轨道继续用各自原发布包。R2.6 尚未证明能自动跑到强奇异性或提高 Profile 的连续极限精度。详见 [搜索阶段修复](research/longtime_lab/BALANCED_SEARCH_STAGE_REPAIR_20260914.md)和[极端冻结态试验](research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md)。
+R2.7 延续 R2.6 的 `meshDensityVersion=2`，仅与自动网格 version 5 配套。`0` 保留旧密度策略，`1` 是 R2.4 的均摊密度，`2` 保持相同的 Y 密度和 70 个 X 候选，但给 X 核心更大的同节点设计余量。全轴相邻比仍须小于 1.08，真实迁移仍须通过所有原质量门。R2.5 从零长跑在 τ≈2.065 首次进入补充搜索时因候选数账本不一致停机；本包补齐登记的 70/260/170 阶段，同一检查点隔离续算到 τ=2.2 已通过。密度版本写入新算例的冻结配置，**旧检查点不能切换版本**；旧轨道继续用各自原发布包。高分辨率新 C 算例尚未证明能自动跑到强奇异性或提高 Profile 的连续极限精度。详见 [搜索阶段修复](research/longtime_lab/BALANCED_SEARCH_STAGE_REPAIR_20260914.md)和[极端冻结态试验](research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md)。
 
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -102,7 +107,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -114,7 +119,7 @@ Profile。报告默认写入运行目录下新的 `analysis/outer_cutoff_*.json`
 此命令不推进 PDE，也不改写原 checkpoint：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914/server'); analyze_outer_profile('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914/server'); analyze_outer_profile('/data/ipm/run01');"
 ```
 
 可用第二个参数指定输出 JSON，第三个参数指定最多读取的 checkpoint 数。
@@ -125,7 +130,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repai
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -133,8 +138,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914');
-addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914/tests');
+addpath('/absolute/path/to/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_7_highres_4to1_candidate_20260914/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 

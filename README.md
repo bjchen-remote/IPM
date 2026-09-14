@@ -56,6 +56,9 @@ R2.5 强核心余量候选包提供显式 `meshDensityVersion=2`：在同节点�
 [极端冻结态试验](research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md)。
 R2.5 从零长跑在 τ≈2.065 遇到层级搜索计数契约错误；R2.6 修复该错误，
 独立短续算已越过故障点。见 [R2.6 发行说明](RELEASE_NOTES_R2_6_SEARCH_REPAIR_ZH.md)。
+R2.7 提供可按绝对路径启动的 [4:1 高分辨率 `main.m`](main.m)，默认
+`1281×321`、自动网格 v5/密度 v2；旧 C 最长验签态为 τ=14.200201，
+不是新 C 长跑结果。见 [R2.7 发行说明](RELEASE_NOTES_R2_7_HIGH_RES_4TO1_ZH.md)。
 
 ## 数值选择与边界
 

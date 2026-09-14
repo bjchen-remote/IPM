@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_r2_4_balanced_candidate_20260914}"
+release_name="${2:-ipm_long_time_server_r2_7_highres_4to1_candidate_20260914}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -21,11 +21,15 @@ cp -R "$project_root/+ipm" "$stage/+ipm"
 cp -R "$project_root/tests" "$stage/tests"
 cp -R "$project_root/examples" "$stage/examples"
 cp -R "$project_root/server" "$stage/server"
+cp "$project_root/main.m" "$stage/main.m"
 cp "$project_root/README.md" "$stage/README.md"
 cp "$project_root/README_SERVER_ZH.md" "$stage/README_SERVER_ZH.md"
 cp "$project_root/RELEASE_NOTES_R2_ZH.md" "$stage/RELEASE_NOTES_R2_ZH.md"
 cp "$project_root/RELEASE_NOTES_R2_3_ZH.md" "$stage/RELEASE_NOTES_R2_3_ZH.md"
 cp "$project_root/RELEASE_NOTES_R2_4_BALANCED_ZH.md" "$stage/RELEASE_NOTES_R2_4_BALANCED_ZH.md"
+cp "$project_root/RELEASE_NOTES_R2_5_CORE_RESERVE_ZH.md" "$stage/RELEASE_NOTES_R2_5_CORE_RESERVE_ZH.md"
+cp "$project_root/RELEASE_NOTES_R2_6_SEARCH_REPAIR_ZH.md" "$stage/RELEASE_NOTES_R2_6_SEARCH_REPAIR_ZH.md"
+cp "$project_root/RELEASE_NOTES_R2_7_HIGH_RES_4TO1_ZH.md" "$stage/RELEASE_NOTES_R2_7_HIGH_RES_4TO1_ZH.md"
 cp "$project_root/MESH_GRID_RECOMMENDATION_ZH.md" "$stage/MESH_GRID_RECOMMENDATION_ZH.md"
 cp "$project_root/STRUCTURE.md" "$stage/STRUCTURE.md"
 cp "$project_root/CHANGELOG.md" "$stage/CHANGELOG.md"
@@ -34,6 +38,10 @@ cp "$project_root/research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_
 cp "$project_root/research/longtime_lab/AMORTIZED_MESH_LIFETIME_HOLDOUT_20260913.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/CROSS_LEVEL_MESH_COST_AND_RHS_20260913.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/BALANCED_MESH_DENSITY_20260914.md" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/BALANCED_SEARCH_STAGE_REPAIR_20260914.md" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/LATE_FROZEN_AUTO_REMESH_20260914.md" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/FOUR_TO_ONE_HIGH_RES_CHOICE_20260914.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/evidence/"*.json "$stage/research/longtime_lab/evidence/"
 cp "$project_root/research/longtime_lab/audit_frozen_pair_ratio.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/verify_continuous_vertical_shadow.m" "$stage/research/longtime_lab/"
@@ -51,6 +59,9 @@ cp "$project_root/research/longtime_lab/rollout_cross_level_mesh_interval.m" "$s
 cp "$project_root/research/longtime_lab/verify_ranked_lifetime_followup.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/continuous_inner_geometry.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/render_continuous_profile_progress.m" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/compare_four_to_one_frozen.m" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/preflight_four_to_one_initial.m" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/stress_last_frozen_remesh.m" "$stage/research/longtime_lab/"
 mkdir -p "$stage/research/acceleration_lab/evidence"
 cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TAU13_SHAPE_AND_REMESH_20260913.md" "$stage/research/acceleration_lab/"
 cp "$project_root/research/acceleration_lab/ORIGINAL_T0_TAU139_PROFILE_20260913.md" "$stage/research/acceleration_lab/"
@@ -93,7 +104,19 @@ for file in new_c_tau35_exact_planned_transfer_v2.json \
     cp "$project_root/result/verification/mesh_density_20260914/$file" \
         "$stage/result/verification/mesh_density_20260914/$file"
 done
-chmod +x "$stage/server/launch.sh" "$stage/server/package_release.sh"
+mkdir -p "$stage/result/verification/four_to_one_20260914"
+for file in geometry_v1.json t0_n256_v1.json t0_n320_v1.json; do
+    cp "$project_root/result/verification/four_to_one_20260914/$file" \
+        "$stage/result/verification/four_to_one_20260914/$file"
+done
+mkdir -p "$stage/result/verification/mode_two_long_repaired_20260914"
+for file in frozen_tau35_native_same_v1.json frozen_tau35_native_growth_v1.json \
+        frozen_tau35_native_grow_y_v1.json; do
+    cp "$project_root/result/verification/mode_two_long_repaired_20260914/$file" \
+        "$stage/result/verification/mode_two_long_repaired_20260914/$file"
+done
+chmod +x "$stage/server/launch.sh" "$stage/server/launch_high_res.sh" \
+    "$stage/server/package_release.sh"
 
 commit="$(git -C "$project_root" rev-parse HEAD)"
 if [[ -z "$(git -C "$project_root" status --porcelain)" ]]; then

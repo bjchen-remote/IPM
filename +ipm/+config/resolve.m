@@ -26,14 +26,14 @@ end
 for index = 1:numel(optionNames)
     name = optionNames{index};
     descriptor = schema.options.(name);
-    if strcmp(descriptor.kind,'boolean')
+    if isfield(values,name) && strcmp(descriptor.kind,'boolean')
         values.(name) = normalize_boolean(values.(name),name,descriptor.errorId);
     end
 end
 for index = 1:numel(optionNames)
     name = optionNames{index};
     descriptor = schema.options.(name);
-    if strcmp(descriptor.kind,'enum')
+    if isfield(values,name) && strcmp(descriptor.kind,'enum')
         values.(name) = normalize_enum(values.(name),name,descriptor.allowed,descriptor.errorId);
     end
 end
@@ -144,7 +144,18 @@ if isfield(values,'initialMeshObservationFallback')
     values.initialMeshObservationFallback = ipm.config.initialMeshObservationPolicy( ...
         values.initialMeshObservationFallback,values);
 end
-if strcmp(values.symmetryMode,'double_odd_omega') && ...
+quadrantOnly = isfield(values,'quadrantOnly') && values.quadrantOnly;
+if quadrantOnly && ( ~strcmp(values.symmetryMode,'double_odd_omega') || ...
+        values.xlim(1) ~= 0 || values.xlim(2) <= 0)
+    error('ipm:QuadrantDomain', ...
+        'quadrantOnly requires double_odd_omega and xlim=[0,H], H>0.');
+end
+if quadrantOnly && isfield(values,'autonomousMesh') && ...
+        values.autonomousMesh.enabled
+    error('ipm:QuadrantAutonomousMesh', ...
+        'The legacy symmetric autonomousMesh policy is not a quadrant policy.');
+end
+if strcmp(values.symmetryMode,'double_odd_omega') && ~quadrantOnly && ...
         (mod(values.nx,2) ~= 1 || abs(sum(values.xlim)) > ...
         100*eps(max(abs(values.xlim))))
     error('ipm:SymmetryGrid', ...
@@ -162,6 +173,15 @@ end
     values.anisotropicPoissonSolver);
 if ~isempty(tupleIdentifier)
     error(tupleIdentifier,'%s',tupleMessage);
+end
+if quadrantOnly && ~(strcmp(values.spatialDiscretization,'high_order') && ...
+        strcmp(values.transportScheme,'weno5_fd') && ...
+        strcmp(values.timeIntegrator,'ssprk54') && ...
+        strcmp(values.remeshTransferScheme,'high_order') && ...
+        strcmp(values.dynamicScaleGeometry,'isotropic'))
+    error('ipm:QuadrantNumericalTuple', ...
+        ['quadrantOnly currently supports the high_order/weno5_fd/' ...
+        'ssprk54/high_order isotropic tuple.']);
 end
 if strcmp(values.dynamicScaleGeometry,'anisotropic') && ...
         strcmp(values.symmetryMode,'double_odd_omega') && ...
@@ -370,7 +390,14 @@ if abs(y(1)) > yTolerance
 end
 y(1) = 0;
 
-if strcmp(values.symmetryMode,'double_odd_omega')
+if isfield(values,'quadrantOnly') && values.quadrantOnly
+    xTolerance = 100*eps(max(1,max(abs(x))));
+    if abs(x(1)) > xTolerance || x(end) <= 0
+        error('ipm:CustomGridQuadrant', ...
+            'quadrantOnly customX must start at x=0 and end at x>0.');
+    end
+    x(1) = 0;
+elseif strcmp(values.symmetryMode,'double_odd_omega')
     xTolerance = 100*eps(max(1,max(abs(x))));
     mirrorError = max(abs(x+fliplr(x)));
     if mod(values.nx,2) ~= 1 || mirrorError > xTolerance || ...

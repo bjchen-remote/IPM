@@ -1,7 +1,8 @@
 # diagnostics：特征、质量与停止条件
 
 由当前状态或记录序列计算诊断量，不修改密度、算子或配置，也不执行文件写入。
-总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
+导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md) ·
+[第一象限架构记录](../../ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)。
 
 ## 接口
 
@@ -67,10 +68,14 @@ canonical 时间上预设给原始最大值；必须分别比较 canonical
 代数约束；但峰值、层级、面积或连通宽度的网格单元计数只能被记录、触发
 remesh 或硬停机，不得作为 `c_l/c_omega/c_r` 的反馈信号。
 
-本模块不调用其他运行模块，便于测试和研究复用。
+本模块只调用 [mesh](../+mesh/INTERNAL.md) 的象限判定/奇偶导数选择，
+向 [remesh](../+remesh/INTERNAL.md) 提供只读特征，不调用求解或重网格事务，
+便于测试和研究复用。
 相关验证：[数值核心](../../tests/+ipmtests/+baseline/numericCore.m)、[缩放](../../tests/+ipmtests/+baseline/scaling.m)、
 [输出](../../tests/+ipmtests/+baseline/output.m)。
 
 meshFeatureIntervals读取真实rho/轴/Dx及逐值相等的rho*Dx，输出正壁面核心、前沿和所选节点列的纵向宽度。
+第一象限模式直接读取非负轴，不构造镜像观测；远边界诊断只包含 `X=H` 和 `Y=Ymax`，
+`X=0` 是对称轴而非人工远边界。
 其actualCoreCells保留原生90%计数；该纵向定义仍来自nodal peak column，不冒充连续峰位置的宽度。
 这些观测仅用于网格规划与验收，不能反馈规范速率或修改演化场。

@@ -34,8 +34,16 @@ interiorWeights = weights(2:end-1,2:end-1);
 weightedSource = interiorSource.*interiorWeights;
 candidate = find(admissible & abs(interiorSource) >= ...
     ops.greenSourceTolerance*sourceMaximum);
-[sourceX,sourceY,sourceStrength] = compress_sources(sourceX,sourceY, ...
-    weightedSource,candidate,ops.greenMaxSources);
+if ipm.mesh.isQuadrant(ops) && strcmp(ops.symmetryMode,'double_odd_omega')
+    % Preserve the established positive-source bin identities of a
+    % conceptual symmetric grid, without allocating its omitted field.
+    [sourceX,sourceY,sourceStrength] = compress_sources( ...
+        sourceX,sourceY,weightedSource,candidate,ops.greenMaxSources, ...
+        2*ops.nx-3,ops.nx-1);
+else
+    [sourceX,sourceY,sourceStrength] = compress_sources(sourceX,sourceY, ...
+        weightedSource,candidate,ops.greenMaxSources);
+end
 
 boundary.left = evaluate_boundary(ops.x(1)*ones(ops.ny,1), ...
     ops.y,sourceX,sourceY,sourceStrength,ops.symmetryMode,kappa);
@@ -48,7 +56,8 @@ boundary.bottom(:) = 0;
 end
 
 function [sourceX,sourceY,sourceStrength] = compress_sources( ...
-    sourceXGrid,sourceYGrid,weightedSource,candidate,maxSources)
+    sourceXGrid,sourceYGrid,weightedSource,candidate,maxSources, ...
+    virtualNx,columnOffset)
 % Preserve signed strength and centroid in uniform-reference grid blocks.
 
 sourceX = sourceXGrid(candidate);
@@ -61,11 +70,14 @@ if numel(candidate) <= maxSources
 end
 
 [ny,nx] = size(weightedSource);
+if nargin<6
+    virtualNx=nx;columnOffset=0;
+end
 targetBins = floor(maxSources/2);
-binsX = max(1,floor(sqrt(targetBins*nx/ny)));
+binsX = max(1,floor(sqrt(targetBins*virtualNx/ny)));
 binsY = max(1,floor(targetBins/binsX));
 [row,column] = ind2sub([ny,nx],candidate);
-binX = min(floor((column-1)*binsX/nx)+1,binsX);
+binX = min(floor((column+columnOffset-1)*binsX/virtualNx)+1,binsX);
 binY = min(floor((row-1)*binsY/ny)+1,binsY);
 bin = binY+(binX-1)*binsY;
 numberOfBins = binsX*binsY;

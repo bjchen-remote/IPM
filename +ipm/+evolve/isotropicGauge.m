@@ -20,7 +20,7 @@ needsStrain = strcmp(r.lengthGauge,'local_strain') || ...
         'anchor_wall_window_l2','anchor_wall_window_l4', ...
         'anchor_wall_template_projection','anchor_bulk_gradient_l2'}));
 if needsStrain
-    u1X = flow.u1*ops.Dx';
+    u1X = flow.u1*ipm.mesh.oddDx(ops)';
 else
     u1X = [];
 end
@@ -32,9 +32,9 @@ peakLocationFullPhaseResidual = NaN;
 peakLocationNormalizedFullPhaseResidual = NaN;
 switch r.lengthGauge
     case 'omega_peak_location'
-        rhoXX = (rho*ops.Dx')*ops.Dx';
+        rhoXX = (rho*ops.Dx')*ipm.mesh.oddDx(ops)';
         rhoXXX = rhoXX*ops.Dx';
-        physicalRhsXX = (physicalRhs*ops.Dx')*ops.Dx';
+        physicalRhsXX = (physicalRhs*ops.Dx')*ipm.mesh.oddDx(ops)';
         peakRhoXXX = interp1( ...
             ops.x,rhoXXX(1,:),trackedPeakX,'linear');
         peakRhoXX = interp1( ...
@@ -333,7 +333,7 @@ switch r.cOmegaGauge
                 'd_x u_1(0,0) is too small relative to the strain field.']);
         end
         [baseU1,~] = ipm.field.velocity(baseRhs,ops);
-        baseStrain = baseU1*ops.Dx';
+        baseStrain = baseU1*ipm.mesh.oddDx(ops)';
         gaugeForcing = baseStrain(1,r.originIndex);
         gaugeEnergy = strain;
         c_omega = -gaugeForcing/strain;

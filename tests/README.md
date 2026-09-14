@@ -9,12 +9,13 @@
 | `ipm.verify('fourth')` | 四阶空间/时间/物理收敛、Green 边界、迁移与 quick 稳定性扫描 |
 | `ipm.verify('fourth','heavy')` | 四阶套件，扩展稳定性扫描 |
 | `ipm.verify('sixth')` | 六阶空间、WENO7、RK6、网格准入、迁移与物理收敛 |
-| `ipm.verify('all')` | 独立目录结构检查，以及基线、四阶、六阶；不需要原版 |
+| `ipm.verify('all')` | 独立结构检查，以及基线、四阶、六阶、第一象限；不需要原版 |
+| `ipm.verify('quadrant')` | 正半轴存储、旧全域 RHS 对照、90% 核心独立触发/其它观察层回退/无峰守门、单分配/单提案迁移、1025 节点一维轴、短算及原生 checkpoint |
 | `ipm.verify('all','heavy')` | 同上，其中四阶采用 heavy 稳定性扫描 |
 | `ipm.verify('equivalence')` | 显式比较本副本与保留的原求解器 |
 
 `quick/heavy` 仅改变四阶稳定性扫描范围，不降低其他套件的通过标准。
-`all` 不隐含新旧一致性检查，保证本副本脱离原目录后仍可独立验证。
+`all` 另含第一象限专项，但不隐含新旧原版一致性检查，保证本副本脱离原目录后仍可独立验证。
 
 一致性检查默认读取相邻 `sixth_order_integration/`，也可以指定其他原版位置：
 

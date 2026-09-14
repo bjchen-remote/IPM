@@ -7,7 +7,7 @@
 ## 目录地图
 
 ```text
-ipm_structured/
+ipm_grid_v6/
 ├── README.md                 使用入口
 ├── STRUCTURE.md              本文件：边界与契约
 ├── CHANGELOG.md              本副本的变更及验证记录
@@ -27,7 +27,8 @@ ipm_structured/
 └── result/                   本副本的生成输出
 ```
 
-每个运行模块各有一份 `INTERNAL.md`。`+ipm` 的父目录是 MATLAB 路径入口；
+从 [+ipm 包导航](+ipm/README.md) 可逐包进入 `INTERNAL.md`，每份包说明可返回导航页。
+`+ipm` 的父目录是 MATLAB 路径入口；
 不复制第二套扁平 `main_ipm` 接口，不依靠递归 `addpath` 拼装运行环境。
 
 ## 模块职责与依赖
@@ -36,8 +37,8 @@ ipm_structured/
 |---|---|---|
 | [config](+ipm/+config/INTERNAL.md) | `resolve`, `schema`, `sixthOrder` | `mesh.sixthOrderPolicy` 的常量 |
 | [mesh](+ipm/+mesh/INTERNAL.md) | `build`, `fdMatrix`, `quality` | `field.weno5Geometry` |
-| [field](+ipm/+field/INTERNAL.md) | `initialDensity`, `velocity`, `transport` | 无；使用传入的 `ops` |
-| [diagnostics](+ipm/+diagnostics/INTERNAL.md) | `measure`, `trackFeatures`, `stopPolicy` | 无；计算输入数据的诊断量 |
+| [field](+ipm/+field/INTERNAL.md) | `initialDensity`, `velocity`, `transport` | `mesh` 的象限奇偶算子选择；其余使用传入的 `ops` |
+| [diagnostics](+ipm/+diagnostics/INTERNAL.md) | `measure`, `trackFeatures`, `stopPolicy` | `mesh` 的象限判定；其余计算输入数据的诊断量 |
 | [remesh](+ipm/+remesh/INTERNAL.md) | `adapt` | `mesh`, `diagnostics` |
 | [output](+ipm/+output/INTERNAL.md) | `record`, `finalize`, `validate`, `makeCheckpoint`, `restoreCheckpoint` | `config`, `mesh`, `field`, `evolve`, `diagnostics` |
 | [evolve](+ipm/+evolve/INTERNAL.md) | `initialize`, `advance`, `flow` | 以上六个模块；统一协调状态 |
@@ -69,7 +70,7 @@ ipm_structured/
 各向同性是 `Cx=Cy` 的特例。步进及重网格结果经有限性检查后才保留；
 非有限状态回退至上一个已接受状态，返回 `non_finite_solution`；数值模块异常继续抛出。
 
-## 四种数据对象
+## 五种数据对象
 
 | 对象 | 所有者 | 契约 |
 |---|---|---|
@@ -83,6 +84,13 @@ ipm_structured/
 重网格通过 `mesh.build(config,gridOverride)` 构建候选算子，不重新解析配置。
 `ops.integrationWeights` 是积分、守恒检查与迁移校正的共同权重。
 
+显式 `grid.quadrantOnly=true` 时 `x=[0,H]`，`nx` 只计实际非负节点；
+同一个 `ipm.solve` 入口下，`mesh` 使用局部奇偶模板、半域求积及半域 Poisson，
+`field` 使用正源 Green 和对称轴反射 WENO，`remesh` 仅做一次 level-set 直接提案。
+旧 `autonomousMesh` 参考族仍专属对称全域，象限配置明确拒绝混用；
+当前象限只支持高阶/WENO5-FD/SSPRK54/高阶迁移的各向同性同节点路径。
+节点/性能和数学边界见 [第一象限架构记录](ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)。
+
 外部 `opts` 为平铺标量结构体；内部配置分为 `grid/time/physics/elliptic/transport/`
 `scaling/remesh/diagnostics/output` 九组。选项全集只在
 [config.schema](+ipm/+config/schema.m) 定义；未知字段和不兼容组合报错。
@@ -94,25 +102,11 @@ config schema 4 固定
 `maxDynamicRate`、`adaptiveGain` 组件及五个 width-controller 选项
 (`adaptiveLengthScaling`、`widthExpansionStrength`、`widthContractionOnset`、
 `widthContractionStrength`、`maxWidthRateCorrection`) 不再属于当前契约。
-可选`remesh.autonomousMesh`仅显式启用，不给旧配置注入默认；省略版本仍是固定节点数/箱的version1。
-显式version2允许在零时刻冻结的方向增点参考族中自动迁移，并预先登记节点资源上限；
-version3加入三倍单轴与3×2/2×3方向成员，version4再在每个成员内部作固定层级参数搜索。
-显式version5按初始方向节点数和启动时节点预算登记更多整数/渐进因子，仍在每个成员内作
-有界搜索，但先按最差相邻比选择合格轴对；实际迁移仍经过原审计。
-仅新 version5 算例可在启动前显式登记 `densityVersion=1`（服务器设置为
-`meshDensityVersion=1`）：保持原节点预算和质量门，扩充 X 圆滑过渡候选并用
-单侧几何密度均摊 Y 外区的相邻格宽增长。省略该字段保留原 version5 策略；
-显式 `densityVersion=2` 保留相同候选数及 Y 密度，把 X 核心设计缓冲从
-`xPadding=1.10` 增至 `1.50`，用略高但仍受 1.08 限制的全轴格比换取同节点数下的
-后期核心余量；旧密度检查点不能切换版本。
-两种均摊密度的补充搜索仍须逐阶段满足冻结的 `70/260/170` 候选身份契约；
-R2.5 首次补充搜索的计数错误及修复见研究记录。
-恢复不能更改其冻结值。冻结态迁移及短程验证不等于长时精度保证。
-已实际从原始t=0跨过两个方向的自然增长，但有限箱、有限族的运行尚不构成长时误差验收。
-配置Nx/Ny保留初始预算，当前实际节点数、参考族成员与各时刻场/网格配对单独记录。
-可选 `initialMeshObservationFallback` 为原始k8初值提供一次自动解析重测，
-仅原初选因候选族耗尽或核心/前沿不足失败时使用；观察网格与实际演化网格分开记录。
-该选项不注入旧配置，恢复不重测或重采样初值；实际网格仍经过原质量与迁移门。
+旧对称全域的可选 `remesh.autonomousMesh` v1–v5 与显式第一象限的直接 level-set
+路径互斥。旧路径的节点族、密度版本、资源账本及初始观察回退仍按冻结策略验证，
+不能通过恢复检查点换版本；详见 [config](+ipm/+config/INTERNAL.md) 与
+[remesh](+ipm/+remesh/INTERNAL.md)。`config.grid.nx/ny` 是初始预算，实际网格、
+参考族成员和每帧场/轴配对分别记录。两条路径的短程通过都不是长时精度保证。
 动态比例率由所选规范的瞬时代数恒等式唯一给出；
 参考量只用于精确条件、定向、正性和病态拒绝，不生成 restoring 源项。
 特征的网格单元计数仍可用于 telemetry、remesh 提案/验收和 hard stop，但不能修改

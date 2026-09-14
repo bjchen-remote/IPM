@@ -10,13 +10,19 @@ validateattributes(x,{'numeric'},{'real','finite','increasing','numel',size(rho,
 validateattributes(y,{'numeric'},{'real','finite','increasing','numel',size(rho,1)});
 assert(islogical(view.trusted)&&isscalar(view.trusted)&&view.trusted && ...
     isequal(size(omega),size(rho))&&isequal(size(view.Dx),[numel(x),numel(x)])&& ...
-    numel(x)>=17&&mod(numel(x),2)==1&&numel(y)>=8&&y(1)==0&&isequal(x,-fliplr(x))&& ...
+    numel(x)>=17&&numel(y)>=8&&y(1)==0&& ...
+    (isequal(x,-fliplr(x)) || x(1)==0)&& ...
     all(isfinite(rho),'all')&&all(isfinite(omega),'all')&&isreal(rho)&&isreal(omega), ...
-    'ipm:AutonomousMeshView','The accepted view must be finite, paired and x-symmetric.');
+    'ipm:AutonomousMeshView','The accepted view must be finite and symmetric or quadrant-only.');
 assert(isequal(omega,rho*view.Dx'), ...
     'ipm:AutonomousMeshSourcePair','Accepted source must equal rho*Dx'' exactly.');
-wall=smooth_signal(.5*(abs(omega(1,:))+fliplr(abs(omega(1,:)))));
-envelope=max(abs(omega),[],1);envelope=smooth_signal(.5*(envelope+fliplr(envelope)));
+if x(1)==0
+    wall=smooth_signal(abs(omega(1,:)));
+    envelope=smooth_signal(max(abs(omega),[],1));
+else
+    wall=smooth_signal(.5*(abs(omega(1,:))+fliplr(abs(omega(1,:)))));
+    envelope=max(abs(omega),[],1);envelope=smooth_signal(.5*(envelope+fliplr(envelope)));
+end
 frontSignal=smooth_signal(abs((view.Dx*wall(:))'));
 tolerance=100*eps(max(1,max(abs(x))));positive=x>=-tolerance;
 xp=x(positive);xp(abs(xp)<=tolerance)=0;wallPositive=wall(positive);envelopePositive=envelope(positive);

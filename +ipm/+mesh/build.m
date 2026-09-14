@@ -7,6 +7,7 @@ grid = config.grid;
 if nargin >= 2 && ~isempty(gridOverride)
     grid = gridOverride;
 end
+quadrantOnly = isfield(grid,'quadrantOnly') && grid.quadrantOnly;
 physics = config.physics;
 elliptic = config.elliptic;
 transport = config.transport;
@@ -24,14 +25,24 @@ if useCustomGrid
     else
         error('ipm:CustomGridPair','customX and customY must be supplied together.');
     end
-    sx = linspace(-1,1,grid.nx);
+    if quadrantOnly
+        sx = linspace(0,1,grid.nx);
+    else
+        sx = linspace(-1,1,grid.nx);
+    end
     sy = linspace(0,1,grid.ny)';
     metricX = ones(size(x));
     metricY = ones(size(y));
 elseif strcmpi(string(grid.gridMode),'stretched') && any(stretch > 0)
-    sx = linspace(-1,1,grid.nx);
-    midpoint = mean(grid.xlim);
-    halfWidth = diff(grid.xlim)/2;
+    if quadrantOnly
+        sx = linspace(0,1,grid.nx);
+        midpoint = 0;
+        halfWidth = grid.xlim(2);
+    else
+        sx = linspace(-1,1,grid.nx);
+        midpoint = mean(grid.xlim);
+        halfWidth = diff(grid.xlim)/2;
+    end
     [normalizedX,normalizedMetricX] = sinh_axis(sx,stretch(1));
     x = midpoint+halfWidth*normalizedX;
     sy = linspace(0,1,grid.ny)';
@@ -40,12 +51,24 @@ elseif strcmpi(string(grid.gridMode),'stretched') && any(stretch > 0)
     metricX = halfWidth*normalizedMetricX;
     metricY = grid.ymax*normalizedMetricY;
 else
-    sx = linspace(-1,1,grid.nx);
+    if quadrantOnly
+        sx = linspace(0,1,grid.nx);
+    else
+        sx = linspace(-1,1,grid.nx);
+    end
     sy = linspace(0,1,grid.ny)';
     x = linspace(grid.xlim(1),grid.xlim(2),grid.nx);
     y = linspace(0,grid.ymax,grid.ny)';
-    metricX = diff(grid.xlim)/2*ones(size(sx));
+    if quadrantOnly
+        metricX = diff(grid.xlim)*ones(size(sx));
+    else
+        metricX = diff(grid.xlim)/2*ones(size(sx));
+    end
     metricY = grid.ymax*ones(size(sy));
+end
+if quadrantOnly
+    assert(x(1)==0 && x(end)>0,'ipm:QuadrantAxis', ...
+        'A quadrant mesh must contain x=0 and only nonnegative x.');
 end
 
 dxFaces = diff(x);
@@ -64,6 +87,29 @@ elseif useCustomGrid
 else
     Dx = mapped_first_derivative(sx,metricX);
     Dy = mapped_first_derivative(sy,metricY);
+end
+if quadrantOnly
+    if sixthOrder
+        stencilWidth = 9;
+    elseif highOrder
+        stencilWidth = 7;
+    else
+        stencilWidth = 3;
+    end
+    Dx = ipm.mesh.quadrantDerivative(x,1,'even',stencilWidth);
+    DxOdd = ipm.mesh.quadrantDerivative(x,1,'odd',stencilWidth);
+else
+    DxOdd = Dx;
+end
+if quadrantOnly && highOrder && useCustomGrid
+    % The logical X map is odd. Its metric is even; a one-sided derivative
+    % at the symmetry axis would disagree with the paired full-grid map.
+    metricX = (ipm.mesh.quadrantDerivative(sx,1,'odd',7)*x')';
+    metricY = ipm.mesh.fdMatrix(sy,1,7)*y;
+    if any(metricX <= 0) || any(metricY <= 0)
+        error('ipm:HighOrderGridMetric', ...
+            'The quadrant high-order mapped metric must remain positive.');
+    end
 end
 
 % Reject an inadmissible sixth-order axis before assembling or factoring
@@ -118,14 +164,22 @@ end
 nxi = grid.nx-2;
 nyi = grid.ny-2;
 if sixthOrder
-    negativeDxx = -ipm.mesh.fdMatrix(x,2,9);
+    if quadrantOnly
+        negativeDxx = -ipm.mesh.quadrantDerivative(x,2,'odd',9);
+    else
+        negativeDxx = -ipm.mesh.fdMatrix(x,2,9);
+    end
     negativeDyy = -ipm.mesh.fdMatrix(y,2,9);
     Tx = negativeDxx(2:end-1,2:end-1);
     Ty = negativeDyy(2:end-1,2:end-1);
     xBoundaryCoefficients = negativeDxx(2:end-1,[1,end]);
     yBoundaryCoefficients = negativeDyy(2:end-1,[1,end]);
 elseif highOrder
-    negativeDxx = -ipm.mesh.fdMatrix(x,2,7);
+    if quadrantOnly
+        negativeDxx = -ipm.mesh.quadrantDerivative(x,2,'odd',7);
+    else
+        negativeDxx = -ipm.mesh.fdMatrix(x,2,7);
+    end
     negativeDyy = -ipm.mesh.fdMatrix(y,2,7);
     Tx = negativeDxx(2:end-1,2:end-1);
     Ty = negativeDyy(2:end-1,2:end-1);
@@ -155,6 +209,9 @@ ops.dyFaces = dyFaces;
 ops.X = repmat(x,grid.ny,1);
 ops.Y = repmat(y,1,grid.nx);
 ops.Dx = Dx;
+if quadrantOnly
+    ops.DxOdd = DxOdd;
+end
 ops.Dy = Dy;
 ops.A = A;
 ops.Tx = Tx;
@@ -164,7 +221,11 @@ ops.hy = hy;
 ops.weights = hy*hx;
 ops.integrationWeights = ops.weights;
 if highOrder
-    integrationHx = ipm.mesh.quadrature(x);
+    if quadrantOnly
+        integrationHx = ipm.mesh.quadrantQuadrature(x);
+    else
+        integrationHx = ipm.mesh.quadrature(x);
+    end
     integrationHy = ipm.mesh.quadrature(y);
     if any(integrationHx <= 0) || any(integrationHy <= 0)
         error('ipm:HighOrderQuadratureWeights', ...
@@ -172,6 +233,10 @@ if highOrder
             'quadrature norm.']);
     end
     ops.integrationWeights = integrationHy*integrationHx;
+    if quadrantOnly
+        ops.integrationHx = integrationHx;
+        ops.integrationHy = integrationHy;
+    end
     ops.poisson = decomposition(A,'lu');
 elseif sixthOrder
     ops.integrationWeights = integrationHy*integrationHx;
@@ -199,7 +264,7 @@ if strcmp(ops.transportScheme,'weno5_nonuniform')
     ops.wenoY = ipm.field.weno5Geometry(y');
 end
 if highOrder
-    if useCustomGrid
+    if useCustomGrid && ~quadrantOnly
         metricX = (ipm.mesh.fdMatrix(sx,1,7)*x')';
         metricY = ipm.mesh.fdMatrix(sy,1,7)*y;
     end
@@ -241,6 +306,9 @@ if sixthOrder
         'maximumMetricError',policy.maximumMetricError);
 end
 ops.symmetryMode = lower(char(physics.symmetryMode));
+if quadrantOnly
+    ops.quadrantOnly = true;
+end
 ops.greenSourceTolerance = elliptic.greenSourceTolerance;
 ops.greenMaxSources = elliptic.greenMaxSources;
 ops.nx = grid.nx;

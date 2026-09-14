@@ -15,8 +15,14 @@ ops = ipm.evolve.initializeScaling(rho,ops);
 scale = ipm.evolve.initialScale(ops);
 [rhoRate,flow] = ipm.evolve.flow(rho,ops,scale);
 
+if ipm.mesh.isQuadrant(ops)
+    initialRemeshReady=all(isfinite([flow.coreGridPoints, ...
+        flow.verticalCoreGridPoints]));
+else
+    initialRemeshReady=isfinite(flow.safetyFactor);
+end
 if ~autonomous && remesh.initialAnalyticRemesh && remesh.adaptiveRemesh && ...
-        isfinite(flow.safetyFactor)
+        initialRemeshReady
     for pass = 1:remesh.initialAnalyticRemeshPasses
         [~,candidateOps,info] = ...
             ipm.remesh.adapt( ...

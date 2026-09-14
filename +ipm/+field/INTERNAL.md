@@ -1,7 +1,8 @@
 # field：密度、速度与输运
 
 在给定 `ops` 和尺度上计算物理场及空间离散量；不拥有时间循环、配置默认值或文件输出。
-总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
+导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md) ·
+[第一象限架构记录](../../ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)。
 
 ## 入口
 
@@ -16,6 +17,10 @@
 物理壁面不透流；`open/closed` 控制人工边界。保守壁面模式与 `advective_upwind`
 不可混同。`weno5_nonuniform` 的两层边界退回 MUSCL，不能据内部重构阶数声明整体四阶。
 FD-WENO 使用映射、常量残差校正及适用的闭边界质量投影。
+
+第一象限显式模式只积分正源并对 `X=0` 使用零流函数迹；WENO5-FD 水平 ghost
+按偶密度/奇速度反射，以概念全域节点数与双分裂通量共同尺度复现旧正半轴 RHS。
+Green 源压缩只保留正源，但沿用全域概念分箱编号。
 `closedMassRateTarget` 默认零，非零目标仅供 WENO7 重标度装配使用。
 
 各向异性椭圆度量是 `kappa=Cy/Cx`；每个 RK 阶段传入当前比例尺。

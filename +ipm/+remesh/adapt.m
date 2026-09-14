@@ -7,6 +7,11 @@ if nargin < 5
 end
 validateattributes(amplitudeScale,{'numeric'}, ...
     {'scalar','real','finite','positive'},mfilename,'amplitudeScale');
+if ipm.mesh.isQuadrant(ops)
+    [rhoNew,opsNew,info] = ipm.remesh.directLevelSetAdapt( ...
+        rho,ops,flow,config,amplitudeScale);
+    return
+end
 
 context = [];
 accepted = false;

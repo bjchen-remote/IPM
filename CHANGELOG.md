@@ -1,5 +1,34 @@
 # 本副本变更记录
 
+## 2026-09-14：源码架构与书写整理（未重新发行）
+
+- 象限 `roundedAxis(...,positiveOnly=true)` 改为直接接收实际 `[0,H]` 节点数；`corePatchAxis` 不再先构造 `2*N-1` 的概念全域节点数。默认旧全域接口及分配搜索保留。核心目标和 80% 触发单元数由 `directLevelSetTargets` 同时返回，运行期预筛与实际重测不再重复写门槛；`remeshIfNeeded` 将共同的自适应开关/次数门提前。整理条件与一维斜率求解的书写，未改变公式或候选数量。
+- 顶层 README 先说明当前象限与保留的旧全域两条路径，明确源码根 `main.m` 仍属旧 R2.7；`STRUCTURE.md` 将旧自动网格版本细节留给包说明，修正数据对象计数与目录名。`remesh/INTERNAL.md` 分开描述象限单事务和旧全域控制器；象限架构记录同步说明节点参数契约。新发行包、`release_history` 标签和旧服务器绝对路径均未改动。
+- MATLAB R2026a：与冻结 9.14 发行版的 1025/1024 实际节点轴及锚点修正轴（坐标和构造信息）`isequaln`；变更运行文件及象限测试 Code Analyzer 0 条；`ipm.verify('quadrant')` exit0（4.814 秒）；旧全域 `ipm.verify('equivalence','quick')` 的 6 个物理算例与 3 次迁移逐值一致（2.627 秒）；最终 `ipm.verify('all','quick')` exit0（91.022 秒）；`git diff --check` 通过。仍未做服务器绝对路径预飞或百万节点 LU/长时收敛测试。
+
+## 2026-09-14：复制主文件与固定绝对发布路径
+
+- [发行版 `main.m` 源入口](server/main_quadrant_release.m)安装到新发行包根目录后，由用户复制到服务器**作业目录**运行。它只从 `mfilename('fullpath')` 得到 `jobRoot`，源码固定为 `/data/user/hd58131/ipm/ipm_long_time_server_20260914`：相对用户给出的旧路径只改末尾版本号。`restoredefaultpath;addpath(releaseRoot)` 后，输出与日志写入 `jobRoot`。独立[象限打包脚本](server/package_quadrant_release.sh)固定生成与该绝对路径同名的发行包；旧全域 `main.m`、旧打包脚本和旧发布目录均未修改。
+- 入口直接组装 `quadrantOnly=true`、`xlim=[0,H]`、实际正半轴 `nx` 及高阶数值元组，保留 level-set 自适应重网格；不通过 `longTimeProfile` 先创建旧自动网格政策再删除。`1025×513` 是 525825 个实际节点，旧 310000 节点上限不适用；`IPM_PREFLIGHT_ONLY=1` 不写输出、不建 LU。该入口不迁移旧 checkpoint 或保证百万节点 LU 内存。
+- 曾误把复制件位置当作源码位置，产生本地 `ipm_quadrant_levelset_server_20260914` 候选。发现与服务器契约冲突后，已将该候选目录、ZIP 和校验文件从正式 `releases/` 移至可恢复的 `/private/tmp/ipm-invalid-release-HQpMzI/`，不作为交付包。它的旧预飞/回归结果仅证明数值配置，不证明正确的服务器定位。
+- 修正后的入口固定路径字面量核对通过；从其真实 `opts=struct(...)` 表达式执行 MATLAB R2026a `ipm.config.resolve`，得到 `1025×513`、`xlim=[0,8]`、`quadrantOnly=true` 且无 `autonomousMesh`，Code Analyzer 0 条。打包脚本 `bash -n` 通过，并核对发行名与主文件固定路径一致。完整复制件启动预飞须在服务器具有上述真实绝对发布目录后运行；本机不虚构该目录，也未建大网格 LU。
+- 修正后发行包的根 `main.m` 与源码入口逐字一致；包内 `SHA256SUMS`、ZIP 完整性和 ZIP SHA-256 校验通过。从新发行包运行 MATLAB R2026a `ipm.verify('quadrant')` exit0（9.525 秒），覆盖象限对照、单提案重网格及短算；这仍不等同于服务器上按绝对路径复制入口后的预飞。
+
+## 2026-09-14：包说明互链与象限 REMESH 简化
+
+- 新增 [+ipm 包导航](+ipm/README.md)，从根 README/结构总览/第一象限架构记录进入，各 `INTERNAL.md` 可返回索引；`mesh/diagnostics/remesh/evolve/output` 的相关职责互链。旧全域多候选事务和新象限直接事务在 [remesh 包说明](+ipm/+remesh/INTERNAL.md) 分开描述。
+- 第一象限 `roundedAxis` 由遍历左右整数分配改为按两侧 level-set 跨度的 `log(1+L/h):log(1+R/h)` 一次分配并投影可行区间，随后只求两条单调标量斜率；保留整轴质量/原生迁移门。旧全域分配遍历逻辑不变。构造信息记录 `splitStrategy/splitEvaluations`，1025 个正半轴节点的纯一维构造回归确认 `splitEvaluations=1`；这不是百万节点二维 LU 性能测试。
+- 象限运行期只以 90% 横/纵核心单元数预筛，内部重测的 90% level set 最终决定是否提案；用户最高观察层不是 90% 时跳过预筛直接重测。解析初值重网格也由该方法判定，不再依赖旧综合 `safetyFactor`；无有限核心观测的无峰物理态跳过反演。旧全域请求条件逐值保留。测试覆盖安全因子与核心不足/足够相反、非 90% 回退、无峰守门、单提案单迁移及短程 checkpoint。
+- `ipm.verify('all','quick')` 在最后的触发边界调整前 exit0（141.792 秒）；随后新进程 `ipm.verify('quadrant')` exit0（最终含无峰断言，6.541 秒），`ipm.verify('equivalence','quick')` 的 6 个物理算例与 3 个迁移逐值一致（最终 7.380 秒）。变更文件 Code Analyzer 除 `evolve.initialize` 原有 MSNU 抑制提示外均 0 条，`git diff --check` 通过。尚未在最终边界调整后重跑整套 `all`，且未验证 1024² 原生 LU 峰值内存或长时网格容量。
+
+## 2026-09-14：显式第一象限与 level-set 单提案重网格
+
+- `quadrantOnly=true` 将实际场、Poisson 未知数、结果和原生 checkpoint 限定在 `X>=0,Y>=0`；同一个 `ipm.solve` 入口保留旧全域默认。当前只准入各向同性高阶/WENO5-FD/SSPRK54/高阶迁移；旧 `autonomousMesh` 参考族明确拒绝混用。奇偶局部差分、正半轴求积、Green 源压缩的概念分箱、反射 WENO 及非均匀逻辑度量均与旧全域正半轴对齐。
+- 自动同节点数重网格以 90% 壁面峰/前沿 level-set 边界和纵宽直接反演一对轴；每次最多 1 对提案和 1 次原生迁移，保留网格质量、质量守恒、峰值和值域验收。`X=0` 在远边界诊断中按对称轴处理，不误计为人工截断边界。大网格可直接指定实际正半轴节点数；自动增点、百万节点 LU 内存及长时收敛尚未验证。
+- `129×65` 旧全域对 `65×65` 象限动态初态的完整 RHS 最大绝对差 `3.9774e-14`；一次真实 `65×33` 聚焦后，非均匀度量/源/流函数/速度/WENO 输运与镜像全域测试算子的最坏差 `1.2434e-14`。小网格目标核心 `12/10`，旧核心约 `7.7066/7.6739`，一提案/一迁移通过，4 步短程结果和原生 checkpoint 验签恢复通过。
+- 旧全域 `ipm.verify('equivalence','quick')` 的 6 个物理算例、3 个迁移算例逐值一致；基线与最终修正前的 `ipm.verify('all','quick')` 均 exit0（后者 112.5367 秒）。最后的非均匀度量奇模板修正后，`ipm.verify('quadrant')` 再次 exit0，新增/受影响文件 Code Analyzer 0 条；该修正只作用于显式象限配置。完整架构、限制及入口见 [第一象限架构记录](ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)。
+- 面向用户的 `examples/quadrant_level_set.m` 实际执行 exit0：`65×33`、4 步、1 次重网格，关闭结果保存/绘图/视频。
+
 ## 2026-09-14：R2.7 4:1 高分辨率绝对路径入口
 
 - 新增根目录 `main.m` 和 `server/launch_high_res.sh`：从脚本所在的绝对发布路径启动 `1281×321`（4:1 单元）原始 `t=0` 算例，采用自动网格 v5/密度 v2、新 `(2,0)` C，登记 1,700,000 总节点上限，独立输出目录。标准 `server/launch.sh` 保留 `321×161` 起点；共同的 `launch_profile` 处理配置验签与断点续算。

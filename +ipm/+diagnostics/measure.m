@@ -3,7 +3,7 @@ function d = measure(rho, flow, ops, mass0)
 
 rhoX = rho*ops.Dx';
 rhoY = ops.Dy*rho;
-divU = flow.u1*ops.Dx' + ops.Dy*flow.u2;
+divU = flow.u1*ipm.mesh.oddDx(ops)' + ops.Dy*flow.u2;
 speed = hypot(flow.u1,flow.u2);
 gradRho = hypot(rhoX,rhoY);
 weights = ops.integrationWeights;
@@ -20,7 +20,10 @@ frameVelocityU1 = interp1(ops.x,flow.u1(1,:),frameX,'linear');
 outer = false(ops.ny,ops.nx);
 bandX = max(2,ceil(0.05*ops.nx));
 bandY = max(2,ceil(0.05*ops.ny));
-outer(:,[1:bandX, end-bandX+1:end]) = true;
+outer(:,end-bandX+1:end) = true;
+if ~ipm.mesh.isQuadrant(ops)
+    outer(:,1:bandX) = true;
+end
 outer(end-bandY+1:end,:) = true;
 
 d.mass = mass;
@@ -48,12 +51,16 @@ d.divInf = max(abs(divU),[],'all');
 d.wallNormalInf = max(abs(flow.u2(1,:)),[],'all');
 [~,originIndex] = min(abs(ops.x));
 d.originVelocity = speed(1,originIndex);
-if strcmp(ops.symmetryMode,'double_odd_omega')
+if strcmp(ops.symmetryMode,'double_odd_omega') && ~ipm.mesh.isQuadrant(ops)
     d.rhoEvenDefect = max(abs(rho-fliplr(rho)),[],'all');
     d.omegaOddDefect = max(abs(flow.source+fliplr(flow.source)),[],'all');
 else
     d.rhoEvenDefect = NaN;
-    d.omegaOddDefect = NaN;
+    if ipm.mesh.isQuadrant(ops)
+        d.omegaOddDefect = max(abs(flow.source(:,1)));
+    else
+        d.omegaOddDefect = NaN;
+    end
 end
 d.poissonResidual = flow.poissonResidual;
 d.farBoundaryVelocity = max(speed(outer),[],'all');

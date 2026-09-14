@@ -1,7 +1,7 @@
 # config：配置解析
 
 `resolve` 将用户的平铺 `opts` 变成唯一一份冻结分组配置，不构造场、不推进时间。
-总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
+导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md)。
 
 ## 接口
 
@@ -51,6 +51,10 @@ version5额外冻结 `nodeFamily.initialNodeCount` 和启动时的 `maximumTotal
 anchor1、double-odd 及已启用的 autonomousMesh v2/v3/v4/v5，要求对称箱 H>4、Ymax>4。
 内区半宽4、间距.025、尾比1.05、20格平滑坡、最多600000观察节点及一次回退均由版本固定。
 省略该选项不补字段、不改变旧配置；它不更改实际求解节点预算、C或时间步规则。
+
+`quadrantOnly` 是无默认值的可选 grid 几何开关。显式启用要求
+`xlim=[0,H]`、`double_odd_omega` 及各向同性高阶/WENO5-FD/SSPRK54/高阶迁移元组；
+`nx` 是实际非负轴节点数。旧 `autonomousMesh` 不能和它混用；未启用时旧配置不增加字段。
 
 配置 schema 4 固定
 `scalingContract='exact_gauge_no_feedback_v1'`。`maxDynamicRate` 已删除；

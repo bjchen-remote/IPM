@@ -1,7 +1,9 @@
 # evolve：状态与时间推进
 
 协调完整数值生命周期，不另建求解器。外层循环由 `ipm.solve` 持有。
-总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
+导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md)。
+网格请求交给 [remesh](../+remesh/INTERNAL.md)，结果记录交给
+[output](../+output/INTERNAL.md)。
 
 ## 路径
 

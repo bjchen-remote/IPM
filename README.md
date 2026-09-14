@@ -4,6 +4,7 @@
 [`../sixth_order_integration`](../sixth_order_integration) 原地保留；本副本可独立运行，
 不调用原版文件。来源为提交 `65f999b7e205dd4decef06c937d1aa003cf8b744`；
 原版 140 个已跟踪文件的 SHA-256 与新旧函数对应见 [source_map.json](tests/source_map.json)。
+运行模块的职责及互相链接的说明从 [+ipm 包导航](+ipm/README.md) 进入。
 
 求解二维上半平面截断域上的不可压多孔介质方程：
 
@@ -32,33 +33,22 @@ run(fullfile(projectRoot,'examples','quick_start.m'));
 启用解析初始重网格、自适应重网格及常规输出。`ipm.solve(struct())` 则采用配置表默认值，
 同样不是短算例。实际选项与默认值以 [schema.m](+ipm/+config/schema.m) 为准。
 
-长时间 Profile 的服务器接口使用
-`opts = ipm.config.longTimeProfile(settings)`；可编辑的启动文件、断点续算和
-`maximumAdjacentGridRatio=2` 的准确语义见
-[README_SERVER_ZH.md](README_SERVER_ZH.md)。该辅助函数只构造并校验配置，数值求解仍统一调用
-`ipm.solve`。
+## 两条运行路径
 
-本次实验包附有连续峰值 X 处的竖向核心**影子观测**。它在 `result.metadata.continuousVerticalShadow`
-中记录与原网格请求的分歧，不修改正式触发、硬停机或 C 规则。冻结数据、当前自适应网格的容量
-问题和验证范围见 [自动网格研究说明](research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md)。
-R2.2 新算例的服务器默认幅值规范改为 `(2,0)` 外壁面密度窗；旧峰值规范仍可显式选择。
-这项 C 规则变更和短测试范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
-R2.3 增加了只读的外区截断 `L^p` 收敛诊断入口
-`server/analyze_outer_profile.m`，并修复新 C 下影子纵向核心观测缺失；
-正式 C 和网格决策不变。初步数据和未验证范围见
-[R2.3 发行说明](RELEASE_NOTES_R2_3_ZH.md)。
-R2.4 balanced 候选包提供显式 `meshDensityVersion=1` 的同节点数密度函数试验；
-其冻结态网格比、原生迁移与当前验证边界见
-[R2.4 候选说明](RELEASE_NOTES_R2_4_BALANCED_ZH.md)和
-[密度函数实验](research/longtime_lab/BALANCED_MESH_DENSITY_20260914.md)。
-R2.5 强核心余量候选包提供显式 `meshDensityVersion=2`：在同节点数、原质量门下
-给后期 X 核心更多单元；其末态原生迁移证据与连续长跑边界见
-[极端冻结态试验](research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md)。
-R2.5 从零长跑在 τ≈2.065 遇到层级搜索计数契约错误；R2.6 修复该错误，
-独立短续算已越过故障点。见 [R2.6 发行说明](RELEASE_NOTES_R2_6_SEARCH_REPAIR_ZH.md)。
-R2.7 提供可按绝对路径启动的 [4:1 高分辨率 `main.m`](main.m)，默认
-`1281×321`、自动网格 v5/密度 v2；旧 C 最长验签态为 τ=14.200201，
-不是新 C 长跑结果。见 [R2.7 发行说明](RELEASE_NOTES_R2_7_HIGH_RES_4TO1_ZH.md)。
+第一象限路径可显式设置 `quadrantOnly=true`、`xlim=[0,H]`；此时 `nx` 是实际正半轴
+节点数，不分配负半轴场。它使用一组由 level-set 边界直接确定的同节点数重网格，
+不启用旧 `autonomousMesh` 的候选/增点族。短例见
+[quadrant_level_set.m](examples/quadrant_level_set.m)，边界、内存、验证与限制见
+[第一象限架构记录](ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)。
+服务器把新发行包内的 `main.m` 复制到作业目录并以复制件绝对路径提交时，另见
+[第一象限发行包入口](server/README_QUADRANT_ABSOLUTE.md)。
+
+旧对称全域的长时间 Profile 使用 `ipm.config.longTimeProfile(settings)`；
+[服务器说明](README_SERVER_ZH.md)介绍启动、续算和相邻格比选项。旧自动网格、
+影子诊断与 R2.2–R2.7 实验包的边界见 [R2 发行说明](RELEASE_NOTES_R2_ZH.md)、
+[R2.7 发行说明](RELEASE_NOTES_R2_7_HIGH_RES_4TO1_ZH.md)和
+[remesh 包说明](+ipm/+remesh/INTERNAL.md)。本源码目录根部的
+[main.m](main.m) 是旧 R2.7 全域入口，不是新的象限服务器主文件。
 
 ## 数值选择与边界
 
@@ -97,7 +87,8 @@ R2.7 提供可按绝对路径启动的 [4:1 高分辨率 `main.m`](main.m)，默
 ipm.verify();                    % 基线；不运行生产算例
 ipm.verify('fourth');            % 四阶，默认 quick 稳定性扫描
 ipm.verify('sixth');             % 六阶
-ipm.verify('all');               % 独立结构检查 + 基线、四阶、六阶
+ipm.verify('quadrant');          % 第一象限等价、直接迁移、短算与 checkpoint
+ipm.verify('all');               % 独立结构检查 + 基线、四阶、六阶、第一象限
 ipm.verify('equivalence');       % 另与保留的原版比较，需要原版目录
 ```
 

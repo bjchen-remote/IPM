@@ -1,7 +1,9 @@
 # output：记录、结果与产物
 
 拥有日志、v2 外部契约及可选可视化/保存，不推进状态，也不决定数值方法。
-总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
+导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md)。
+接受 [evolve](../+evolve/INTERNAL.md) 的已接受状态与当前网格；
+checkpoint 恢复后交回同一演化入口。
 
 ## 接口
 
@@ -21,6 +23,8 @@
 ## 数据与写入约定
 
 v2 包含 `metadata/state/grid/scale/physical/history/quality/fit/config/elliptic/snapshots`。
+第一象限结果与原生 checkpoint 的轴/场只含 `X>=0`，并保留冻结的可选
+`grid.quadrantOnly` 标记；不可将旧全域检查点裁半或修改 `xlim` 后续算。
 历史分组及各时钟必须对齐；启用快照时，每帧保留自己的坐标，不能套用末态网格。
 所有末态场为有限实数组且尺寸匹配。加载时不猜测变量名、不升级旧结果或注入旧字段。
 历史 v2 结果的配置 schema 1/2/3 可原样校验；新运行配置为

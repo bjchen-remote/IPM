@@ -35,15 +35,26 @@ if sixthOrderTransfer
     rhoX = conserve_rows_smooth( ...
         rho,rhoX,ops.integrationHx,opsNew.integrationHx);
 elseif highOrderTransfer
-    rhoX = ipm.remesh.interpolate(ops.x,rho,xNew, ...
-        struct('sampleDimension',2,'conservation','constant'));
+    if ipm.mesh.isQuadrant(ops)
+        gridOverride = config.grid;
+        gridOverride.customX = xNew;
+        gridOverride.customY = yNew;
+        opsNew = ipm.mesh.build(config,gridOverride);
+        rhoX = ipm.remesh.interpolate(ops.x,rho,xNew, ...
+            struct('sampleDimension',2,'conservation','none'));
+        rhoX = conserve_rows_smooth( ...
+            rho,rhoX,ops.integrationHx,opsNew.integrationHx);
+    else
+        rhoX = ipm.remesh.interpolate(ops.x,rho,xNew, ...
+            struct('sampleDimension',2,'conservation','constant'));
+    end
 else
     rhoX = interp1(ops.x,rho',xNew,'pchip')';
     if ~strcmp(ops.rescalingMode,'physical')
         rhoX = conserve_rows(rho,rhoX,ops.hx,xNew);
     end
 end
-if strcmp(ops.symmetryMode,'double_odd_omega')
+if strcmp(ops.symmetryMode,'double_odd_omega') && ~ipm.mesh.isQuadrant(ops)
     rhoX = 0.5*(rhoX+fliplr(rhoX));
 end
 if sixthOrderTransfer
@@ -63,10 +74,10 @@ else
 end
 % The PCHIP path is range preserving.  The high-order path preserves both
 % y-boundary traces during its smooth wall-normal conservation correction.
-if strcmp(ops.symmetryMode,'double_odd_omega')
+if strcmp(ops.symmetryMode,'double_odd_omega') && ~ipm.mesh.isQuadrant(ops)
     rhoNew = 0.5*(rhoNew+fliplr(rhoNew));
 end
-if ~sixthOrderTransfer
+if ~sixthOrderTransfer && ~(highOrderTransfer && ipm.mesh.isQuadrant(ops))
     gridOverride = config.grid;
     gridOverride.customX = xNew;
     gridOverride.customY = yNew;

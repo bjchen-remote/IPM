@@ -1,5 +1,52 @@
 # 结构化副本验证记录
 
+## 2026-09-14：架构整理后的最终回归
+
+冻结 9.14 包与源码构造的 1025/1024 实际节点象限轴、锚点修正轴及其构造信息
+均 `isequaln`。变更运行文件和象限测试的 Code Analyzer 为 0 条。
+`ipm.verify('quadrant')` exit0（4.814 秒）；`ipm.verify('equivalence','quick')`
+的 6 个旧全域物理算例与 3 次迁移逐值一致（2.627 秒）；最终
+`ipm.verify('all','quick')` exit0（91.022 秒）。未重新发行、未运行服务器复制主文件预飞，
+也未测百万节点 LU 与长时收敛。
+
+## 2026-09-14：复制主文件的绝对路径契约
+
+`server/main_quadrant_release.m` 只用自身路径确定作业目录，固定源码
+`releaseRoot='/data/user/hd58131/ipm/ipm_long_time_server_20260914'`。
+固定路径字面量、源文件中的真实选项构造、MATLAB R2026a `config.resolve`
+与 Code Analyzer 均通过：`1025×513`、`xlim=[0,8]`、象限开启、无旧自动网格；
+打包脚本 `bash -n` 通过。
+修正后发行包根 `main.m` 与源码入口逐字一致，`SHA256SUMS`、ZIP 完整性及
+ZIP SHA-256 校验通过；从发行包运行 `ipm.verify('quadrant')` exit0
+（9.525 秒）。
+旧自定位候选的数值配置预飞不能替代复制件路径测试，已从正式发行目录撤出。
+真正的复制件预飞需要服务器存在上述发布绝对路径；本机尚未执行该测试，
+也未运行 525825 节点的 PDE/LU。
+
+## 2026-09-14：象限直接分配与 level-set 独立触发
+
+横轴整数分配只评估 1 次，65×33 原生迁移与 1025 节点一维轴回归通过；
+默认 90% 核心触发不受旧综合 `safetyFactor` 支配，非 90% 用户观察层回退
+到直接 90% 测量；无正峰的物理态跳过反演。最终 `ipm.verify('quadrant')` exit0（6.541 秒），
+`ipm.verify('equivalence','quick')` 的 6 个旧全域物理算例及 3 个迁移逐值一致
+（7.380 秒）。`ipm.verify('all','quick')` 在最后的边界调整前 exit0
+（141.792 秒）；完整最终版本未重复运行该全套。变更的运行文件 Code Analyzer
+仅 `evolve.initialize` 留有原有 MSNU 抑制提示，其余 0 条。
+1024² 二维求解/分解性能、长期再网格容量与时空收敛仍未验证。
+
+## 2026-09-14：第一象限直接重网格
+
+显式 `quadrantOnly` 的 `ipm.verify('quadrant')` 在 MATLAB R2026a 通过：
+129×65 全域与 65×65 象限动态 RHS 最大绝对差 3.9774e-14；
+65×33 单提案原生迁移、非均匀聚焦轴对照（最坏差 1.2434e-14）、
+4 步短算、远边界轴分类及 schema-v4 checkpoint 验签恢复通过。
+旧全域 equivalence 的 6 条物理轨迹和 3 次迁移仍逐值一致。
+`ipm.verify('all','quick')` 在最后一项仅限象限自定义逻辑度量修正前 exit0，
+耗时 112.5367 秒；修正后单独的象限专项再 exit0，旧全域路径未触及。
+最后修改的 `mesh.build`、象限测试及短例 Code Analyzer 均 0 条；
+全运行包 125 个 `.m` 文件仅有未改动 `evolve.initialize.m` 的 1 条旧 `MSNU` 抑制提示。
+尚未运行百万节点 LU/长时收敛，不能把短算认证外推到服务器规模。
+
 ## 2026-09-05：schema 4 exact-no-feedback 验证
 
 本机 MATLAB R2026a 对当前副本的 129 个 `.m` 文件执行 Code Analyzer，

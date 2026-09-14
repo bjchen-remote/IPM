@@ -38,7 +38,7 @@ end
 [~,baseRhs,transportU1,transportU2,conservativeSource] = ...
     ipm.evolve.assembleRhs( ...
         rho,flow.u1,flow.u2,cX,cY,cOmega,cR,ops);
-u1X = flow.u1*ops.Dx';
+u1X = flow.u1*ipm.mesh.oddDx(ops)';
 details.strain = u1X(1,r.originIndex);
 details.strainError = details.strain-r.strainTarget;
 details.strainCondition = abs(details.strain)/max(abs(u1X),[],'all');

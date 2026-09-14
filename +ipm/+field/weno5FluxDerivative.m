@@ -30,6 +30,11 @@ function fluxDerivative = weno5FluxDerivative( ...
 %                         (default 1e-12). The actual regularizer is
 %                         max(epsilon,1/(nNodes-1)^2), which preserves the
 %                         optimal weights at high-order critical points.
+%     normalizationNodeCount  optional conceptual node count for the
+%                         reflected quadrant's regularizer; no extra
+%                         field nodes are allocated.
+%     symmetricFluxScale  use the common maximum of both split fluxes;
+%                         this matches an omitted reflected half-axis.
 %     alpha               optional scalar or one value per line. It must
 %                         bound abs(A./J) on its line.
 %
@@ -94,7 +99,14 @@ if numberOfNodes < minimumNodes
         ['At least %d nodes are required for the selected WENO5 ' ...
         'boundary extension.'],minimumNodes);
 end
-normalizedEpsilon = max(epsilonFloor,1/(numberOfNodes-1)^2);
+normalizationNodeCount = numberOfNodes;
+if isfield(options,'normalizationNodeCount')
+    normalizationNodeCount = options.normalizationNodeCount;
+    validateattributes(normalizationNodeCount,{'numeric'}, ...
+        {'scalar','integer','finite','>=',numberOfNodes},mfilename, ...
+        'options.normalizationNodeCount');
+end
+normalizedEpsilon = max(epsilonFloor,1/(normalizationNodeCount-1)^2);
 
 minimumAlpha = max(abs(a./J),[],2);
 alpha = alpha_option(options,minimumAlpha,numberOfLines,q);
@@ -113,6 +125,11 @@ negativeFlux = 0.5*(physicalFlux-alpha.*mappedState);
 physicalNodes = 4:numberOfNodes+3;
 positiveScale = max(abs(positiveFlux(:,physicalNodes)),[],2);
 negativeScale = max(abs(negativeFlux(:,physicalNodes)),[],2);
+if isfield(options,'symmetricFluxScale') && options.symmetricFluxScale
+    reflectedScale = max(positiveScale,negativeScale);
+    positiveScale = reflectedScale;
+    negativeScale = reflectedScale;
+end
 commonScale = max(positiveScale,negativeScale);
 splitScaleFloor = sqrt(eps(class(q)))*commonScale;
 positiveScale = max(positiveScale,splitScaleFloor);

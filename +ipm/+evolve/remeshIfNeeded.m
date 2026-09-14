@@ -6,9 +6,23 @@ remesh = config.remesh;
 output = config.output;
 info = struct('applied',false);
 rhoRate = [];
-requested = remesh.adaptiveRemesh && isfinite(flow.safetyFactor) && ...
-    flow.safetyFactor > remesh.remeshSafetyTrigger && ...
-    ops.remeshCount < remesh.maxRemeshes;
+if ~remesh.adaptiveRemesh || ops.remeshCount>=remesh.maxRemeshes
+    return
+end
+if ipm.mesh.isQuadrant(ops)
+    % The positive-only planner uses only its 90% core level-set counts.
+    % Reuse flow's counts only when its highest tracked level is 90%.
+    % Other user-selected levels must be measured by the direct planner.
+    core=[flow.coreGridPoints,flow.verticalCoreGridPoints];
+    requested=all(isfinite(core));
+    if requested && abs(ops.rescaling.adaptiveLevels(end)-.9)<=100*eps(1)
+        [~,triggerCells]=ipm.remesh.directLevelSetTargets(ops);
+        requested=any(core<triggerCells);
+    end
+else
+    requested = isfinite(flow.safetyFactor) && ...
+        flow.safetyFactor > remesh.remeshSafetyTrigger;
+end
 if ~requested
     return;
 end

@@ -1,7 +1,8 @@
 # remesh：网格迁移事务
 
 将网格提案、场迁移与验收分开；候选失败不能改变已接受的场或网格。
-总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
+导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md) ·
+[第一象限架构记录](../../ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)。
 
 ## 接口与流程
 
@@ -9,13 +10,15 @@
 `info.applied` 表示真正提交，只有接受后 `remeshCount` 才增加。
 
 ```text
-propose（axis） -> transfer（interpolate + mesh.build）
-               -> validate -> 接受 / 减弱变形并重试 / 原样回退
+第一象限：level-set 测量 -> 单组 x/y 轴 -> 质量门 -> 原生迁移 -> 接受/原样回退
+旧全域：旧候选计划 -> 原生迁移 -> 验收 -> 减弱重试/原样回退
 ```
 
 提案负责候选坐标、局部分辨率与单元比；迁移只构造候选场和算子；
-验收负责改善幅度、值域、峰值变化及配套守恒指标。最多尝试初始提案和八次减弱重试。
-可恢复的高阶网格/迁移拒绝会重试；程序错误或不相关异常向调用者传播。
+验收负责改善幅度、值域、峰值变化及配套守恒指标。旧全域通用路径最多尝试
+初始提案和八次减弱重试，可恢复的高阶网格/迁移拒绝会重试。
+第一象限直接方法不减弱重试；任一门失败即返回原场/原轴。
+程序错误或不相关异常向调用者传播。
 
 ## 方法与约束
 
@@ -27,11 +30,34 @@ propose（axis） -> transfer（interpolate + mesh.build）
 特征网格单元计数可以触发提案、参与候选设计/验收并支持分辨率硬停机；
 在 schema-4 `exact_gauge_no_feedback_v1` 中，它们不得反馈修改任何动态比例率。
 
-依赖 `mesh` 构建候选算子，依赖 `diagnostics` 测量特征；不负责求解循环或输出。
+依赖 [mesh](../+mesh/INTERNAL.md) 构建候选算子，依赖
+[diagnostics](../+diagnostics/INTERNAL.md) 测量特征；由
+[evolve](../+evolve/INTERNAL.md) 调度，不负责求解循环或输出。
 相关验证：[基线迁移](../../tests/+ipmtests/+baseline/remesh.m)、[四阶迁移](../../tests/+ipmtests/+fourth/remap.m)、
 [六阶核心](../../tests/+ipmtests/+sixth/core.m)。
 
-## 自动网格的纯计划和实际审计
+## 第一象限：一次 level-set 事务
+
+显式第一象限模式不复用下述旧对称全域候选族。`directLevelSetAdapt` 从已接受场的
+90% 壁面核心/前沿边界与纵向宽度一次反演一个正 `X` 轴和一个 `Y` 轴，
+最多一对几何提案、一次原生迁移；质量、守恒、峰值和值域门失败即回退。
+`evolve.remeshIfNeeded` 在配置的最高观察层为 90% 时，复用当前 `flow` 的
+横向/纵向核心单元数作廉价预筛，与内部几何测量共用 `directLevelSetTargets`
+的目标和 80% 阈值；其他观察层直接由本方法重测 90% level set。
+解析初值的重网格也直接由本方法判断；象限不再使用旧综合 `safetyFactor`
+触发。没有有限核心观测的无峰物理态不尝试反演。最终以重测的 level-set 几何为准。
+现阶段保持同节点数，需更大分辨率时应在初始配置给出更大的实际正半轴 `nx`。
+象限 `roundedAxis` 不再枚举左右单元分配：对细区外的两段长度 `L/R` 和细格宽 `h`，
+先按 `log(1+L/h):log(1+R/h)` 分配固定的剩余单元预算，再投影到单元数与
+最小格宽均可行的区间；只为这一组分配求解两条单调标量斜率。
+`roundedGeometricAxis` 对纵向宽度另求解一条单调标量方程。
+这些标量二分不是二维场候选搜索；仍须通过整轴质量与原生迁移验收。
+旧全域 `roundedAxis` 的遍历分配逻辑保持不变。
+`roundedAxis(...,positiveOnly=true)` 的 `nodeCount` 是实际存储的 `[0,H]` 节点数；
+默认旧全域调用的 `nodeCount` 仍是 `[-H,H]` 节点数。构造信息另记概念全域节点数，
+调用者无需为象限先做 `2*nodeCount-1` 换算。
+
+## 旧对称全域：自动网格计划与审计
 
 plannedAxisPairs/roundedAxis/corePatchAxis/equalizedAxis只构造一维几何，数值依赖不进入research。
 固定70个横轴和4个纵轴候选按最差无量纲质量余量排序，最多交回3对；保持实际单位、箱和节点数。

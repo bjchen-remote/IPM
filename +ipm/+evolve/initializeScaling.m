@@ -42,7 +42,7 @@ if enableModulation
             ['Dynamic rescaling requires a grid point at x=0. ' ...
             'Use odd nx and a grid containing the origin.']);
     end
-    u1X = u1*ops.Dx';
+    u1X = u1*ipm.mesh.oddDx(ops)';
     strainTarget = u1X(1,originIndex);
     if strcmp(settings.cOmegaGauge,'strain_point') && ...
             abs(strainTarget) < 1e-12

@@ -8,7 +8,7 @@ end
 [psi,interiorRhs,~,poissonSolveInfo,poissonOperator] = ...
     ipm.field.poisson(omega,ops,kappa);
 u1 = -(ops.Dy*psi);
-u2 = psi*ops.Dx';
+u2 = psi*ipm.mesh.oddDx(ops)';
 
 % The physical wall has constant psi=0, hence exact no penetration there.
 % Green data on artificial far boundaries must be allowed to carry flux.

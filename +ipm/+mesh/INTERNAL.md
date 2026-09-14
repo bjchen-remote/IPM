@@ -1,7 +1,8 @@
 # mesh：网格与运行算子
 
 把冻结配置和可选网格覆盖装配为完整 `ops`，统一几何、导数、求积与椭圆离散数据。
-总体契约见 [STRUCTURE.md](../../STRUCTURE.md)。
+导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md) ·
+[第一象限架构记录](../../ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)。
 
 ## 接口与数据
 
@@ -15,6 +16,12 @@
 基线导数和控制体积权重保持原实现；四、六阶分别使用七点、九点导数与配套求积。
 高阶单边闭合不对称，不能复用基线的 SPD 假设。
 
+象限选项仅保存非负 `x`：`quadrantDerivative` 在局部虚拟模板上折叠奇偶系数，
+`Dx` 作用于偶密度，`oddDx` 作用于奇流函数/水平速度；高阶 `Tx` 对奇流函数装配。
+`quadrantQuadrature` 是和旧全域正半域一致的单侧权重；
+非均匀 `X(ξ)` 的逻辑度量由奇模板求导，避免对称轴单边闭合改变 WENO 物理间距。
+Poisson 内部未知数仍为 `(nx-2)×(ny-2)`。
+
 ## 六阶准入
 
 二维稀疏矩阵装配及分解前，每轴必须满足：相邻单元比 `<=1.15`、
@@ -24,7 +31,8 @@
 网格质量与特征单元计数只是网格准入、诊断、remesh 和 hard-stop 数据；
 mesh 不实现 width/scaling feedback，也不修改精确规范返回的比例率。
 
-本模块仅跨模块调用 `field.weno5Geometry`；椭圆矩阵及缓存由 `build` 直接装配。
-运行时的度量算子由 `field.poissonOperator` 处理；本模块不调用推进、输出或研究代码。
+本模块仅跨模块调用 [field](../+field/INTERNAL.md) 的 `weno5Geometry`；椭圆矩阵及缓存由 `build` 直接装配。
+运行时的度量算子由 `field.poissonOperator` 处理；候选网格由
+[remesh](../+remesh/INTERNAL.md) 提交给 `build`，本模块不调用推进、输出或研究代码。
 相关验证：[基线网格](../../tests/+ipmtests/+baseline/grid.m)、[四阶核心](../../tests/+ipmtests/+fourth/core.m)、
 [六阶核心](../../tests/+ipmtests/+sixth/core.m)。

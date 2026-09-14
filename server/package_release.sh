@@ -95,5 +95,8 @@ fi
     cd "$release_parent"
     zip -qr "$archive" "$release_name"
 )
-shasum -a 256 "$archive" > "$archive.sha256"
+(
+    cd "$release_parent"
+    shasum -a 256 "$release_name.zip" > "$release_name.zip.sha256"
+)
 echo "$archive"

@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="${2:-ipm_long_time_server_r2_3_cutoff_20260914}"
+release_name="${2:-ipm_long_time_server_r2_4_balanced_candidate_20260914}"
 if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
     echo "Release name must be a single safe directory name." >&2
     exit 2
@@ -25,6 +25,7 @@ cp "$project_root/README.md" "$stage/README.md"
 cp "$project_root/README_SERVER_ZH.md" "$stage/README_SERVER_ZH.md"
 cp "$project_root/RELEASE_NOTES_R2_ZH.md" "$stage/RELEASE_NOTES_R2_ZH.md"
 cp "$project_root/RELEASE_NOTES_R2_3_ZH.md" "$stage/RELEASE_NOTES_R2_3_ZH.md"
+cp "$project_root/RELEASE_NOTES_R2_4_BALANCED_ZH.md" "$stage/RELEASE_NOTES_R2_4_BALANCED_ZH.md"
 cp "$project_root/MESH_GRID_RECOMMENDATION_ZH.md" "$stage/MESH_GRID_RECOMMENDATION_ZH.md"
 cp "$project_root/STRUCTURE.md" "$stage/STRUCTURE.md"
 cp "$project_root/CHANGELOG.md" "$stage/CHANGELOG.md"
@@ -32,6 +33,7 @@ mkdir -p "$stage/research/longtime_lab/evidence"
 cp "$project_root/research/longtime_lab/AUTONOMOUS_GRID_DESIGN_FROM_FROZEN_DATA_20260913.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/AMORTIZED_MESH_LIFETIME_HOLDOUT_20260913.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/CROSS_LEVEL_MESH_COST_AND_RHS_20260913.md" "$stage/research/longtime_lab/"
+cp "$project_root/research/longtime_lab/BALANCED_MESH_DENSITY_20260914.md" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/evidence/"*.json "$stage/research/longtime_lab/evidence/"
 cp "$project_root/research/longtime_lab/audit_frozen_pair_ratio.m" "$stage/research/longtime_lab/"
 cp "$project_root/research/longtime_lab/verify_continuous_vertical_shadow.m" "$stage/research/longtime_lab/"
@@ -84,6 +86,13 @@ cp "$project_root/result/verification/outer_c_long_20260914/cutoff_old_frozen_v2
 cp "$project_root/result/verification/outer_c_long_20260914/cutoff_tau3_v1.json" "$stage/research/acceleration_lab/evidence/"
 cp "$project_root/result/verification/outer_c_long_20260914/status_tau3.log" "$stage/research/acceleration_lab/evidence/"
 cp "$project_root/result/verification/outer_c_long_20260914/shadow_integration_v1.json" "$stage/research/acceleration_lab/evidence/"
+mkdir -p "$stage/result/verification/mesh_density_20260914"
+for file in new_c_tau35_exact_planned_transfer_v2.json \
+        old_v5_tau124_cross_level_v2.json zero_to_half.json \
+        mesh_ratio_distribution_tau35.png; do
+    cp "$project_root/result/verification/mesh_density_20260914/$file" \
+        "$stage/result/verification/mesh_density_20260914/$file"
+done
 chmod +x "$stage/server/launch.sh" "$stage/server/package_release.sh"
 
 commit="$(git -C "$project_root" rev-parse HEAD)"

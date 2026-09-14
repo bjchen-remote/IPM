@@ -2,6 +2,8 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
+R2.4 balanced **候选包**的密度函数与验证边界见 [R2.4 候选说明](RELEASE_NOTES_R2_4_BALANCED_ZH.md)；该包的服务器设置默认 `meshDensityVersion=1`。现有 R2.2/R2.3 发布包与正在运行的轨道均不变。
+
 本包新增的外区截断范数分析与观察器修复见 [R2.3 发行说明](RELEASE_NOTES_R2_3_ZH.md)。
 第二发行版的自动长跑验收、新幅值规范和未验证范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
 冻结态的方向网格成本前沿和已知停机原因见 [网格建议](MESH_GRID_RECOMMENDATION_ZH.md)。
@@ -14,7 +16,7 @@
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_r2_3_cutoff_20260914
+cd ipm_long_time_server_r2_4_balanced_candidate_20260914
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -58,12 +60,12 @@ R2.2 默认的幅值规范保持 `(2,0)` 附近壁面密度平滑窗的加权 `L
 
 `ipm.config.longTimeProfile` 在未指定 `autonomousMeshVersion` 时仍默认 version 4，以便已有脚本配置逐值不变；它的注册节点族固定到 310000。version 5 已完成 H8 从原始 `t=0` 到可信 `τ=12.400290` 的无人工换网格长跑、37 次自主重布，主动暂停前没有网格停机；不同计算域的同等长跑仍需验证。
 
-开发源码现提供显式的 `meshDensityVersion=1` 试验选项，仅与自动网格 version 5 配套。在本开发目录的 `server/profile_settings.m` 中，将 `settings.meshDensityVersion=0` 改为 `1`，然后从**新算例**启动；该值写入冻结配置。默认 `0` 不向旧策略添加字段，旧检查点保持原密度规则。选 `1` 后，Y 轴用平滑起步、外区近乎恒定对数格宽增长的密度函数，保持节点数和 `1.15×` 的核心格数设计缓冲；X 轴的原 70 次候选预算中加入较短的平滑过渡。它不能在旧检查点续算时切换。冻结态 `641×321` 上的原生迁移和从零短算例已测试；尚未证明该模式能从零自动跑到强奇异性或提高 Profile 的连续极限精度。详细数据见 [密度函数实验](research/longtime_lab/BALANCED_MESH_DENSITY_20260914.md)。现有 R2.3 压缩发行包不包含这个开发选项。
+R2.4 候选包提供显式的 `meshDensityVersion=1`，仅与自动网格 version 5 配套。其 `server/profile_settings.m` 已默认设为 1，供**新算例**启动；该值写入冻结配置。设为 `0` 则使用旧密度规则且不向政策添加字段。选 `1` 后，Y 轴用平滑起步、外区近乎恒定对数格宽增长的密度函数，保持节点数和 `1.15×` 的核心格数设计缓冲；X 轴的原 70 次候选预算中加入较短的平滑过渡。它不能在旧检查点续算时切换；旧轨道请继续使用各自原发布包。冻结态 `641×321` 上的原生迁移和从零短算例已测试；尚未证明该模式能从零自动跑到强奇异性或提高 Profile 的连续极限精度。详细数据见 [密度函数实验](research/longtime_lab/BALANCED_MESH_DENSITY_20260914.md)。现有 R2.3 压缩发行包不包含这个选项。
 
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_4_balanced_candidate_20260914');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -98,7 +100,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_4_balanced_candidate_20260914/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -110,7 +112,7 @@ Profile。报告默认写入运行目录下新的 `analysis/outer_cutoff_*.json`
 此命令不推进 PDE，也不改写原 checkpoint：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914/server'); analyze_outer_profile('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_4_balanced_candidate_20260914/server'); analyze_outer_profile('/data/ipm/run01');"
 ```
 
 可用第二个参数指定输出 JSON，第三个参数指定最多读取的 checkpoint 数。
@@ -121,7 +123,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_4_balanced_candidate_20260914');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -129,8 +131,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914');
-addpath('/absolute/path/to/ipm_long_time_server_r2_3_cutoff_20260914/tests');
+addpath('/absolute/path/to/ipm_long_time_server_r2_4_balanced_candidate_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_4_balanced_candidate_20260914/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 

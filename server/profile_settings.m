@@ -30,9 +30,11 @@ settings.omegaGaugeWindowRadius = 0.5;
 % Version 5 generates additional directional node levels automatically up to
 % the resource cap chosen before the t=0 run. Version 4 remains available.
 settings.autonomousMeshVersion = 5;
-% This candidate release starts new runs with balanced log-width density.
+% This candidate starts new runs with balanced Y density and stronger
+% same-node X core reserve. Use 1 for the R2.4 balanced setting, or 0 for
+% the original density policy, before beginning a new physical t=0 run.
 % Use the original release package, or set 0, when resuming an old policy.
-settings.meshDensityVersion = 1;
+settings.meshDensityVersion = 2;
 settings.maximumTotalNodes = 310000;
 
 settings.outputDirectory = fullfile(projectRoot,'runs','profile_H8_long');

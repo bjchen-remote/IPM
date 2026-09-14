@@ -52,11 +52,16 @@ defaults = struct('version',version,'enabled',true,'targetCoreCells',target, ...
 if isfield(input,'densityVersion')
     if version~=5 || ~isnumeric(input.densityVersion) || ...
             ~isscalar(input.densityVersion) || ~isreal(input.densityVersion) || ...
-            ~isfinite(input.densityVersion) || input.densityVersion~=1
-        error(identifier,'densityVersion=1 is supported only with autonomousMesh.version=5.');
+            ~isfinite(input.densityVersion) || ~any(input.densityVersion==[1,2])
+        error(identifier,'densityVersion=1 or 2 is supported only with autonomousMesh.version=5.');
     end
-    defaults.densityVersion=1;
+    defaults.densityVersion=double(input.densityVersion);
     defaults.search.roundingCells=[8,16,24,32,40];
+    if defaults.densityVersion==2
+        % More same-node core reserve, still under the original whole-axis
+        % quality, transfer, and finite-flow gates.
+        defaults.search.xPadding=1.50;
+    end
 end
 if any(version == [2,3,4,5])
     if ~isfield(input,'nodeFamily')

@@ -51,6 +51,9 @@ R2.4 balanced 候选包提供显式 `meshDensityVersion=1` 的同节点数密度
 其冻结态网格比、原生迁移与当前验证边界见
 [R2.4 候选说明](RELEASE_NOTES_R2_4_BALANCED_ZH.md)和
 [密度函数实验](research/longtime_lab/BALANCED_MESH_DENSITY_20260914.md)。
+R2.5 强核心余量候选包提供显式 `meshDensityVersion=2`：在同节点数、原质量门下
+给后期 X 核心更多单元；其末态原生迁移证据与连续长跑边界见
+[极端冻结态试验](research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md)。
 
 ## 数值选择与边界
 

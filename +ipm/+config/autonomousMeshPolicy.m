@@ -47,6 +47,17 @@ defaults = struct('version',version,'enabled',true,'targetCoreCells',target, ...
     'maximumMassRelativeDefect',5e-12,'maximumRelativeRangeViolation',2e-4, ...
     'qualityLimits',quality,'search',search,'timeUnit','native_canonical', ...
     'trendWindow',.35,'maximumReviewInterval',.2);
+% Explicit, frozen density opt-in. Absence preserves every prior v5 policy
+% and checkpoint exactly; no implicit upgrade occurs during restoration.
+if isfield(input,'densityVersion')
+    if version~=5 || ~isnumeric(input.densityVersion) || ...
+            ~isscalar(input.densityVersion) || ~isreal(input.densityVersion) || ...
+            ~isfinite(input.densityVersion) || input.densityVersion~=1
+        error(identifier,'densityVersion=1 is supported only with autonomousMesh.version=5.');
+    end
+    defaults.densityVersion=1;
+    defaults.search.roundingCells=[8,16,24,32,40];
+end
 if any(version == [2,3,4,5])
     if ~isfield(input,'nodeFamily')
         error(identifier,'Versions 2 through 5 require an explicit nodeFamily.maximumTotalNodes.');

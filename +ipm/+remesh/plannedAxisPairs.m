@@ -41,13 +41,31 @@ if isfield(cache,'yEntries')
     end
 end
 if ~reuseY
-for sigma=search.ySigma
-    [v,info]=ipm.remesh.equalizedAxis(referenceAxes.y(:)/anchor, ...
-        [0,feature.yCoreWidth/anchor],policy.targetCoreCells(2)*search.yPadding, ...
-        struct('geometry','positive','focusCenters',0,'sigma',sigma,'power',2,'meshLimits',meshLimits));
-    v=v(:)*anchor;v(1)=y(1);v(end)=y(end);
-    [q,reasons,margin]=axis_quality(v,limits);count=interval_count(v,[0,min(v(end),feature.yCoreWidth)]);
-    reasons=with_reasons(reasons,count<policy.targetCoreCells(2)-1e-6,{'y_core_target'});
+for yTrialIndex=1:numel(search.ySigma)
+    sigma=search.ySigma(yTrialIndex);
+    if isfield(policy,'densityVersion') && policy.densityVersion==1 && ...
+            yTrialIndex==numel(search.ySigma)
+        try
+            [v,info]=ipm.remesh.roundedGeometricAxis(referenceAxes.y(:), ...
+                feature.yCoreWidth,policy.targetCoreCells(2)*search.yPadding,8);
+        catch e
+            if ~strcmp(e.identifier,'ipm:RoundedGeometricInfeasible'),rethrow(e);end
+            v=[];info=struct('kind','one_sided_rounded_geometric_equalizer_v1', ...
+                'status','ratio_capacity_exhausted');
+        end
+    else
+        [v,info]=ipm.remesh.equalizedAxis(referenceAxes.y(:)/anchor, ...
+            [0,feature.yCoreWidth/anchor],policy.targetCoreCells(2)*search.yPadding, ...
+            struct('geometry','positive','focusCenters',0,'sigma',sigma,'power',2,'meshLimits',meshLimits));
+        v=v(:)*anchor;v(1)=y(1);v(end)=y(end);
+    end
+    if isempty(v)
+        q=struct();reasons={'geometric_ratio_capacity'};margin=-Inf;count=NaN;
+    else
+        [q,reasons,margin]=axis_quality(v,limits);
+        count=interval_count(v,[0,min(v(end),feature.yCoreWidth)]);
+        reasons=with_reasons(reasons,count<policy.targetCoreCells(2)-1e-6,{'y_core_target'});
+    end
     row=struct('sigma',sigma,'quality',q,'coreCells',count,'admissible',isempty(reasons), ...
         'reasons',{reasons},'qualityMargin',margin,'equalizerInfo',info);
     yRows=append_row(yRows,row);yAxes{end+1}=v; %#ok<AGROW>

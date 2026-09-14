@@ -47,6 +47,9 @@ R2.3 增加了只读的外区截断 `L^p` 收敛诊断入口
 `server/analyze_outer_profile.m`，并修复新 C 下影子纵向核心观测缺失；
 正式 C 和网格决策不变。初步数据和未验证范围见
 [R2.3 发行说明](RELEASE_NOTES_R2_3_ZH.md)。
+开发源码另有显式 `meshDensityVersion=1` 的同节点数密度函数试验；
+其冻结态网格比、原生迁移与当前验证边界见
+[密度函数实验](research/longtime_lab/BALANCED_MESH_DENSITY_20260914.md)。
 
 ## 数值选择与边界
 

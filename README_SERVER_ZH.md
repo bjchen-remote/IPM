@@ -2,7 +2,7 @@
 
 这个发布包面向“从原始物理时间 `t=0` 自动运行到长时间”的 Profile 实验。数值求解仍只有一个入口 `ipm.solve`；服务器脚本只是把少量常用设置翻译成完整且经过校验的配置。
 
-R2.5 core-reserve **候选包**的密度函数与验证边界见 [R2.5 候选说明](RELEASE_NOTES_R2_5_CORE_RESERVE_ZH.md)；服务器设置默认 `meshDensityVersion=2`。R2.4 与此前各包、正在运行的轨道均不变。
+R2.6 search-repair **候选包**的密度函数与验证边界见 [R2.6 候选说明](RELEASE_NOTES_R2_6_SEARCH_REPAIR_ZH.md)；服务器设置默认 `meshDensityVersion=2`。R2.5 保留以复现其首次补充搜索停机，旧运行目录均不改动。
 
 本包新增的外区截断范数分析与观察器修复见 [R2.3 发行说明](RELEASE_NOTES_R2_3_ZH.md)。
 第二发行版的自动长跑验收、新幅值规范和未验证范围见 [R2.2 发行说明](RELEASE_NOTES_R2_ZH.md)。
@@ -16,7 +16,7 @@ R2.5 core-reserve **候选包**的密度函数与验证边界见 [R2.5 候选说
 需要 MATLAB，建议使用与本机验证相同的 R2026a。解压后进入发布目录：
 
 ```bash
-cd ipm_long_time_server_r2_5_core_reserve_candidate_20260914
+cd ipm_long_time_server_r2_6_search_repair_candidate_20260914
 chmod +x server/launch.sh
 nohup server/launch.sh > launcher.out 2>&1 &
 ```
@@ -61,12 +61,12 @@ R2.2 默认的幅值规范保持 `(2,0)` 附近壁面密度平滑窗的加权 `L
 
 `ipm.config.longTimeProfile` 在未指定 `autonomousMeshVersion` 时仍默认 version 4，以便已有脚本配置逐值不变；它的注册节点族固定到 310000。version 5 已完成 H8 从原始 `t=0` 到可信 `τ=12.400290` 的无人工换网格长跑、37 次自主重布，主动暂停前没有网格停机；不同计算域的同等长跑仍需验证。
 
-R2.5 候选包默认 `meshDensityVersion=2`，仅与自动网格 version 5 配套。`0` 保留旧密度策略，`1` 是 R2.4 的均摊密度，`2` 保持相同的 Y 密度和 70 个 X 候选，但给 X 核心更大的同节点设计余量。全轴相邻比仍须小于 1.08，真实迁移仍须通过所有原质量门。密度版本写入新算例的冻结配置，**旧检查点不能切换版本**；旧轨道继续用原发布包。新模式已从物理 t=0 自主重布到 τ=0.5，极端冻结态完成真实迁移；尚未证明它能从零自动跑到强奇异性或提高 Profile 的连续极限精度。详见 [极端冻结态试验](research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md)。
+R2.6 候选包默认 `meshDensityVersion=2`，仅与自动网格 version 5 配套。`0` 保留旧密度策略，`1` 是 R2.4 的均摊密度，`2` 保持相同的 Y 密度和 70 个 X 候选，但给 X 核心更大的同节点设计余量。全轴相邻比仍须小于 1.08，真实迁移仍须通过所有原质量门。R2.5 从零长跑在 τ≈2.065 首次进入补充搜索时因候选数账本不一致停机；本包补齐登记的 70/260/170 阶段，同一检查点隔离续算到 τ=2.2 已通过。密度版本写入新算例的冻结配置，**旧检查点不能切换版本**；旧轨道继续用各自原发布包。R2.6 尚未证明能自动跑到强奇异性或提高 Profile 的连续极限精度。详见 [搜索阶段修复](research/longtime_lab/BALANCED_SEARCH_STAGE_REPAIR_20260914.md)和[极端冻结态试验](research/longtime_lab/EXTREME_FROZEN_MESH_RESERVE_20260914.md)。
 
 也可以直接在 MATLAB 中使用配置接口：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_5_core_reserve_candidate_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914');
 settings = struct( ...
     'canonicalFinalTime',1000, ...
     'maximumSteps',10000000, ...
@@ -102,7 +102,7 @@ result = ipm.solve(opts);           % 从物理 t=0 启动
 运行中只读查看最新可信 checkpoint（不建 LU、不改变轨道）：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_5_core_reserve_candidate_20260914/server'); profile_status('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914/server'); profile_status('/data/ipm/run01');"
 ```
 
 `profile_status` 返回时间、步数、节点数、累计自动重布次数、核心格数、两轴相邻网格比、物理梯度以及远边界的源与速度指标。它验证 checkpoint，但 checkpoint 的存在本身不能证明求解器进程仍在运行；进程状态需由作业系统或 `ps` 单独确认。
@@ -114,7 +114,7 @@ Profile。报告默认写入运行目录下新的 `analysis/outer_cutoff_*.json`
 此命令不推进 PDE，也不改写原 checkpoint：
 
 ```bash
-matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_5_core_reserve_candidate_20260914/server'); analyze_outer_profile('/data/ipm/run01');"
+matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914/server'); analyze_outer_profile('/data/ipm/run01');"
 ```
 
 可用第二个参数指定输出 JSON，第三个参数指定最多读取的 checkpoint 数。
@@ -125,7 +125,7 @@ matlab -batch "addpath('/absolute/path/to/ipm_long_time_server_r2_5_core_reserve
 查看结果：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_5_core_reserve_candidate_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914');
 r = ipm.output.validate('/data/ipm/run01/result_CASE_ID.mat');
 ipm.output.plotResult(r);
 ```
@@ -133,8 +133,8 @@ ipm.output.plotResult(r);
 安装后的接口检查：
 
 ```matlab
-addpath('/absolute/path/to/ipm_long_time_server_r2_5_core_reserve_candidate_20260914');
-addpath('/absolute/path/to/ipm_long_time_server_r2_5_core_reserve_candidate_20260914/tests');
+addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914');
+addpath('/absolute/path/to/ipm_long_time_server_r2_6_search_repair_candidate_20260914/tests');
 r = ipmtests.baseline.serverInterface();
 ```
 

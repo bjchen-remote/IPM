@@ -1,0 +1,68 @@
+{
+  "kind": "signed_native_frozen_outer_wall_gauge_rhs_v1",
+  "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000017950.mat",
+  "step": 17950,
+  "tau": 13.900068393775856,
+  "nodeCount": [
+    641,
+    321
+  ],
+  "anchor": [
+    2,
+    0
+  ],
+  "windowHalfWidth": 0.5,
+  "windowSupportNodes": 14,
+  "pointR": 0.0095222543870210757,
+  "pointB": -1.5567676883774287E-5,
+  "pointCondition": 0.43937690939574409,
+  "oldCOmega": -0.30543179276311094,
+  "pointCOmega": 0.0016348730301716345,
+  "windowCOmega": 0.0016387076823653536,
+  "pointRateResidual": 0,
+  "windowRateResidual": 0,
+  "pointVsWindowRateDifference": -3.8346521937190382E-6,
+  "outerSamplesX": [
+    1.4,
+    1.6,
+    2,
+    2.4,
+    2.8
+  ],
+  "outerRx": [
+    0.0065278879881575267,
+    0.0052426762871104647,
+    0.0039592331245232185,
+    0.0032811568609947546,
+    0.0028501862264226881
+  ],
+  "outerRxLogRateOld": [
+    -0.30818793803367339,
+    -0.30828376077669584,
+    -0.30838543262216384,
+    -0.30844177770889725,
+    -0.30846203947967826
+  ],
+  "outerRxLogRatePoint": [
+    -0.0011212722403908077,
+    -0.0012170949834132499,
+    -0.001318766828881268,
+    -0.0013751119156146696,
+    -0.0013953736863956845
+  ],
+  "outerRxLogRateWindow": [
+    -0.0011174375881970887,
+    -0.0012132603312195308,
+    -0.0013149321766875491,
+    -0.0013712772634209506,
+    -0.0013915390342019655
+  ],
+  "wallPeak": 0.68501811370634025,
+  "wallPeakX": 0.98225594521956328,
+  "peakLogRateOld": 0.017813309442591293,
+  "peakLogRatePoint": 0.32487997523587386,
+  "peakLogRateWindow": 0.32488380988806759,
+  "nativeRhsReconstructed": true,
+  "pdeAdvanced": false,
+  "interpretation": "Algebraic counterfactual rate at one accepted physical state. It does not prove long-time stability of the new gauge or covariance of a new discrete trajectory."
+}

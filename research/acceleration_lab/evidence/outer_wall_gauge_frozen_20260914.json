@@ -1,0 +1,289 @@
+{
+  "kind": "signed_original_t0_outer_gauge_frozen_v1",
+  "point": [
+    2,
+    0
+  ],
+  "records": [
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000012593.mat",
+      "step": 12593,
+      "tau": 12.300312043872202,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "point": [
+        2,
+        0
+      ],
+      "pointR": 0.015696927452703978,
+      "pointRx": 0.0065427558778950691,
+      "pointRCondition": 0.43858198188129666,
+      "patchCenter": [
+        2,
+        0
+      ],
+      "patchHalfWidth": [
+        0.5,
+        0.5
+      ],
+      "supportNodes": [
+        15,
+        228
+      ],
+      "patchRrms": 0.014393560407287721,
+      "patchGradientRms": 0.011940604552240604,
+      "wallWindowRrms": 0.015682295024088459,
+      "wallWindowRxRms": 0.0066738157057503137,
+      "wallSamplesX": [
+        1.4,
+        1.6,
+        2,
+        2.4,
+        2.8
+      ],
+      "wallSamplesR": [
+        0.010788287295666128,
+        0.012712648610807049,
+        0.015696927452703978,
+        0.0180696872820544,
+        0.020086346862141558
+      ],
+      "wallSamplesRx": [
+        0.010785601187718409,
+        0.0086618868227964513,
+        0.0065427558778950691,
+        0.0054248548250941031,
+        0.0047130589992075041
+      ],
+      "wallSamplesROverPointR": [
+        0.68728656153709367,
+        0.809881338186165,
+        1,
+        1.1511607820383785,
+        1.2796355798077828
+      ],
+      "wallSamplesRxOverPointR": [
+        0.68711543836946665,
+        0.55182052977535678,
+        0.41681761590660876,
+        0.34559978960465981,
+        0.30025360143940938
+      ],
+      "wallRxPeak": 0.68521205335875934,
+      "oldCOmega": -0.32004484973559616
+    },
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000014751.mat",
+      "step": 14751,
+      "tau": 13.000216678018507,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "point": [
+        2,
+        0
+      ],
+      "pointR": 0.012578525543758691,
+      "pointRx": 0.0052350700862882592,
+      "pointRCondition": 0.43900251368844151,
+      "patchCenter": [
+        2,
+        0
+      ],
+      "patchHalfWidth": [
+        0.5,
+        0.5
+      ],
+      "supportNodes": [
+        15,
+        230
+      ],
+      "patchRrms": 0.01153367327370813,
+      "patchGradientRms": 0.0095711433039974321,
+      "wallWindowRrms": 0.012567403143859868,
+      "wallWindowRxRms": 0.0053401963260901871,
+      "wallSamplesX": [
+        1.4,
+        1.6,
+        2,
+        2.4,
+        2.8
+      ],
+      "wallSamplesR": [
+        0.008649966859656244,
+        0.010189097881171161,
+        0.012578525543758691,
+        0.014476478539401805,
+        0.016092770604637738
+      ],
+      "wallSamplesRx": [
+        0.0086320458648396145,
+        0.0069343436548919227,
+        0.0052350700862882592,
+        0.0043412331238277778,
+        0.0037690378785028497
+      ],
+      "wallSamplesROverPointR": [
+        0.68767732987180286,
+        0.81003912944525247,
+        1,
+        1.1508883524575626,
+        1.2793844992923493
+      ],
+      "wallSamplesRxOverPointR": [
+        0.68625260049837311,
+        0.55128430043477217,
+        0.41619107645616193,
+        0.34513052493516172,
+        0.29964067452826376
+      ],
+      "wallRxPeak": 0.68498911424441644,
+      "oldCOmega": -0.31407527776978966
+    },
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000017950.mat",
+      "step": 17950,
+      "tau": 13.900068393775856,
+      "nodeCount": [
+        641,
+        321
+      ],
+      "point": [
+        2,
+        0
+      ],
+      "pointR": 0.0095222543870210757,
+      "pointRx": 0.0039592331245232185,
+      "pointRCondition": 0.43937690939574409,
+      "patchCenter": [
+        2,
+        0
+      ],
+      "patchHalfWidth": [
+        0.5,
+        0.5
+      ],
+      "supportNodes": [
+        14,
+        231
+      ],
+      "patchRrms": 0.0087322467949313958,
+      "patchGradientRms": 0.0072480283583049943,
+      "wallWindowRrms": 0.00951562541575366,
+      "wallWindowRxRms": 0.004037070366350367,
+      "wallSamplesX": [
+        1.4,
+        1.6,
+        2,
+        2.4,
+        2.8
+      ],
+      "wallSamplesR": [
+        0.0065525781872501276,
+        0.0077166984884323529,
+        0.0095222543870210757,
+        0.010958809383475623,
+        0.012178855434747173
+      ],
+      "wallSamplesRx": [
+        0.0065278879881575267,
+        0.0052426762871104647,
+        0.0039592331245232185,
+        0.0032811568609947546,
+        0.0028501862264226881
+      ],
+      "wallSamplesROverPointR": [
+        0.68813307447250671,
+        0.81038566864484185,
+        1,
+        1.1508629089359959,
+        1.2789886658927185
+      ],
+      "wallSamplesRxOverPointR": [
+        0.68554018017572615,
+        0.55057091252007329,
+        0.41578737172992264,
+        0.34457773628343757,
+        0.29931842928997143
+      ],
+      "wallRxPeak": 0.68501811370634025,
+      "oldCOmega": -0.30543179276311094
+    },
+    {
+      "checkpointFile": "/Users/bjchen/Library/CloudStorage/OneDrive-北京大学/Research/IPM/ipm_structured/runs/profile_H8_tau16/checkpoint_20260913T135512796_dynamic_isotropic_321x161_tpb8778b82_7c17_43b4_9c8d_ef9986690bc2_step0000019135.mat",
+      "step": 19135,
+      "tau": 14.20020125954303,
+      "nodeCount": [
+        961,
+        321
+      ],
+      "point": [
+        2,
+        0
+      ],
+      "pointR": 0.0086860453359150526,
+      "pointRx": 0.0036081663095710132,
+      "pointRCondition": 0.43953887630144439,
+      "patchCenter": [
+        2,
+        0
+      ],
+      "patchHalfWidth": [
+        0.5,
+        0.5
+      ],
+      "supportNodes": [
+        20,
+        232
+      ],
+      "patchRrms": 0.0079635091141085669,
+      "patchGradientRms": 0.006612028138031821,
+      "wallWindowRrms": 0.0086783080809703077,
+      "wallWindowRxRms": 0.0036810026392343118,
+      "wallSamplesX": [
+        1.4,
+        1.6,
+        2,
+        2.4,
+        2.8
+      ],
+      "wallSamplesR": [
+        0.0059777398476963065,
+        0.0070390751350125737,
+        0.0086860453359150526,
+        0.0099947471711060061,
+        0.011107878431593174
+      ],
+      "wallSamplesRx": [
+        0.0059507469769202233,
+        0.0047793628033414573,
+        0.0036081663095710132,
+        0.0029914707258313963,
+        0.0025978591318932677
+      ],
+      "wallSamplesROverPointR": [
+        0.68820039690324353,
+        0.81038894718951238,
+        1,
+        1.1506671660784149,
+        1.2788188412584411
+      ],
+      "wallSamplesRxOverPointR": [
+        0.68509278351508018,
+        0.550234614086085,
+        0.41539805170622013,
+        0.34439962147817327,
+        0.29908422434219195
+      ],
+      "wallRxPeak": 0.68487575603403061,
+      "oldCOmega": -0.30419842362447269
+    }
+  ],
+  "nativeSignatureValidated": true,
+  "pdeAdvanced": false,
+  "poissonFactored": false,
+  "interpretation": "Outer point and smooth-window amplitudes from the unchanged peak-pinned orbit. Temporal drift is a screening diagnostic, not a validated counterfactual gauge trajectory."
+}

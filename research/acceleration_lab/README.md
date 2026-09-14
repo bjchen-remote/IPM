@@ -1,8 +1,10 @@
 # Profile acceleration experiments
 
-This directory tests convergence acceleration while the registered PDE
-trajectory continues independently. It calls the maintained `ipm.evolve.flow`
-and changes no production solver, gauge formula, time speed, or checkpoint.
+This directory tests convergence acceleration and alternative gauge choices
+without altering registered checkpoints. Earlier acceleration trials call the
+maintained `ipm.evolve.flow` and leave their source trajectory unchanged.
+The optional experimental `(2,0)` wall-density amplitude gauge is documented
+in [OUTER_WALL_DENSITY_GAUGE_X2_20260914.md](OUTER_WALL_DENSITY_GAUGE_X2_20260914.md).
 An extrapolated density is a stationary-profile **candidate**, with no assigned
 physical or canonical evolution time. It must never be substituted into the
 accepted checkpoint chain.

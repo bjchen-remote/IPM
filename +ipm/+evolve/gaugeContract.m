@@ -123,6 +123,11 @@ switch scaling.cOmegaGauge
     case 'anchor_wall_window_l4'
         value.formula = 'c_omega=-<R_X^3,B_X>_w/<R_X^4>_w';
         value.observable = 'fixed_wall_window_l4';
+    case 'outer_wall_density_window_l2'
+        value.formula = 'c_omega=-<R,B>_w/<R,R>_w';
+        value.observable = 'fixed_X2_wall_density_l2';
+        value.evaluation = ...
+            'raised_cosine_window_X2_radius_omegaGaugeWindowRadius';
     case 'anchor_wall_template_projection'
         value.formula = 'c_omega=-<B_X,T>_w/<R_X,T>_w';
         value.observable = 'fixed_wall_template_projection';

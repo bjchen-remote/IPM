@@ -1,0 +1,24 @@
+{
+  "kind": "outer_wall_density_window_l2_bounded_test_v1",
+  "initialFormulaError": 0,
+  "initialRateResidual": 0,
+  "initialCondition": 0.33451485088194671,
+  "historyRecorded": true,
+  "referenceRestored": true,
+  "remeshReferencePreserved": true,
+  "tinyStep": 1E-5,
+  "tinyStepRelativeWindowDrift": 0,
+  "lateStep": 19135,
+  "lateTau": 14.20020125954303,
+  "lateNodeCount": [
+    961,
+    321
+  ],
+  "lateWindowSupportPoints": 20,
+  "lateWindowCondition": 0.4391473489477925,
+  "lateOldCOmega": -0.30419842362447269,
+  "lateNewCOmega": 0.001495984258746366,
+  "lateFormulaError": 0,
+  "lateRateResidual": 0,
+  "lateCheckpointAdvanced": false
+}

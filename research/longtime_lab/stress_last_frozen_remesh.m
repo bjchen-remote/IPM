@@ -21,7 +21,16 @@ modeOne=ipm.config.autonomousMeshPolicy(input);
 % registered under a new density policy version.
 modeOne.search.xPadding=xPadding;
 memory=source.runMetadata.autonomousMesh;
-if growX
+if ischar(growX) || isstring(growX)
+    assert(strcmp(string(growX),"growY"));
+    members=memory.referenceFamily.members;
+    counts=vertcat(members.nodeCount);
+    eligible=counts(:,1)==numel(source.ops.x) & ...
+        counts(:,2)>numel(source.ops.y);
+    targetId=find(eligible,1);
+    assert(~isempty(targetId));
+    reference=struct('x',members(targetId).baseX,'y',members(targetId).baseY);
+elseif growX
     members=memory.referenceFamily.members;
     counts=vertcat(members.nodeCount);
     targetId=find(counts(:,1)>numel(source.ops.x) & ...

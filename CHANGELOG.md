@@ -6,6 +6,7 @@
 - 正轴构造现在由连续左右容量平衡点相邻的两个整数分配直接求最大可行细格宽，必要时只限幅一次，再沿原单提案路径构造轴。它不增加候选、循环重试或二维搜索；未触发限幅时恢复原 `diff(interval)/fineCells` 运算顺序，正常轴与 9.14 冻结发行版逐位一致。预期的几何不可行使用稳定 `ipm:RoundedAxisInfeasible` 标识，事务仍兼容按旧错误文本回退，并保存失败标识/信息。
 - 服务器入口版本号更新为固定绝对路径 `/data/user/hd58131/ipm/ipm_long_time_server_20260915`。可选环境变量 `IPM_RESTART_CHECKPOINT` 允许从因该 9.14 缺陷中断前的最后一个原生象限 checkpoint 恢复；不设置时仍是拒绝覆盖输出的全新运行。恢复日志、启动配置、结果和指针使用不覆盖旧文件的路径。
 - MATLAB R2026a：原失败几何 `N=65,h=0.05` 被解析限幅到 `0.04545454545454457`，只评估一次分配且最大相邻格比约 `1.04828596`；`ipm.verify('quadrant')` exit0（5.894 秒）；正常 1025 节点轴及锚点修正轴与冻结版逐位一致；`ipm.verify('equivalence','quick')` 的 6 个旧全域物理算例和 3 次迁移逐值一致（5.339 秒）；最终 `ipm.verify('all','quick')` exit0（88.363 秒）；变更 MATLAB 文件 Code Analyzer 0 条，`bash -n` 与 `git diff --check` 通过。尚未在服务器复现原长跑时刻，也未执行服务器 525825 节点 LU/续算。
+- 从源码提交 `564bfa1` 生成 `ipm_long_time_server_20260915.zip`，打包时工作树干净。包内 SHA256SUMS、ZIP SHA-256（`28b92a472a228c23dcfdaa09dd49a7cd354ec48daeadfbb49dd2d2fc95f91255`）及压缩结构通过；从解包目录运行 `ipm.verify('quadrant')` exit0（5.142 秒）。发行包已导入本地 Git 标签 `ipm_long_time_server_20260915`；`releases/` 中被替代的 9.14 文件已移除，其原 ZIP 可由同名 Git 标签恢复。
 
 ## 2026-09-14：源码架构与书写整理（未重新发行）
 

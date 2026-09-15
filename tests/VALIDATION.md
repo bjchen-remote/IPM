@@ -12,6 +12,9 @@ MATLAB R2026a 的 `ipm.verify('quadrant')` exit0（5.894 秒）；
 （5.339 秒）；最终 `ipm.verify('all','quick')` exit0（88.363 秒）。
 变更 MATLAB 文件 Code Analyzer 0 条，打包脚本 `bash -n` 与 `git diff --check` 通过。
 服务器 R2022b 的原长跑时刻、525825 节点 LU 和跨版本 checkpoint 续算尚未实测。
+源码提交 `564bfa1` 的 20260915 包通过包内哈希、ZIP SHA-256 与压缩结构检查；
+从解包目录运行 `ipm.verify('quadrant')` exit0（5.142 秒）。ZIP SHA-256 为
+`28b92a472a228c23dcfdaa09dd49a7cd354ec48daeadfbb49dd2d2fc95f91255`。
 
 ## 2026-09-14：架构整理后的最终回归
 

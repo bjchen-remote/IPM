@@ -261,6 +261,10 @@ end
 if values.minDt >= values.maxDt
     error('ipm:BadTimeStep','opts.minDt must be smaller than opts.maxDt.');
 end
+if isfinite(values.maxSteps) && values.maxSteps ~= floor(values.maxSteps)
+    error('ipm:BadMaximumSteps', ...
+        'opts.maxSteps must be a positive integer or Inf.');
+end
 
 config = freeze_config(values,schema,optionNames);
 end

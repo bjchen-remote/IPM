@@ -26,8 +26,6 @@ else
         restartCheckpoint,userOpts);
 end
 time = state.config.time;
-diagnostics = state.config.diagnostics;
-remesh = state.config.remesh;
 output = state.config.output;
 
 viz = [];
@@ -81,18 +79,11 @@ while ipm.evolve.isActive(state)
     end
     [log,~] = ipm.output.record(log,state);
     cursor.nextOutput = cursor.nextOutput+time.outputEvery;
-    stopReasonAtOutput = ipm.diagnostics.stopPolicy(log.history, ...
-        log.history.common.physicalGradInf(end),state.flow,state.ops, ...
-        diagnostics,remesh);
     [state,cursor] = ipm.output.maybeCheckpoint( ...
-        state,log,cursor,~isempty(stopReasonAtOutput));
+        state,log,cursor,false);
     if ~isempty(viz)
         viz = ipm.output.visualize(viz,state.rho,state.flow,state.ops, ...
             state.scale,log.history,output,state.runMetadata);
-    end
-    if ~isempty(stopReasonAtOutput)
-        stopReason = stopReasonAtOutput;
-        break;
     end
 end
 

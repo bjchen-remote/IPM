@@ -1,5 +1,13 @@
 # 结构化副本验证记录
 
+## 2026-09-15：256 级无诊断硬停长跑入口
+
+`maxSteps=Inf` 配置解析及有限非整数拒绝测试通过；象限短程回归把
+`gradientStop` 设为 `realmin` 后仍到达 `final_time`，证明记录诊断不再终止主循环。
+MATLAB R2026a 的 `ipm.verify('all','quick')` exit0；本次涉及的 MATLAB 文件
+Code Analyzer 0 条，`git diff --check` 通过。正式 `513×257` 长跑使用
+`server/main_quadrant_256_long_local.m`，完整场切片间隔 `Δτ=0.5`，步数上限为 `Inf`。
+
 ## 2026-09-15：rounded-axis 容量失败回归
 
 旧版会抛出 `No feasible direct rounded-log cell split.` 的

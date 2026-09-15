@@ -46,7 +46,7 @@ schema 4 的运行期边界是 `exact_gauge_no_feedback_v1`：`c_l`、`c_omega`�
 `c_r` 只由所选规范的瞬时代数恒等式给出。`lengthScaleGain=1`，
 `omegaGaugeGain=widthGaugeGain=travelingWaveGain=0`；不得添加幅值、宽度或位移 restoring
 项。旧 `adaptiveGain` width controller 不在 RHS/规范路径上。峰值、层级或连通宽度的
-网格单元计数可由诊断层产生，但只能驱动 telemetry、remesh 和 hard stop。
+网格单元计数可由诊断层产生，但只能驱动 telemetry 和 remesh；网格质量不再终止演化。
 
 ### 固定锚点幅值规范
 

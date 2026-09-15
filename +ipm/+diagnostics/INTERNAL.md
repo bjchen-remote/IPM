@@ -9,8 +9,8 @@
 - `measure(rho,flow,ops,mass0)`：当前场的质量、梯度、值域、边界及分辨率指标。
 - `trackFeatures`：供精确规范定位、诊断、重网格与停机使用的当前峰值/宽度特征。
 - `measureFeatures`、`peakLocation`、`peakResolution`：一维特征及有效点数测量。
-- `resolutionFailed(flow,ops)`：步进后即时分辨率失败判定。
-- `stopPolicy(...)`：记录时的安全停止规则，返回停止原因。
+- `resolutionFailed(flow,ops)`：分辨率不足的离线判定；只作为质量证据，不终止步进。
+- `stopPolicy(...)`：保留历史阈值分类供离线审计；求解主循环不再调用它。
 - `finalQuality(history)`：最终质量摘要。
 - `blowupFit(t,gradInf)`：输入时间窗内的梯度拟合，不自行声明奇性。
 - `maximumGrowthRateFit(t,M)`：物理时间下比较指数、有限时幂律与

@@ -109,7 +109,4 @@ if ~ipm.evolve.isFinite(state)
     return;
 end
 state.timeStep = timeStep;
-if ipm.diagnostics.resolutionFailed(state.flow,state.ops)
-    stopReason = 'grid_resolution_failure';
-end
 end

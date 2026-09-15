@@ -63,10 +63,9 @@
 
 短例见 `examples/quadrant_level_set.m`；验证运行 `ipm.verify('quadrant')`。
 服务器新发行包根目录直接含可复制的 `main.m`：源码固定指向
-`/data/user/hd58131/ipm/ipm_long_time_server_20260915`，仅修改旧绝对路径末尾版本号。
+`/data/user/hd58131/ipm/ipm_long_time_server_20260915_v2`，仅修改旧绝对路径末尾版本号。
 把主文件复制到作业目录，以**复制件绝对路径**
 运行；仅 `jobRoot` 从自身路径获得，输出进入作业目录。打包和预飞见
-[第一象限发行入口](server/README_QUADRANT_ABSOLUTE.md)。不改用旧 R2.7 全域
-`main.m` 或旧发布包。
+[第一象限发行入口](server/README_QUADRANT_ABSOLUTE.md)。不改用旧全域发布包。
 服务器可直接将 `nx,ny` 设为例如 `1025,1025`，但须先做单步和 LU 内存预飞。
 旧全域 checkpoint 不得改写 `xlim` 后作为象限续算；冻结配置、网格与规范始终按原生检查点恢复。

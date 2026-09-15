@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="ipm_long_time_server_20260915"
+release_name="ipm_long_time_server_20260915_v2"
 if [[ $# -gt 1 ]]; then
     echo "Only the release parent may be overridden; main.m fixes the server release name." >&2
     exit 2
@@ -23,14 +23,8 @@ fi
 mkdir -p "$release_parent"
 mkdir "$stage"
 cp -R "$project_root/+ipm" "$stage/+ipm"
-cp -R "$project_root/tests" "$stage/tests"
-cp -R "$project_root/examples" "$stage/examples"
-cp -R "$project_root/server" "$stage/server"
-cp -R "$project_root/research" "$stage/research"
 cp "$project_root/server/main_quadrant_release.m" "$stage/main.m"
-cp "$project_root"/README*.md "$stage/"
-cp "$project_root"/RELEASE_NOTES*.md "$stage/"
-cp "$project_root/MESH_GRID_RECOMMENDATION_ZH.md" "$stage/"
+cp "$project_root/README.md" "$stage/"
 cp "$project_root/STRUCTURE.md" "$stage/"
 cp "$project_root/ARCHITECTURE_QUADRANT_LEVELSET_20260914.md" "$stage/"
 cp "$project_root/CHANGELOG.md" "$stage/"

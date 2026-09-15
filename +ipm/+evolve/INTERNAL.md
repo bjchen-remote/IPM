@@ -123,13 +123,12 @@ advance第三输出仅返回纯网格计划；solve在该调用返回后释放�
 这样旧接受步的局部引用不与新LU共存。实际迁移按原transfer执行，全部审计和新flow通过后才提交计数。
 失败计划回退前一接受步；候选实际迁移全部失败则保留已通过端点门的来源步并按同一A恢复LU。
 两类退出都记录原因；错误与数值拒绝分开。memory、真实迁移审计与有界时间窗放入runMetadata。
-version1当前仅固定节点数/箱；时间窗有限不等于记录数有固定上限，长期加点与有界采样仍在研究。
-完整运行期范围与证据见../../research/longtime_lab/AUTONOMOUS_RUNTIME_INTEGRATION.md。
+version1当前仅固定节点数/箱；该旧全域兼容路径不是当前服务器发布目标。
 
 显式version2在零时刻冻结referenceFamily，按当前实际场枚举分量单调、资源准入的成员。
 各级独立最多3提案，不同N禁止keep；原始config N和物理epoch不变。
 apply只接受来源时钟/step/level/N匹配的计划，audit和flow通过后同步提交新base/currentLevel、计数和真实决策账本。
-原生跨尺寸恢复及每级历史合同见../../research/longtime_lab/AUTONOMOUS_NODE_GROWTH_RUNTIME_V2.md。
+原生跨尺寸恢复及每级历史合同由代码与 controller 回归测试共同维持。
 version5仍由同一 `advance → planAutonomousMesh → applyAutonomousMesh` 路径运行，
 方向族由初始节点数与预设资源上限确定。规划按目标总节点数递增，成员内按最大相邻比
 排序；实际迁移失败继续尝试已注册后备，不触碰C率或原接受场。

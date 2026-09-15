@@ -15,7 +15,8 @@ checkpoint 恢复后交回同一演化入口。
 - `makeCheckpoint`、`writeCheckpoint`、`readCheckpoint`：打包、原子安装并严格校验
   schema-v4 接受步事务。
 - `maybeCheckpoint`：只在已记录末态仍属于连续可信前缀时执行 cadence/exit 写入。
-- `restoreCheckpoint`：按白名单覆盖终止界和输出控制，重建 same-grid 完整状态。
+- `restoreCheckpoint`：按白名单覆盖时间/步数终止界、`rhoXStop` 和输出控制，重建
+  same-grid 完整状态。
 - `checkpointFromResult`：从 terminal-trusted v2 结果重建并 overlap 复核一次性 checkpoint；
   不换网格，也不把指数化尺度冒充 bitwise 原值。
 - `plotResult`、`visualize`、`closeLive`：结果图、在线绘图/视频与资源清理。

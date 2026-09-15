@@ -11,7 +11,7 @@
 
 当前第一象限只准入各向同性 `high_order / weno5_fd / ssprk54 / high_order` 数值元组。可沿用 `transport_anchor` 和 `(2,0)` 外壁面密度窗等动态规范。旧 `autonomousMesh` v1–v5 的对称轴/节点族契约不适用，配置解析明确拒绝与第一象限混用；新路径使用同节点数直接重网格。自动增加节点数、各向异性象限路径和百万节点长跑尚未实现或验收。大网格应在启动时直接给出所需 `nx,ny`。
 
-网格质量量用于 REMESH 触发、新网格事务验收和事后可信区间分析，不作为 PDE 主循环的终止条件。历史停机阈值仅在运行期新网格已成功接受后评估；超阈值事件输出 `WARNING`、持久化到 `metadata.remeshWarnings`，但不回滚网格、不改写 `stopReason`。`maxSteps=Inf` 表示没有接受步数上限；有限值仍须是正整数。演化只会在到达时间终点、时间步低于数值下限、状态出现非有限数，或发生不能继续执行的实际异常时退出。
+网格质量量用于 REMESH 触发、新网格事务验收和事后可信区间分析，不作为 PDE 主循环的终止条件。历史停机阈值仅在运行期新网格已成功接受后评估；超阈值事件输出 `WARNING`、持久化到 `metadata.remeshWarnings`，但不回滚网格、不改写 `stopReason`。REMESH 提案拒绝、几何构造或迁移异常同样保留当前接受网格并发布去重警告。服务器 v3 把 canonical/physical 时间、接受步数和 REMESH 次数上限全部设为 `Inf`，唯一配置的正常终止条件是物理 `max|rho_x|>=1000`；该量在每步检查、每次输出播报。只有非有限算术或时间步下溢到机器零这类无法形成下一接受态的数值故障仍会退出并保存最后有限态。
 
 ## 数学与存储契约
 
@@ -63,7 +63,7 @@
 
 短例见 `examples/quadrant_level_set.m`；验证运行 `ipm.verify('quadrant')`。
 服务器新发行包根目录直接含可复制的 `main.m`：源码固定指向
-`/data/user/hd58131/ipm/ipm_long_time_server_20260915_v2`，仅修改旧绝对路径末尾版本号。
+`/data/user/hd58131/ipm/ipm_long_time_server_20260915_v3`，仅修改旧绝对路径末尾版本号。
 把主文件复制到作业目录，以**复制件绝对路径**
 运行；仅 `jobRoot` 从自身路径获得，输出进入作业目录。打包和预飞见
 [第一象限发行入口](server/README_QUADRANT_ABSOLUTE.md)。不改用旧全域发布包。

@@ -38,8 +38,8 @@ if output.livePlot || output.writeVideo
 end
 videoCleanup = onCleanup(@()ipm.output.closeLive(viz));
 
-stopReason = 'final_time';
-while ipm.evolve.isActive(state)
+stopReason = rho_x_stop_reason(state);
+while isempty(stopReason) && ipm.evolve.isActive(state)
     [state,stepStopReason,meshPlan] = ipm.evolve.advance(state);
     if ~isempty(meshPlan)
         % Own the factor lifetime here: advance has returned, so neither its
@@ -63,6 +63,9 @@ while ipm.evolve.isActive(state)
                 stepStopReason = 'autonomous_mesh_error';
             end
         end
+    end
+    if isempty(stepStopReason)
+        stepStopReason = rho_x_stop_reason(state);
     end
     if ~isempty(stepStopReason)
         stopReason = stepStopReason;
@@ -89,7 +92,8 @@ while ipm.evolve.isActive(state)
     end
 end
 
-if strcmp(stopReason,'final_time')
+if isempty(stopReason)
+    stopReason = 'final_time';
     if state.scale.physicalTime >= time.physicalFinalTime
         stopReason = 'physical_final_time';
     elseif state.step >= time.maxSteps && ...
@@ -112,6 +116,16 @@ result = ipm.output.write(result,output);
 ipm.output.report(result);
 if output.makePlots && isempty(viz)
     ipm.output.plotResult(result);
+end
+end
+
+function stopReason = rho_x_stop_reason(state)
+maximum = ipm.diagnostics.physicalRhoXInf(state.flow,state.scale);
+threshold = state.config.diagnostics.rhoXStop;
+if isfinite(threshold) && maximum >= threshold
+    stopReason = 'rho_x_threshold';
+else
+    stopReason = '';
 end
 end
 

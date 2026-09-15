@@ -8,14 +8,15 @@
 ## 路径
 
 - `initialize(opts)`：一次配置解析、网格、初值、尺度、流场及必要的解析初始重网格。
-- `advance(state)`：选步长、配套 RK、有限性检查及必要的重网格；成功 REMESH 后发布非终止质量告警。
+- `advance(state)`：选步长、配套 RK、有限性检查及必要的重网格；成功 REMESH 后发布质量告警，失败 REMESH 保留当前网格并发布非终止告警。
 - `flow`、`rhs`：空间场、特征、规范、缩放输运与源项的共同组装路径。
 - `stepSsprk3`、`stepSsprk54`、`stepRk6`：通过 `stepRk` 共享阶段状态契约。
 - `isActive`、`selectTimestep`：处理归一化、规范及物理时钟和步数限制。
 
 `state` 保存冻结配置、当前 `ops/rho/flow/scale`、初始质量/值域、步数与时刻。
-接受状态只在完整步进与迁移通过有限性检查后保留；失败时回退并报告停止原因，
-不吞掉数值函数抛出的异常。最后一个有限状态供外层记录和输出。
+接受状态只在完整步进通过有限性检查后保留。REMESH 是附加事务：提案拒绝或内部
+异常不撤销已经接受的 PDE 步，而是保留当前网格、持久化去重警告并继续。非有限
+Runge--Kutta 状态仍回退到最后一个有限态并报告停止原因。
 同网格恢复由 `output.restoreCheckpoint` 重建 `ops/flow` 后交回同一个外层循环；它不另建
 时间推进入口。checkpoint 必须保留参考轴和派生重标度参考量，不能只保存末态 `rho`。
 
@@ -37,7 +38,8 @@ SSPRK3、SSPRK(5,4) 与 RK6 因此分别将连续步的 RHS 求值数从 4/6/9 �
 RK6 使用六阶推进行，不用嵌入五阶行自适应控步，也不声称 SSP/TVD/保正。
 canonical `tau` 是直接积分时钟；不再有 `maxDynamicRate` 限速或
 状态依赖的公共时间重参数化。`canonicalRateMagnitude` 仅是原始率的诊断量，
-不参与步进；CFL、终止时钟和有限性安全门仍独立生效。
+不参与步进；CFL、显式终止门和有限性安全门仍独立生效。外层在每个接受步后以
+`diagnostics.physicalRhoXInf` 检查物理 `max|rho_x|`。
 
 冻结壁面模板投影以初始离散网格上的模板为定义，目前只准用于固定网格；配置解析会拒绝
 其与 adaptive remesh 的组合，避免在尚未注册模板重采样规则时悄悄改变规范泛函。

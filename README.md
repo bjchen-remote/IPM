@@ -20,7 +20,11 @@ run(fullfile(projectRoot,'examples','quadrant_level_set.m'));
 opts.quadrantOnly = true;
 opts.xlim = [0,8];
 opts.adaptiveRemesh = true;
+opts.finalTime = Inf;
+opts.physicalFinalTime = Inf;
 opts.maxSteps = Inf;
+opts.maxRemeshes = Inf;
+opts.rhoXStop = 1000;
 result = ipm.solve(opts);
 ```
 
@@ -35,6 +39,11 @@ result = ipm.solve(opts);
 历史上的梯度、值域、振荡、相邻格比和核心分辨率停机阈值只在成功 REMESH 后
 检查。越界项输出 `WARNING` 并写入 `result.metadata.remeshWarnings`，但不回滚、
 不改写 `stopReason`、不终止 PDE。
+
+生产服务器入口没有 canonical/physical 时间终点、步数上限或重网格次数上限；唯一
+配置的正常终止条件是物理 `max|rho_x| >= 1000`。每次输出都会播报该值。重网格构造
+或迁移异常也会保留当前已接受网格并记录警告。非有限算术或时间步下溢到机器零属于
+无法继续推进的数值故障，程序会保存最后有限态后退出。
 
 完整设计见[架构记录](ARCHITECTURE_QUADRANT_LEVELSET_20260914.md)，模块关系见
 [结构说明](STRUCTURE.md)，包内接口从[包导航](+ipm/README.md)进入。

@@ -265,6 +265,10 @@ if isfinite(values.maxSteps) && values.maxSteps ~= floor(values.maxSteps)
     error('ipm:BadMaximumSteps', ...
         'opts.maxSteps must be a positive integer or Inf.');
 end
+if isfinite(values.maxRemeshes) && values.maxRemeshes ~= floor(values.maxRemeshes)
+    error('ipm:BadMaximumRemeshes', ...
+        'opts.maxRemeshes must be a nonnegative integer or Inf.');
+end
 
 config = freeze_config(values,schema,optionNames);
 end

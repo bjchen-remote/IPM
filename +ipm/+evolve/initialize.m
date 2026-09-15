@@ -24,10 +24,24 @@ end
 if ~autonomous && remesh.initialAnalyticRemesh && remesh.adaptiveRemesh && ...
         initialRemeshReady
     for pass = 1:remesh.initialAnalyticRemeshPasses
-        [~,candidateOps,info] = ...
-            ipm.remesh.adapt( ...
-            rho,ops,flow,config,exp(scale.logC_omega));
+        try
+            [~,candidateOps,info] = ...
+                ipm.remesh.adapt( ...
+                rho,ops,flow,config,exp(scale.logC_omega));
+        catch exception
+            runMetadata = initial_remesh_warning(runMetadata,ops, ...
+                'remesh_exception',sprintf('%s: %s', ...
+                exception.identifier,exception.message));
+            break;
+        end
         if ~info.applied
+            if isfield(info,'status') && ...
+                    ~strcmp(info.status,'not_triggered')
+                runMetadata = initial_remesh_warning(runMetadata,ops, ...
+                    'remesh_candidate_rejected',sprintf( ...
+                    'initial direct level-set remesh returned %s', ...
+                    info.status));
+            end
             break;
         end
         % Sample the analytic datum on the accepted grid; interpolating the
@@ -89,6 +103,22 @@ if ~ipm.evolve.isFinite(state)
 end
 end
 
+function metadata = initial_remesh_warning(metadata,ops,code,message)
+message = strrep(char(message),newline,' ');
+row = struct('code',char(code),'metric','remesh_attempt', ...
+    'value',NaN,'threshold',NaN,'message',message, ...
+    'step',0,'canonicalTime',0,'physicalTime',0, ...
+    'remeshCount',ops.remeshCount);
+if isfield(metadata,'remeshWarnings') && ~isempty(metadata.remeshWarnings)
+    metadata.remeshWarnings(end+1) = row;
+else
+    metadata.remeshWarnings = row;
+end
+fprintf(2,['WARNING [initial-remesh/%s] remesh=%d: %s. ' ...
+    'Initial grid retained; evolution continues.\n'], ...
+    row.code,row.remeshCount,row.message);
+end
+
 function yes = initial_observer_enabled(config)
 yes=isfield(config.remesh,'initialMeshObservationFallback') && ...
     config.remesh.initialMeshObservationFallback.enabled;
@@ -143,7 +173,7 @@ for k=1:numel(evidence.candidateAudits)
         'actualCoreCells',a.features.actualCoreCells, ...
         'actualFrontCells',a.features.leftFrontCells);
     if isempty(summary.candidateAudits),summary.candidateAudits=row;
-    else,summary.candidateAudits(end+1)=row;end %#ok<AGROW>
+    else,summary.candidateAudits(end+1)=row;end
 end
 if isfield(evidence,'nativeAttempts')
     summary.nativeAttemptCount=numel(evidence.nativeAttempts);

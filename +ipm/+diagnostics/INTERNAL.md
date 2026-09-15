@@ -12,6 +12,8 @@
 - `resolutionFailed(flow,ops)`：分辨率不足的历史分类；只作为质量证据。
 - `postRemeshWarnings(...)`：仅在运行期新网格已接受后评估原停机阈值，返回所有告警事件。
 - `physicalGradientInf(...)`：统一记录与重网格后审计的物理梯度定义。
+- `physicalRhoXInf(flow,scale)`：播报、历史和终止门共用的全局物理
+  `max|rho_x|` 定义。
 - `stopPolicy(...)`：仅保留历史停机结果的离线复现；求解主循环不调用它。
 - `finalQuality(history)`：最终质量摘要。
 - `blowupFit(t,gradInf)`：输入时间窗内的梯度拟合，不自行声明奇性。
@@ -69,6 +71,8 @@ canonical 时间上预设给原始最大值；必须分别比较 canonical
 超阈值事件写入 `metadata.remeshWarnings` 并输出 `WARNING`；不回滚、不修改
 `stopReason`、不终止 PDE。诊断计算自身的异常也降级为
 `diagnostic_evaluation_error` 告警，不得成为新的隐式停机点。
+`diagnostics.rhoXStop` 是独立的物理目标门；有限值在每个接受步后检查，达到时以
+`rho_x_threshold` 正常结束。`Inf` 明确关闭该门。
 在 schema-4 `exact_gauge_no_feedback_v1` 中，特征的位置/场值可以进入规范的精确
 代数约束；但峰值、层级、面积或连通宽度的网格单元计数只能被记录、触发
 remesh 或产生重网格后告警，不得作为 `c_l/c_omega/c_r` 的反馈信号。

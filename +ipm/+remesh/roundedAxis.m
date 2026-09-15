@@ -27,9 +27,37 @@ validateattributes(anchorFraction,{'numeric'},{'scalar','>',0,'<',1});
 H=halfWidth/anchor;
 leftFineCells=round(fineCells*anchorFraction);
 assert(leftFineCells>=1 && leftFineCells<fineCells);
-interval=1+[-leftFineCells,fineCells-leftFineCells]*(fineSpacing/anchor);
+rightFineCells=fineCells-leftFineCells;
+requestedSpacing=fineSpacing/anchor;
+designSpacing=requestedSpacing;
+spacingCap=Inf;
+spacingLimited=false;
+if positiveOnly
+    minimumBranch=roundingCells+2;
+    outerCells=cells-fineCells;
+    if outerCells<2*minimumBranch
+        error('ipm:RoundedAxisInfeasible', ...
+            'Insufficient rounded-branch cell budget.');
+    end
+    % Largest constant fine width that leaves a feasible integer split.
+    % The continuous balance is exact; only its two adjacent integers can
+    % maximize the minimum left/right capacity.
+    idealLeft=cells/H-leftFineCells;
+    candidates=unique(min(outerCells-minimumBranch, ...
+        max(minimumBranch,[floor(idealLeft),ceil(idealLeft)])));
+    candidateCaps=min(1./(candidates+leftFineCells), ...
+        (H-1)./(outerCells-candidates+rightFineCells));
+    spacingCap=max(candidateCaps);
+    safeCap=spacingCap-128*eps(spacingCap);
+    designSpacing=min(designSpacing,safeCap);
+    spacingLimited=designSpacing<requestedSpacing;
+else
+    assert(fineCells+2*(roundingCells+2)<=cells, ...
+        'Insufficient rounded-branch cell budget.');
+end
+interval=1+[-leftFineCells,rightFineCells]*designSpacing;
 assert(interval(1)>0 && interval(2)<H);
-assert(fineCells+2*(roundingCells+2)<=cells,'Insufficient rounded-branch cell budget.');
+% Preserve the established interval-to-width floating-point operation.
 spacing=diff(interval)/fineCells;
 leftLength=interval(1);
 rightLength=H-interval(2);
@@ -41,10 +69,12 @@ if positiveOnly
     % budget from the two measured spans, then solve only two scalar slopes.
     % Projection enforces the minimum rounded branch and spacing feasibility.
     outerCells=cells-fineCells;
-    minimumBranch=roundingCells+2;
     lower=max(minimumBranch,outerCells-floor(rightLength/spacing));
     upper=min(outerCells-minimumBranch,floor(leftLength/spacing));
-    assert(lower<=upper,'No feasible direct rounded-log cell split.');
+    if lower>upper
+        error('ipm:RoundedAxisInfeasible', ...
+            'No feasible direct rounded-log cell split.');
+    end
     spanWeight=log1p([leftLength,rightLength]/spacing);
     leftCount=min(upper,max(lower,round(outerCells*spanWeight(1)/sum(spanWeight))));
     rightCount=outerCells-leftCount;
@@ -110,6 +140,8 @@ info=struct('kind','direct_generic_rounded_log_candidate','anchor',anchor, ...
     'normalization','u=x/anchor','normalizedHalfWidth',H,'nodeCount',nodeCount, ...
     'fineCells',fineCells,'leftFineCells',leftFineCells,'roundingCells',roundingCells, ...
     'normalizedFineInterval',interval,'normalizedFineSpacing',spacing, ...
+    'requestedNormalizedFineSpacing',requestedSpacing, ...
+    'normalizedFineSpacingCap',spacingCap,'fineSpacingLimited',spacingLimited, ...
     'split',best,'anchorIndex',anchorIndex,'normalizedAnchorBeforeSnap',before, ...
     'splitStrategy',splitStrategy,'splitEvaluations',splitEvaluations, ...
     'historicalAxisReproductionClaim',false,'nestedLegacyFactory',false, ...

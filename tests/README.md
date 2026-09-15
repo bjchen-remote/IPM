@@ -10,7 +10,7 @@
 | `ipm.verify('fourth','heavy')` | 四阶套件，扩展稳定性扫描 |
 | `ipm.verify('sixth')` | 六阶空间、WENO7、RK6、网格准入、迁移与物理收敛 |
 | `ipm.verify('all')` | 独立结构检查，以及基线、四阶、六阶、第一象限；不需要原版 |
-| `ipm.verify('quadrant')` | 正半轴存储、旧全域 RHS 对照、90% 核心独立触发/其它观察层回退/无峰守门、单分配/单提案迁移、1025 节点一维轴、短算及原生 checkpoint |
+| `ipm.verify('quadrant')` | 正半轴存储、旧全域 RHS 对照、90% 核心独立触发/其它观察层回退/无峰守门、单提案迁移、1024/1025 节点轴、细格宽容量限幅、短算及原生 checkpoint |
 | `ipm.verify('all','heavy')` | 同上，其中四阶采用 heavy 稳定性扫描 |
 | `ipm.verify('equivalence')` | 显式比较本副本与保留的原求解器 |
 

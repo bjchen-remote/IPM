@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="ipm_long_time_server_20260914"
+release_name="ipm_long_time_server_20260915"
 if [[ $# -gt 1 ]]; then
     echo "Only the release parent may be overridden; main.m fixes the server release name." >&2
     exit 2

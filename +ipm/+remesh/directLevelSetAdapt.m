@@ -16,7 +16,8 @@ info=struct('applied',false,'count',ops.remeshCount, ...
     'predictedCells',[NaN,NaN,NaN],'feature',struct(), ...
     'xQuality',struct(),'yQuality',struct(), ...
     'massRelativeDefect',NaN,'relativePeakJump',NaN, ...
-    'relativeRangeViolation',NaN,'geometryProposals',0,'nativeTransfers',0);
+    'relativeRangeViolation',NaN,'geometryProposals',0,'nativeTransfers',0, ...
+    'geometryFailureIdentifier','','geometryFailureMessage','');
 view=struct('rho',rho,'x',ops.x,'y',ops.y,'Dx',ops.Dx, ...
     'source',flow.source,'trusted',true);
 feature=ipm.diagnostics.meshFeatureIntervals(view);
@@ -60,12 +61,20 @@ try
         ops.y,feature.yCoreWidth,1.15*targetY, ...
         min(8,max(2,floor((ops.ny-1)/4))));
 catch exception
-    if strcmp(exception.identifier,'ipm:RoundedGeometricInfeasible') || ...
-            strcmp(exception.identifier,'MATLAB:assertion:failed')
-        info.status=['geometry_rejected:' exception.identifier];return
+    if direct_geometry_rejection(exception)
+        identifier=exception.identifier;
+        if isempty(identifier)
+            identifier='unidentified_geometry_failure';
+        end
+        info.status=['geometry_rejected:' identifier];
+        info.geometryFailureIdentifier=exception.identifier;
+        info.geometryFailureMessage=exception.message;
+        return
     end
     rethrow(exception)
 end
+info.xConstruction=xConstruction;
+info.yConstruction=yConstruction;
 qx=ipm.mesh.quality(x,7,ipm.mesh.quadrantQuadrature(x));
 qy=ipm.mesh.quality(y,7,ipm.mesh.quadrature(y));
 info.xQuality=qx;info.yQuality=qy;
@@ -107,7 +116,6 @@ info.applied=true;info.count=candidateOps.remeshCount;
 info.status='accepted';
 info.newPeakSpacing=local_spacing(x,feature.coreCenter);
 info.newWallSpacing=y(2)-y(1);
-info.xConstruction=xConstruction;info.yConstruction=yConstruction;
 end
 
 function count=interval_count(axis,bounds)
@@ -120,4 +128,14 @@ function spacing=local_spacing(axis,point)
 [~,index]=min(abs(axis-point));
 left=max(index-1,1);right=min(index+1,numel(axis));
 spacing=(axis(right)-axis(left))/(right-left);
+end
+
+function answer=direct_geometry_rejection(exception)
+identifiers={'ipm:RoundedAxisInfeasible','ipm:RoundedGeometricInfeasible', ...
+    'ipm:CorePatchAxisInfeasible'};
+legacyMessages={'No feasible direct rounded-log cell split.', ...
+    'Insufficient rounded-branch cell budget.', ...
+    'No feasible rounded-log cell split.'};
+answer=any(strcmp(exception.identifier,identifiers)) || ...
+    any(strcmp(exception.message,legacyMessages));
 end

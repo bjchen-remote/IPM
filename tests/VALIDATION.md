@@ -1,5 +1,18 @@
 # 结构化副本验证记录
 
+## 2026-09-15：rounded-axis 容量失败回归
+
+旧版会抛出 `No feasible direct rounded-log cell split.` 的
+`N=65,h=0.05,fineCells=24,roundingCells=8` 正轴，现在一次把细格宽限到
+`0.04545454545454457`，`splitEvaluations=1`，最大相邻格比约 `1.04828596`。
+正常 1025 节点轴和锚点修正轴与冻结 9.14 包逐位一致。
+
+MATLAB R2026a 的 `ipm.verify('quadrant')` exit0（5.894 秒）；
+`ipm.verify('equivalence','quick')` 的 6 个旧全域物理算例及 3 次迁移逐值一致
+（5.339 秒）；最终 `ipm.verify('all','quick')` exit0（88.363 秒）。
+变更 MATLAB 文件 Code Analyzer 0 条，打包脚本 `bash -n` 与 `git diff --check` 通过。
+服务器 R2022b 的原长跑时刻、525825 节点 LU 和跨版本 checkpoint 续算尚未实测。
+
 ## 2026-09-14：架构整理后的最终回归
 
 冻结 9.14 包与源码构造的 1025/1024 实际节点象限轴、锚点修正轴及其构造信息

@@ -1,5 +1,12 @@
 # 本副本变更记录
 
+## 2026-09-15：象限 rounded-axis 容量修复
+
+- 修复服务器 MATLAB 中 `No feasible direct rounded-log cell split.` 从 `roundedAxis` 逸出并终止 PDE 的问题。原因是测得的目标细格宽偶尔大于固定节点预算在左右外区可容纳的宽度，而旧代码把这种正常候选不可行性写成了无稳定标识的 `assert`；不同 MATLAB 版本的异常标识不一致，外层回退未识别。
+- 正轴构造现在由连续左右容量平衡点相邻的两个整数分配直接求最大可行细格宽，必要时只限幅一次，再沿原单提案路径构造轴。它不增加候选、循环重试或二维搜索；未触发限幅时恢复原 `diff(interval)/fineCells` 运算顺序，正常轴与 9.14 冻结发行版逐位一致。预期的几何不可行使用稳定 `ipm:RoundedAxisInfeasible` 标识，事务仍兼容按旧错误文本回退，并保存失败标识/信息。
+- 服务器入口版本号更新为固定绝对路径 `/data/user/hd58131/ipm/ipm_long_time_server_20260915`。可选环境变量 `IPM_RESTART_CHECKPOINT` 允许从因该 9.14 缺陷中断前的最后一个原生象限 checkpoint 恢复；不设置时仍是拒绝覆盖输出的全新运行。恢复日志、启动配置、结果和指针使用不覆盖旧文件的路径。
+- MATLAB R2026a：原失败几何 `N=65,h=0.05` 被解析限幅到 `0.04545454545454457`，只评估一次分配且最大相邻格比约 `1.04828596`；`ipm.verify('quadrant')` exit0（5.894 秒）；正常 1025 节点轴及锚点修正轴与冻结版逐位一致；`ipm.verify('equivalence','quick')` 的 6 个旧全域物理算例和 3 次迁移逐值一致（5.339 秒）；最终 `ipm.verify('all','quick')` exit0（88.363 秒）；变更 MATLAB 文件 Code Analyzer 0 条，`bash -n` 与 `git diff --check` 通过。尚未在服务器复现原长跑时刻，也未执行服务器 525825 节点 LU/续算。
+
 ## 2026-09-14：源码架构与书写整理（未重新发行）
 
 - 象限 `roundedAxis(...,positiveOnly=true)` 改为直接接收实际 `[0,H]` 节点数；`corePatchAxis` 不再先构造 `2*N-1` 的概念全域节点数。默认旧全域接口及分配搜索保留。核心目标和 80% 触发单元数由 `directLevelSetTargets` 同时返回，运行期预筛与实际重测不再重复写门槛；`remeshIfNeeded` 将共同的自适应开关/次数门提前。整理条件与一维斜率求解的书写，未改变公式或候选数量。

@@ -26,6 +26,7 @@ opts
   -> evolve.advance
        -> selectTimestep -> Runge-Kutta -> finite check
        -> remeshIfNeeded -> one proposal -> transfer -> accept/fallback
+       -> rejected proposal -> wait for one-cell level-set change
        -> accepted REMESH only: publishRemeshWarnings
   -> physical max|rho_x| threshold
   -> output.record / maybeCheckpoint
@@ -35,13 +36,15 @@ opts
 `state` 是唯一可变运行对象，持有 `rho/ops/flow/scale/config/runMetadata`。
 REMESH 是事务：候选状态只有在几何、迁移和有限性全部通过后才替换当前状态。
 质量阈值警告在事务提交后生成，只进入控制台和 `runMetadata.remeshWarnings`。
+失败事务的几何记忆进入 `runMetadata.quadrantRemeshRetry` 和 checkpoint；等待期间只比较
+已有的核心中心/宽度，不再构轴或迁移。
 
 ## 文件与数据契约
 
 - `result.schemaVersion = 2`：末态、物理场、网格、历史和元数据分组保存。
 - checkpoint schema 4：保存完整接受态、当前非均匀轴、冻结配置和输出游标。
 - `quadrantOnly=true`：所有运行场、快照和 checkpoint 都是 `ny x nx` 正象限数组。
-- 服务器 v3 将 canonical/physical 时间、步数和 REMESH 次数上限全部设为 `Inf`，
+- 服务器 v4 将 canonical/physical 时间、步数和 REMESH 次数上限全部设为 `Inf`，
   每步只以物理 `max|rho_x|=1000` 作为正常终止条件。
 - REMESH 提案拒绝或异常保留当前接受网格并持久化警告。非有限状态和机器时间步为零
   仍是不可继续的数值故障，不冒充可恢复警告。

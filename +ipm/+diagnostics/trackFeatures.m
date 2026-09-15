@@ -3,6 +3,8 @@ function details = trackFeatures(rho,physicalRhs,flow,ops)
 
 details = empty_details();
 r = ops.rescaling;
+sourceScale = max(abs(flow.source),[],'all');
+details.rhoXInf = sourceScale;
 
 if ~r.enabled && ~isfield(r,'pinX')
     return;
@@ -27,8 +29,6 @@ levelGridPoints = wall.gridPoints;
 peakGridPoints = wall.areaPoints(1);
 vertical = ipm.diagnostics.measureFeatures( ...
     abs(flow.source(:,wall.peakIndex))',ops.y',r.adaptiveLevels,[]);
-sourceScale = max(abs(flow.source),[],'all');
-
 if r.enabled && strcmp(r.lengthGauge,'wall_density_width')
     positive = find(ops.x >= 0);
     wallDensity = rho(1,positive);
@@ -183,7 +183,7 @@ details = struct('c_lNominal',0,'lengthScaleGain',1, ...
     'wallDensityLowerCondition',NaN,'wallDensityUpperCondition',NaN, ...
     'wallDensityLowerBracket',NaN,'wallDensityUpperBracket',NaN, ...
     'wallWidthRate',NaN,'wallWidthCurrent',NaN, ...
-    'travelingWaveResidual',NaN);
+    'travelingWaveResidual',NaN,'rhoXInf',NaN);
 end
 
 function widthRate = normalized_width_rate( ...

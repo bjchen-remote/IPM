@@ -1,11 +1,11 @@
 # 第一象限服务器发布
 
-当前大版本名：`ipm_long_time_server_20260915_v3`。
+当前大版本名：`ipm_long_time_server_20260915_v4`。
 
 完整发行包部署到固定位置：
 
 ```text
-/data/user/hd58131/ipm/ipm_long_time_server_20260915_v3
+/data/user/hd58131/ipm/ipm_long_time_server_20260915_v4
 ```
 
 随后把包根目录的 `main.m` 复制到独立作业目录，并按复制件的绝对路径运行。
@@ -46,6 +46,8 @@ IPM_PREFLIGHT_ONLY=1 /opt/MATLAB/R2026a/bin/matlab -batch \
 REMESH 次数均为 `Inf`，唯一正常终止门是物理 `max|rho_x|>=1000`。每隔 `0.01`
 canonical time 的播报包含当前 `max|rho_x|`，checkpoint 间隔为 `0.1`。REMESH 保持
 开启；质量越界、提案拒绝和 REMESH 异常只发布警告并保留当前网格。
+失败 REMESH 不会在下一步立刻重做；仅当 level-set 核心中心或尺度累计改变约一个
+目标单元时重试。该规则不依赖时间或步数。
 
 如需恢复同版本原生 checkpoint，设置 `IPM_RESTART_CHECKPOINT` 为其绝对路径。
 恢复时冻结网格、物理和数值配置，只延长原终止界并生成不覆盖旧文件的新产物。

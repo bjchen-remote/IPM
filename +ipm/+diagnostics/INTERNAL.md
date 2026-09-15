@@ -13,7 +13,8 @@
 - `postRemeshWarnings(...)`：仅在运行期新网格已接受后评估原停机阈值，返回所有告警事件。
 - `physicalGradientInf(...)`：统一记录与重网格后审计的物理梯度定义。
 - `physicalRhoXInf(flow,scale)`：播报、历史和终止门共用的全局物理
-  `max|rho_x|` 定义。
+  `max|rho_x|` 定义；优先复用 `trackFeatures` 已随 `flow` 返回的 `rhoXInf`，
+  兼容外部 flow 时才扫描源场。
 - `stopPolicy(...)`：仅保留历史停机结果的离线复现；求解主循环不调用它。
 - `finalQuality(history)`：最终质量摘要。
 - `blowupFit(t,gradInf)`：输入时间窗内的梯度拟合，不自行声明奇性。

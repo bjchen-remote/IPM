@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 release_parent="${1:-$(dirname "$project_root")/releases}"
-release_name="ipm_long_time_server_20260915_v3"
+release_name="ipm_long_time_server_20260915_v4"
 if [[ $# -gt 1 ]]; then
     echo "Only the release parent may be overridden; main.m fixes the server release name." >&2
     exit 2
@@ -37,7 +37,7 @@ else
 fi
 {
     echo "release=$release_name"
-    echo "launcher=quadrant_positive_only_copied_main_v2"
+    echo "launcher=quadrant_positive_only_copied_main_v3"
     echo "server_release_root=/data/user/hd58131/ipm/$release_name"
     echo "created_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo "source_commit=$commit"

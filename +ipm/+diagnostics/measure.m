@@ -31,9 +31,9 @@ d.massDrift = (mass-mass0)/max(abs(mass0),eps);
 d.l2 = sqrt(sum(rho.^2.*weights,'all'));
 d.rhoMin = min(rho,[],'all');
 d.rhoMax = max(rho,[],'all');
-d.rhoXInf = max(abs(rhoX),[],'all');
+d.rhoXInf = flow.rhoXInf;
 d.rhoYInf = max(abs(rhoY),[],'all');
-d.omegaInf = max(abs(flow.source),[],'all');
+d.omegaInf = flow.rhoXInf;
 positiveHalfPlane = ops.x > 0;
 if any(positiveHalfPlane)
     positiveSource = flow.source(:,positiveHalfPlane);

@@ -1,6 +1,9 @@
 function stopReason = stopPolicy( ...
         history,physicalGradientInf,flow,ops,diagnostics,remesh)
-%IPM.DIAGNOSTICS.STOPPOLICY Evaluate terminal diagnostics after a recorded state.
+%IPM.DIAGNOSTICS.STOPPOLICY Reproduce the retired terminal classification.
+%   The solver does not call this historical audit helper. Runtime quality
+%   thresholds are emitted by postRemeshWarnings only after an accepted
+%   replacement grid and never become a stop reason.
 
 common = history.common;
 mesh = history.mesh;

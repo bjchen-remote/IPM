@@ -1,4 +1,4 @@
-# diagnostics：特征、质量与停止条件
+# diagnostics：特征与质量证据
 
 由当前状态或记录序列计算诊断量，不修改密度、算子或配置，也不执行文件写入。
 导航：[包索引](../README.md) · [结构总览](../../STRUCTURE.md) ·
@@ -7,10 +7,12 @@
 ## 接口
 
 - `measure(rho,flow,ops,mass0)`：当前场的质量、梯度、值域、边界及分辨率指标。
-- `trackFeatures`：供精确规范定位、诊断、重网格与停机使用的当前峰值/宽度特征。
+- `trackFeatures`：供精确规范定位、诊断、重网格与 REMESH 后审计使用的当前峰值/宽度特征。
 - `measureFeatures`、`peakLocation`、`peakResolution`：一维特征及有效点数测量。
-- `resolutionFailed(flow,ops)`：分辨率不足的离线判定；只作为质量证据，不终止步进。
-- `stopPolicy(...)`：保留历史阈值分类供离线审计；求解主循环不再调用它。
+- `resolutionFailed(flow,ops)`：分辨率不足的历史分类；只作为质量证据。
+- `postRemeshWarnings(...)`：仅在运行期新网格已接受后评估原停机阈值，返回所有告警事件。
+- `physicalGradientInf(...)`：统一记录与重网格后审计的物理梯度定义。
+- `stopPolicy(...)`：仅保留历史停机结果的离线复现；求解主循环不调用它。
 - `finalQuality(history)`：最终质量摘要。
 - `blowupFit(t,gradInf)`：输入时间窗内的梯度拟合，不自行声明奇性。
 - `maximumGrowthRateFit(t,M)`：物理时间下比较指数、有限时幂律与
@@ -63,10 +65,13 @@ provenance 不可用；传入 `true` 时则速率为 prescribed，两种情况�
 `1/max|rho_x| ~ const*(T-t)`。因而“线性增长”不应在
 canonical 时间上预设给原始最大值；必须分别比较 canonical
 线性/指数模型和物理时间上的倒数线性/有限时幂律。
-停止原因属于结果契约，即使提前停止也要保留最后可用状态及对应诊断。
+原质量停机分类不再属于运行期终止契约。只在成功的运行期 REMESH 之后审计，
+超阈值事件写入 `metadata.remeshWarnings` 并输出 `WARNING`；不回滚、不修改
+`stopReason`、不终止 PDE。诊断计算自身的异常也降级为
+`diagnostic_evaluation_error` 告警，不得成为新的隐式停机点。
 在 schema-4 `exact_gauge_no_feedback_v1` 中，特征的位置/场值可以进入规范的精确
 代数约束；但峰值、层级、面积或连通宽度的网格单元计数只能被记录、触发
-remesh 或硬停机，不得作为 `c_l/c_omega/c_r` 的反馈信号。
+remesh 或产生重网格后告警，不得作为 `c_l/c_omega/c_r` 的反馈信号。
 
 本模块只调用 [mesh](../+mesh/INTERNAL.md) 的象限判定/奇偶导数选择，
 向 [remesh](../+remesh/INTERNAL.md) 提供只读特征，不调用求解或重网格事务，

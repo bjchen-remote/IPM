@@ -121,7 +121,8 @@ else
 end
 common.physicalGradientEnergy = common.physicalGradientEnergyX + ...
     common.physicalGradientEnergyY;
-common.physicalGradInf = physical_gradient_inf(d,scale,rho,ops);
+common.physicalGradInf = ...
+    ipm.diagnostics.physicalGradientInf(d,scale,rho,ops);
 common.physicalMassDrift = ...
     (common.physicalMass-state.mass0)/max(abs(state.mass0),eps);
 
@@ -412,18 +413,6 @@ for index = 1:numel(names)
             isnumeric(source.(name)) && isfinite(source.(name))
         target.(name) = source.(name);
     end
-end
-end
-
-function value = physical_gradient_inf(d,scale,rho,ops)
-if isfield(scale,'logC_y')
-    rhoX = rho*ops.Dx';
-    rhoY = ops.Dy*rho;
-    physicalRhoX = exp(scale.logC_l-scale.logC_omega)*rhoX;
-    physicalRhoY = exp(scale.logC_y-scale.logC_omega)*rhoY;
-    value = max(hypot(physicalRhoX,physicalRhoY),[],'all');
-else
-    value = exp(scale.logC_l-scale.logC_omega)*d.gradInf;
 end
 end
 

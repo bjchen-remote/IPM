@@ -38,7 +38,7 @@ ipm_grid_v6/
 | [config](+ipm/+config/INTERNAL.md) | `resolve`, `schema`, `sixthOrder` | `mesh.sixthOrderPolicy` 的常量 |
 | [mesh](+ipm/+mesh/INTERNAL.md) | `build`, `fdMatrix`, `quality` | `field.weno5Geometry` |
 | [field](+ipm/+field/INTERNAL.md) | `initialDensity`, `velocity`, `transport` | `mesh` 的象限奇偶算子选择；其余使用传入的 `ops` |
-| [diagnostics](+ipm/+diagnostics/INTERNAL.md) | `measure`, `trackFeatures`, `stopPolicy` | `mesh` 的象限判定；其余计算输入数据的诊断量 |
+| [diagnostics](+ipm/+diagnostics/INTERNAL.md) | `measure`, `trackFeatures`, `postRemeshWarnings` | `mesh` 的象限判定；其余计算输入数据的诊断量 |
 | [remesh](+ipm/+remesh/INTERNAL.md) | `adapt` | `mesh`, `diagnostics` |
 | [output](+ipm/+output/INTERNAL.md) | `record`, `finalize`, `validate`, `makeCheckpoint`, `restoreCheckpoint` | `config`, `mesh`, `field`, `evolve`, `diagnostics` |
 | [evolve](+ipm/+evolve/INTERNAL.md) | `initialize`, `advance`, `flow` | 以上六个模块；统一协调状态 |
@@ -57,7 +57,8 @@ ipm_grid_v6/
        -> mesh.build -> field.initialDensity -> 初始化重标度与流场
   -> solve 循环
        -> evolve.advance -> 选步长 -> 配套 RK -> remesh.adapt
-       -> output.record -> diagnostics.stopPolicy
+            -> 仅在接受 REMESH 后发布非终止质量告警
+       -> output.record
        -> output.maybeCheckpoint（仅连续可信前缀中的已记录接受步）
   -> output.finalize -> 物理量重建 -> v2 校验
   -> output.write / report / plotResult
@@ -109,7 +110,7 @@ config schema 4 固定
 参考族成员和每帧场/轴配对分别记录。两条路径的短程通过都不是长时精度保证。
 动态比例率由所选规范的瞬时代数恒等式唯一给出；
 参考量只用于精确条件、定向、正性和病态拒绝，不生成 restoring 源项。
-特征的网格单元计数仍可用于 telemetry、remesh 提案/验收和 hard stop，但不能修改
+特征的网格单元计数仍可用于 telemetry、remesh 提案/验收和 REMESH 后告警，但不能修改
 `c_l`、`c_omega`、`c_r` 或时间速度。
 
 四个数值选择分别为 `spatialDiscretization`、`transportScheme`、`timeIntegrator`、

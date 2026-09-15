@@ -1,5 +1,18 @@
 # 结构化副本验证记录
 
+## 2026-09-15：REMESH 后告警代替质量停机
+
+`ipm.verify('quadrant')` exit 0：小网格运行第 1 步接受第 1 次 REMESH 后，
+故意设为 `realmin` 的梯度阈值产生 `gradient_threshold` 告警，
+事件保存了 step/canonical time/physical time/remesh count，且求解仍以
+`final_time` 结束。关闭 adaptive REMESH 的同配置对照没有
+`metadata.remeshWarnings`。
+
+`ipm.verify('baseline')` exit 0：包布局、长时间服务器接口、网格、椭圆、
+数值核心、输运、对称、缩放、迁移、smoke、输出、checkpoint/restart 和集成层
+全部通过。最终 `ipm.verify('all','quick')` exit 0，又覆盖四阶、六阶与象限完整快速套件。
+变更 MATLAB 文件 Code Analyzer 0 条，`git diff --check` 通过。
+
 ## 2026-09-15：256 级无诊断硬停长跑入口
 
 `maxSteps=Inf` 配置解析及有限非整数拒绝测试通过；象限短程回归把

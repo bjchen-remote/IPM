@@ -108,5 +108,8 @@ if ~ipm.evolve.isFinite(state)
     stopReason = 'non_finite_solution';
     return;
 end
+if remeshInfo.applied
+    state = ipm.evolve.publishRemeshWarnings(state);
+end
 state.timeStep = timeStep;
 end

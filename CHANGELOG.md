@@ -1,5 +1,11 @@
 # 本副本变更记录
 
+## 2026-09-15：重网格后非终止质量告警
+
+- 保留 REMESH 的触发、网格构造、原生迁移与事务验收；梯度、值域、壁面振荡、相邻格比和核心分辨率等原停机阈值，改为仅在运行期新网格已成功接受后检查。固定网格步和未接受提案不执行该审计。
+- 所有超阈值项逐项写入 `result.metadata.remeshWarnings` 和 schema-v4 checkpoint，同时在控制台输出带 step/时钟/remesh 序号的 `WARNING`。告警不回滚已接受网格、不改写 `stopReason`、不终止 PDE；告警计算本身的异常也会降级为记录事件。
+- MATLAB R2026a 专项 `ipm.verify('quadrant')`、完整 `ipm.verify('baseline')` 及最终 `ipm.verify('all','quick')` 均 exit 0；变更 MATLAB 文件 Code Analyzer 0 条。专项回归强制梯度阈值越界，第 1 步重网格后产生告警但仍以 `final_time` 结束；同阈值的固定网格对照不产生 REMESH 告警。
+
 ## 2026-09-15：256 级无诊断硬停长跑
 
 - 网格平滑度和核心分辨率降为纯观测量；主循环不再因这些质量指标停止，也不再调用记录时的诊断阈值停止策略。非有限状态和小于 `minDt` 等无法继续演化的故障仍会退出。

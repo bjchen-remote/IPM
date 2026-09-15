@@ -73,7 +73,7 @@ run(fullfile(projectRoot,'examples','quick_start.m'));
 `widthContractionStrength`、`maxWidthRateCorrection` 这些 width-controller 选项已退役。
 规范的参考量可用于定义、
 符号、正性和条件数安全门，但不得以 restoring 项回馈到变化率。
-峰值、层级和连通宽度的网格单元计数只是诊断、重网格触发/提案和硬停机输入，
+峰值、层级和连通宽度的网格单元计数只是诊断、重网格触发/提案和 REMESH 后告警输入，
 不参与 `c_l`、`c_omega` 或 `c_r` 的方程。
 
 四、六阶的整体阶数证据限于相应测试覆盖的光滑固定网格问题；六阶仅覆盖均匀网格及

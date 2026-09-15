@@ -9,7 +9,7 @@
 | [config](+config/INTERNAL.md) | 冻结配置及组合准入 | `config.resolve` |
 | [mesh](+mesh/INTERNAL.md) | 坐标、导数、求积、完整运行算子 | `mesh.build` |
 | [field](+field/INTERNAL.md) | 密度、Green/Poisson、速度与输运 | `field.velocity`, `field.transport` |
-| [diagnostics](+diagnostics/INTERNAL.md) | 峰、level set、分辨率及停止诊断 | `diagnostics.meshFeatureIntervals` |
+| [diagnostics](+diagnostics/INTERNAL.md) | 峰、level set、分辨率及 REMESH 后告警 | `diagnostics.meshFeatureIntervals` |
 | [remesh](+remesh/INTERNAL.md) | 候选轴、迁移、验收事务 | `remesh.adapt` |
 | [output](+output/INTERNAL.md) | 历史、v2 结果与原生 checkpoint | `output.finalize` |
 | [evolve](+evolve/INTERNAL.md) | 初始化、时间推进、重网格调度 | `evolve.initialize`, `evolve.advance` |

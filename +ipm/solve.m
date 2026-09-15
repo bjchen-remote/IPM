@@ -46,7 +46,9 @@ while ipm.evolve.isActive(state)
         % pre-step rollback state nor this state can retain a second old LU.
         state.ops = rmfield(state.ops,'poisson');
         [state,applied,attempts] = ipm.evolve.applyAutonomousMesh(state,meshPlan);
-        if ~applied
+        if applied
+            state = ipm.evolve.publishRemeshWarnings(state);
+        else
             state.ops.poisson = decomposition(state.ops.A,'lu');
             state.runMetadata.autonomousMesh.lastFailure = struct( ...
                 'kind','candidate_transaction_failure','attempts',attempts, ...

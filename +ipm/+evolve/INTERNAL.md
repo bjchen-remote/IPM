@@ -8,7 +8,7 @@
 ## 路径
 
 - `initialize(opts)`：一次配置解析、网格、初值、尺度、流场及必要的解析初始重网格。
-- `advance(state)`：选步长、配套 RK、有限性检查、必要的重网格及分辨率停止检查。
+- `advance(state)`：选步长、配套 RK、有限性检查及必要的重网格；成功 REMESH 后发布非终止质量告警。
 - `flow`、`rhs`：空间场、特征、规范、缩放输运与源项的共同组装路径。
 - `stepSsprk3`、`stepSsprk54`、`stepRk6`：通过 `stepRk` 共享阶段状态契约。
 - `isActive`、`selectTimestep`：处理归一化、规范及物理时钟和步数限制。

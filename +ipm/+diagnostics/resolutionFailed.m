@@ -1,5 +1,6 @@
 function failed = resolutionFailed(flow,ops)
-%IPM.DIAGNOSTICS.RESOLUTIONFAILED Hard lower bound for every tracked core count.
+%IPM.DIAGNOSTICS.RESOLUTIONFAILED Historical lower-bound classification.
+%   Runtime callers may use this only as post-remesh warning evidence.
 
 if ~isfinite(flow.safetyFactor)
     failed = false;

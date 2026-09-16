@@ -87,6 +87,11 @@ MAT 先写临时文件再安装，失败仅清理由本次尝试生成的临时�
 
 checkpoint 与 result 分离。前者保存当前 `rho/x/y`、参考轴、重标度运行期 reference、内部尺度、
 初值质量/值域、标量日志、可选历史快照以及输出/checkpoint 游标；因此
+`history.wallCore` 在每个标量输出时刻保存以跟踪峰为中心的最多 129 个壁面节点：
+重标度/物理/随动坐标、物理 `rho`、物理 `rho_x`、核心宽度和全局 `max|rho_x|`。
+这是必备的一维轻量诊断，会进入 checkpoint 签名；它不开启或代替二维 `snapshots`。
+旧 schema-4 checkpoint 缺少该可选组时仍可恢复，记录从恢复后的第一个输出时刻开始。
+
 `storeSnapshots=false` 仍可恢复。写入先在目标目录生成临时 MAT，再以带 case ID 和步数的
 新路径安装，并追加 `checkpoint_manifest.jsonl`，绝不覆盖请求的基名文件。
 

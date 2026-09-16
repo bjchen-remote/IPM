@@ -44,6 +44,10 @@ assert_terminal_time(result.history.common.canonicalTau, ...
 assert_terminal_time(result.history.common.physicalTime, ...
     result.state.physicalTime,'physical');
 validate_current_canonical_contract(result);
+if isfield(result.history,'wallCore')
+    ipm.output.validateWallCoreHistory( ...
+        result.history.wallCore,result.history.common);
+end
 validate_snapshots(result.snapshots,result.history.common);
 validate_autonomous_mesh_controller(result);
 end

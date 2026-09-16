@@ -247,6 +247,11 @@ end
 
 function projected = result_kernel(result)
 projected = rmfield(result,{'metadata','config','fit'});
+if isfield(projected.history,'wallCore')
+    % Compact wall traces are new output-only telemetry and do not alter
+    % the legacy trajectory equivalence kernel.
+    projected.history = rmfield(projected.history,'wallCore');
+end
 % Schema 4 advances canonical tau directly as tau+dt; the legacy code sends
 % the constant derivative one through each RK tableau.  In physical mode the
 % two forms have the same trajectory but can differ in roundoff.  Remove only

@@ -269,6 +269,10 @@ assert_terminal_clock(t(end),state.normalizedTime,'normalized');
 assert_terminal_clock(canonical(end),state.scale.canonicalTime,'canonical');
 assert_terminal_clock(physical(end),state.scale.physicalTime,'physical');
 validate_canonical_identity(log.history.common,state,t,canonical);
+if isfield(log.history,'wallCore')
+    ipm.output.validateWallCoreHistory( ...
+        log.history.wallCore,log.history.common);
+end
 
 snapshotCount = numel(log.snapshotRho);
 if ~iscell(log.snapshotRho) || ~iscell(log.snapshotX) || ...

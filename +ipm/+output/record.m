@@ -149,6 +149,13 @@ if ~ops.rescaling.enabled
 end
 common = merge_scalars(common,diagnostics);
 log.history.common = append_scalars(log.history.common,common);
+if ~isfield(log.history,'wallCore')
+    % Schema-4 checkpoints created before compact wall tracing remain
+    % resumable; their new trace begins at the first post-resume record.
+    log.history.wallCore = ipm.output.emptyWallCoreHistory();
+end
+log.history.wallCore = ipm.output.recordWallCore( ...
+    log.history.wallCore,state,numel(log.history.common.t));
 
 mesh = struct('remeshCount',ops.remeshCount, ...
     'minimumDx',min(ops.dxFaces),'minimumDy',min(ops.dyFaces), ...
